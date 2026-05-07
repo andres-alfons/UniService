@@ -546,7 +546,7 @@ const Perfil = () => {
                         icon="🔒"
                         title="Seguridad"
                         desc="Gestiona tu cuenta"
-                        onClick={() => navigate("/home#mis-servicios")}
+                        onClick={() => setActiveModal("seguridad")}
                       />
                     </div>
                   )}
@@ -947,6 +947,50 @@ const Perfil = () => {
                   <span className="image-option-icon">📁</span>
                   <div className="image-option-text">
                     <b>Subir Imagen</b>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ══ MODAL: Cambiar avatar (solo perfil propio) */}
+        {activeModal === "seguridad" && (
+          <div
+            className="image-menu-overlay active"
+            onClick={() => setActiveModal(null)}
+          >
+            <div className="image-menu" onClick={(e) => e.stopPropagation()}>
+                <h3 className="image-menu-title">🔐 Opciones de Seguridad "FALTA IMPLEMENTAR FUNCIONALIDAD"</h3>
+              <div className="image-menu-options">
+                {/* Cada botón usa prompt() para pedir el nuevo valor y llama a handleUpdate */}
+
+                <button
+                  className="image-option"
+                  onClick={() => {
+                    const n = prompt("Nuevo nombre:", userData.nombre);
+                    if (n) handleUpdate("nombre", n);
+                  }}
+                >
+                  <span className="image-option-icon">🔑</span>
+                  <div className="image-option-text">
+                    <b>Cambiar Contraseña</b>
+                  </div>
+                </button>
+
+                <button
+                  className="image-option"
+                  onClick={() => {
+                    const d = prompt(
+                      "Nueva descripción:",
+                      userData.descripcion,
+                    );
+                    if (d) handleUpdate("descripcion", d);
+                  }}
+                >
+                  <span className="image-option-icon">📧</span>
+                  <div className="image-option-text">
+                    <b>Cambiar Correo Electrónico</b>
                   </div>
                 </button>
               </div>
