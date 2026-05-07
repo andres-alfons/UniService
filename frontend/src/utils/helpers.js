@@ -1,8 +1,14 @@
 export function formatearFecha(fechaISO) {
   if (!fechaISO) return "—";
-  return new Date(fechaISO).toLocaleDateString("es-CO", {
-    year: "numeric", month: "long", day: "numeric"
-  });
+  try {
+    const fecha = new Date(fechaISO);
+    if (isNaN(fecha.getTime())) return "—";
+    return fecha.toLocaleDateString("es-CO", {
+      year: "numeric", month: "long", day: "numeric"
+    });
+  } catch {
+    return "—";
+  }
 }
 
 export function calcularEstrellas(resenas) {

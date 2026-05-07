@@ -12,12 +12,8 @@ const API_USUARIO = "https://localhost:7237/api/Users";
 const API_SOLICITUD = "https://localhost:7237/api/Solicitudes";
 
 // Mapeos para convertir los valores numéricos de la BD a texto legible
-const MODALIDAD_MAP = { 0: "Presencial", 1: "Virtual", 2: "Mixta" };
-const DISPONIBILIDAD_MAP = {
-  0: "Entre semana",
-  1: "Fines de semana",
-  2: "Siempre disponible",
-};
+const MODALIDAD_MAP = { 0: "🏫 Presencial", 1: "💻 Virtual", 2: "🔄 Mixta", "0": "🏫 Presencial", "1": "💻 Virtual", "2": "🔄 Mixta", "Presencial": "🏫 Presencial", "Virtual": "💻 Virtual", "Mixta": "🔄 Mixta" };
+const DISPONIBILIDAD_MAP = { 0: "📆 Entre semana", 1: "🎉 Fines de semana", 2: "⏰ Siempre disponible", "0": "📆 Entre semana", "1": "🎉 Fines de semana", "2": "⏰ Siempre disponible", "Entre semana": "📆 Entre semana", "Fines de semana": "🎉 Fines de semana", "Siempre disponible": "⏰ Siempre disponible" };
 
 // Normaliza el formato de hora al patrón HH:MM:SS que espera el backend
 const formatHora = (hora) => {
@@ -663,11 +659,17 @@ export default function Servicio() {
 
   function formatearFecha(fechaISO) {
     if (!fechaISO) return "—";
-    return new Date(fechaISO).toLocaleDateString("es-CO", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    try {
+      const fecha = new Date(fechaISO);
+      if (isNaN(fecha.getTime())) return "—";
+      return fecha.toLocaleDateString("es-CO", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch {
+      return "—";
+    }
   }
 
   if (error || !servicio)
@@ -700,8 +702,10 @@ export default function Servicio() {
   // Normaliza el nombre de la universidad (1 = UPC, cualquier otro valor se muestra tal cual)
   const universidad =
     servicio.universidad === 1 || servicio.universidad === "1"
-      ? "Universidad Popular del Cesar"
-      : servicio.universidad || "No especificada";
+      ? "🏛️ Universidad Popular del Cesar"
+      : servicio.universidad === "No pertenece a ninguna universidad"
+      ? "🌐 Independiente"
+      : `🏫 ${servicio.universidad || "No especificada"}`;
 
   // Emojis usados como imágenes de la galería (reemplazarían imágenes reales en producción)
   const emojisGaleria = [servicio.icono || "📌", "🖥️", "⌨️", "🔧"];

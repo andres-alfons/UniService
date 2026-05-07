@@ -571,9 +571,109 @@ fieldset {
   box-shadow: 0 8px 24px rgba(14, 165, 160, 0.35);
 }
 
-/* ══════════════════════════════
-   CHIPS BAR
-══════════════════════════════ */
+/* ═══════════════════════════════════════════
+   SEARCH BAR - FONDO OSCURO Y ESTILO MEJORADO
+   ═══════════════════════════════════════════ */
+
+.search-container {
+  background: rgba(3, 8, 14, 0.7);
+  border: 1px solid rgba(14, 165, 160, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 18px;
+  font-size: 1.2rem;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.search-input {
+  width: 100%;
+  background: rgba(7, 13, 22, 0.8);
+  border: 2px solid var(--borde);
+  border-radius: 12px;
+  color: var(--texto);
+  font-family: "Poppins", sans-serif;
+  font-size: 1rem;
+  padding: 16px 16px 16px 48px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.search-input:hover {
+  border-color: rgba(14, 165, 160, 0.4);
+}
+
+.search-input:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 4px rgba(14, 165, 160, 0.1);
+  background: rgba(7, 13, 22, 0.95);
+}
+
+.search-input::placeholder {
+  color: var(--texto3);
+}
+
+/* ═══════════════════════════════════════════
+   CHIPS DE CATEGORÍA MEJORADOS
+   ═══════════════════════════════════════════ */
+
+.chips-container-enhanced {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.chip-enhanced {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--texto);
+  background: rgba(14, 25, 41, 0.8);
+  border: 2px solid var(--borde);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  text-decoration: none;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.chip-enhanced:hover {
+  border-color: var(--teal);
+  background: rgba(14, 165, 160, 0.12);
+  color: var(--teal2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(14, 165, 160, 0.2);
+}
+
+.chip-enhanced.activo {
+  background: linear-gradient(135deg, var(--teal), var(--teal2));
+  border-color: var(--teal);
+  color: #070d16;
+  font-weight: 700;
+  box-shadow: 0 4px 20px rgba(14, 165, 160, 0.35);
+  transform: translateY(-2px);
+}
+
+/* ═══════════════════════════════════════════
+   CHIPS BAR (legacy)
+   ═══════════════════════════════════════════ */
 .chips-bar {
   background-color: var(--bg2);
   border-top: 1px solid var(--borde);
@@ -620,24 +720,12 @@ fieldset {
   overflow: hidden;
 }
 
-.seccion::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(14, 165, 160, 0.05) 0%,
-    transparent 40%,
-    rgba(14, 165, 160, 0.02) 100%
-  );
-  pointer-events: none;
-  z-index: 0;
+/* When bg-canvas exists, push ::below it */
+.seccion:has(.bg-canvas)::before {
+  z-index: -1;
 }
 
-.seccion > * {
+.seccion > *:not(.bg-canvas) {
   position: relative;
   z-index: 1;
 }
@@ -2374,4 +2462,266 @@ html {
 
 .btn-publicar {
   min-width: 200px;
+}
+
+/* ═══════════════════════════════════════════
+   UNIVERSIDAD FIELDSET
+   ═══════════════════════════════════════════ */
+
+.universidad-fieldset {
+  background: rgba(245, 200, 66, 0.03);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0 !important;
+  border: 1px solid rgba(245, 200, 66, 0.1);
+}
+
+.universidad-type-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.universidad-type-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border: 2px solid var(--borde);
+  border-radius: 12px;
+  background: var(--bg2);
+  color: var(--texto2);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: "Poppins", sans-serif;
+  text-align: left;
+}
+
+.universidad-type-btn:hover {
+  border-color: var(--amarillo);
+  background: rgba(245, 200, 66, 0.06);
+  transform: translateX(4px);
+}
+
+.universidad-type-btn.active {
+  background: linear-gradient(135deg, rgba(245, 200, 66, 0.15), rgba(245, 200, 66, 0.05));
+  border-color: var(--amarillo);
+  color: var(--amarillo);
+  box-shadow: 0 4px 12px rgba(245, 200, 66, 0.2);
+  transform: translateX(4px);
+  font-weight: 600;
+}
+
+.universidad-icon {
+  font-size: 1.4rem;
+}
+
+.otra-universidad-animado {
+  animation: slideDown 0.3s ease-out;
+}
+
+/* ═══════════════════════════════════════════
+   FORM WIDTH REDUCTION
+   ═══════════════════════════════════════════ */
+
+.publicar-wrapper {
+  max-width: 880px !important;
+}
+
+/* ═══════════════════════════════════════════
+   SCROLL REVEAL ANIMATIONS
+   ═══════════════════════════════════════════ */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-50px);
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(50px);
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-scale.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.delay-1 { transition-delay: 0.1s; }
+.delay-2 { transition-delay: 0.2s; }
+.delay-3 { transition-delay: 0.3s; }
+.delay-4 { transition-delay: 0.4s; }
+
+/* ═══════════════════════════════════════════
+   FONDOS DINÁMICOS - CANVAS DE SECCIONES
+   ═══════════════════════════════════════════ */
+
+.bg-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0 !important;
+}
+
+.seccion > header {
+  position: relative;
+  z-index: 1;
+}
+
+/* Patrón de nodos/constelación - Publicar */
+.bg-canvas-nodes {
+  background:
+    radial-gradient(2px 2px at 15% 25%, rgba(14, 165, 160, 0.3), transparent),
+    radial-gradient(2px 2px at 35% 65%, rgba(245, 200, 66, 0.25), transparent),
+    radial-gradient(2px 2px at 55% 15%, rgba(139, 92, 246, 0.25), transparent),
+    radial-gradient(2px 2px at 75% 55%, rgba(59, 130, 246, 0.25), transparent),
+    radial-gradient(3px 3px at 8% 80%, rgba(14, 165, 160, 0.2), transparent),
+    radial-gradient(3px 3px at 92% 35%, rgba(245, 200, 66, 0.2), transparent),
+    radial-gradient(2px 2px at 45% 45%, rgba(255, 255, 255, 0.08), transparent),
+    radial-gradient(2px 2px at 65% 85%, rgba(139, 92, 246, 0.2), transparent),
+    radial-gradient(1.5px 1.5px at 20% 50%, rgba(59, 130, 246, 0.15), transparent),
+    radial-gradient(1.5px 1.5px at 80% 10%, rgba(14, 165, 160, 0.15), transparent),
+    radial-gradient(2px 2px at 50% 70%, rgba(245, 200, 66, 0.15), transparent),
+    radial-gradient(1.5px 1.5px at 10% 5%, rgba(255, 255, 255, 0.1), transparent),
+    radial-gradient(1.5px 1.5px at 95% 90%, rgba(255, 255, 255, 0.1), transparent);
+  animation: nodeTwinkle 6s ease-in-out infinite alternate;
+}
+
+@keyframes nodeTwinkle {
+  0% { opacity: 0.6; filter: brightness(0.8); }
+  50% { opacity: 1; filter: brightness(1.2); }
+  100% { opacity: 0.8; filter: brightness(1); }
+}
+
+/* Patrón de grid/líneas - Buscar */
+.bg-canvas-grid-lines {
+  background:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      rgba(14, 165, 160, 0.06) 40px,
+      rgba(14, 165, 160, 0.06) 41px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 40px,
+      rgba(139, 92, 246, 0.05) 40px,
+      rgba(139, 92, 246, 0.05) 41px
+    );
+  animation: gridDrift 30s linear infinite;
+}
+
+@keyframes gridDrift {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(41px, 41px); }
+}
+
+/* Patrón de estrellas - Top calificados */
+.bg-canvas-stars {
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 18%, rgba(245, 200, 66, 0.4), transparent),
+    radial-gradient(1px 1px at 28% 52%, rgba(245, 200, 66, 0.3), transparent),
+    radial-gradient(2px 2px at 45% 8%, rgba(245, 200, 66, 0.35), transparent),
+    radial-gradient(1px 1px at 62% 72%, rgba(245, 200, 66, 0.25), transparent),
+    radial-gradient(2px 2px at 78% 35%, rgba(245, 200, 66, 0.4), transparent),
+    radial-gradient(1px 1px at 90% 85%, rgba(255, 255, 255, 0.2), transparent),
+    radial-gradient(1.5px 1.5px at 5% 65%, rgba(255, 255, 255, 0.15), transparent),
+    radial-gradient(1px 1px at 35% 90%, rgba(245, 200, 66, 0.2), transparent),
+    radial-gradient(1.5px 1.5px at 55% 45%, rgba(245, 200, 66, 0.3), transparent),
+    radial-gradient(1px 1px at 72% 12%, rgba(255, 255, 255, 0.18), transparent);
+  animation: starsDrift 20s ease-in-out infinite alternate;
+}
+
+@keyframes starsDrift {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-5px, -8px) scale(1.02); }
+}
+
+/* Patrón de circuito - Recientes */
+.bg-canvas-circuit {
+  background:
+    linear-gradient(90deg, transparent 49.5%, rgba(14, 165, 160, 0.08) 49.5%, rgba(14, 165, 160, 0.08) 50.5%, transparent 50.5%),
+    linear-gradient(0deg, transparent 49.5%, rgba(14, 165, 160, 0.08) 49.5%, rgba(14, 165, 160, 0.08) 50.5%, transparent 50.5%);
+  background-size: 50px 50px;
+  animation: circuitPulse 8s ease-in-out infinite alternate;
+}
+
+@keyframes circuitPulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.6; }
+}
+
+/* Patrón de código/git - Solicitudes */
+.bg-canvas-code {
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(14, 165, 160, 0.1) 1px, transparent 1px),
+    radial-gradient(circle at 60% 40%, rgba(245, 200, 66, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 40% 80%, rgba(59, 130, 246, 0.06) 1px, transparent 1px),
+    radial-gradient(circle at 10% 60%, rgba(14, 165, 160, 0.06) 1px, transparent 1px),
+    radial-gradient(circle at 90% 20%, rgba(245, 200, 66, 0.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: codeDrift 25s linear infinite;
+}
+
+@keyframes codeDrift {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(60px, 60px); }
+}
+
+/* Asegurar que el contenido quede encima del bg-canvas */
+.seccion > .container,
+.seccion > header,
+.section-dynamic > .container {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .universidad-type-buttons {
+    flex-direction: column;
+  }
+
+  .publicar-wrapper {
+    max-width: 100% !important;
+  }
 }

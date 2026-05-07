@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/styleHome.css";
 import { formatearFecha } from "../utils/helpers";
@@ -205,8 +205,10 @@ function TarjetaServicio({ servicio }) {
   // Compatibilidad: si la universidad llega como ID numérico "1", se muestra el nombre completo
   const universidad =
     servicio.universidad === 1 || servicio.universidad === "1"
-      ? "Universidad Popular del Cesar"
-      : servicio.universidad || "Universidad no especificada";
+      ? "🏛️ Universidad Popular del Cesar"
+      : servicio.universidad === "No pertenece a ninguna universidad"
+      ? "🌐 Independiente"
+      : `🏫 ${servicio.universidad || "Universidad no especificada"}`;
 
   return (
     <a
@@ -263,23 +265,24 @@ function TarjetaServicio({ servicio }) {
 function SeccionRecientes({ servicios, cargando }) {
   return (
     <section className="seccion" id="recientes">
+      <div className="bg-canvas bg-canvas-circuit" />
       <div className="container">
-        <p className="label-seccion">🕐 Recién publicados</p>
-        <h2>Servicios más recientes</h2>
-        <p className="seccion-desc">
+        <p className="label-seccion reveal">🕐 Recién publicados</p>
+        <h2 className="reveal delay-1">Servicios más recientes</h2>
+        <p className="seccion-desc reveal delay-2">
           Los últimos servicios añadidos por la comunidad
         </p>
 
         {cargando ? (
           <p
-            className="texto-muted"
+            className="texto-muted reveal delay-3"
             style={{ textAlign: "center", padding: "40px 0" }}
           >
             Cargando servicios...
           </p>
         ) : servicios.length === 0 ? (
           <p
-            className="texto-muted"
+            className="texto-muted reveal delay-3"
             style={{ textAlign: "center", padding: "40px 0" }}
           >
             Aún no hay servicios publicados.
@@ -301,10 +304,11 @@ function SeccionTop({ top3 }) {
   const medallas = ["🥇", "🥈", "🥉"];
   return (
     <section className="seccion seccion-oscura" id="mejor-calificados">
+      <div className="bg-canvas bg-canvas-stars" />
       <div className="container">
-        <p className="label-seccion">🏆 Top valorados</p>
-        <h2>Servicios mejor calificados ⭐</h2>
-        <p className="seccion-desc">
+        <p className="label-seccion reveal">🏆 Top valorados</p>
+        <h2 className="reveal delay-1">Servicios mejor calificados ⭐</h2>
+        <p className="seccion-desc reveal delay-2">
           Ordenados por satisfacción de los usuarios
         </p>
 
@@ -313,7 +317,7 @@ function SeccionTop({ top3 }) {
             <a
               key={s.id_servicio}
               href={`/servicio?id=${s.id_servicio}`}
-              className="top-card"
+              className={`top-card reveal-scale delay-${i + 1}`}
             >
               <div className="top-card-rank">
                 <span className="rank-number">{i + 1}</span>
@@ -324,8 +328,10 @@ function SeccionTop({ top3 }) {
                 <h5>{s.titulo}</h5>
                 <p className="top-card-meta">
                   {s.universidad === 1 || s.universidad === "1"
-                    ? "Universidad Popular del Cesar"
-                    : s.universidad || "Universidad no especificada"}
+                    ? "🏛️ Universidad Popular del Cesar"
+                    : s.universidad === "No pertenece a ninguna universidad"
+                    ? "🌐 Independiente"
+                    : `🏫 ${s.universidad || "Universidad no especificada"}`}
                 </p>
                 <div className="top-card-rating">
                   <span className="stars estrellas">
@@ -462,41 +468,45 @@ function SeccionBuscar({ serviciosTotales }) {
 
   return (
     <section className="seccion seccion-oscura" id="buscar">
+      <div className="bg-canvas bg-canvas-grid-lines" />
       {/* Header búsqueda */}
       <header
         className="seccion"
         style={{ paddingBottom: 0, paddingTop: 0, background: "transparent" }}
       >
         <div className="container" style={{ textAlign: "center" }}>
-          <p className="label-seccion">Marketplace Universitario</p>
-          <h1 style={{ fontSize: "2.5rem" }}>
+          <p className="label-seccion reveal">Marketplace Universitario</p>
+          <h1 className="reveal delay-1" style={{ fontSize: "2.5rem" }}>
             Todos los <span className="acento">servicios</span>
           </h1>
           <div
-            className="caja-formulario"
+            className="search-container reveal delay-2"
             style={{ maxWidth: "700px", margin: "30px auto" }}
           >
-            <input
-              type="text"
-              className="form-input"
-              placeholder="¿Qué necesitas hoy? (Ej: Álgebra, Logo, Habitación...)"
-              value={busqueda}
-              onChange={handleBusqueda}
-            />
+            <div className="search-input-wrapper">
+              <span className="search-icon">🔍</span>
+              <input
+                type="text"
+                className="search-input"
+                placeholder="¿Qué necesitas hoy? (Ej: Álgebra, Logo, Habitación...)"
+                value={busqueda}
+                onChange={handleBusqueda}
+              />
+            </div>
           </div>
         </div>
       </header>
 
       {/* Chips de categoría: filtros visuales rápidos */}
       <div
-        className="container chips-container"
+        className="container chips-container-enhanced"
         id="filtros-categorias"
         style={{ marginBottom: "24px" }}
       >
         {CHIPS_CATEGORIA.map((chip) => (
           <button
             key={chip.valor}
-            className={`chip${categoriaActual === chip.valor ? " activo" : ""}`}
+            className={`chip-enhanced${categoriaActual === chip.valor ? " activo" : ""}`}
             onClick={(e) => handleCategoria(chip.valor, e)}
             type="button"
           >
@@ -506,7 +516,7 @@ function SeccionBuscar({ serviciosTotales }) {
       </div>
 
       <div className="container">
-        <div className="sort-bar">
+        <div className="sort-bar reveal">
           <p className="texto-muted">
             Resultados:{" "}
             <strong className="texto-claro">{resultados.length}</strong>
@@ -574,6 +584,8 @@ function SeccionPublicar({ onPublicado }) {
   const [errorCampo, setErrorCampo] = useState("");
   const [modalExito, setModalExito] = useState(false);
   const [modalError, setModalError] = useState(null);
+  const [tipoUniversidad, setTipoUniversidad] = useState("");
+  const [otraUniversidad, setOtraUniversidad] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -581,16 +593,35 @@ function SeccionPublicar({ onPublicado }) {
     if (errorCampo) setErrorCampo("");
   };
 
+  const handleTipoUniversidad = (tipo) => {
+    setTipoUniversidad(tipo);
+    if (tipo === "upc") {
+      setForm((prev) => ({ ...prev, universidad: "Universidad Popular del Cesar" }));
+      setOtraUniversidad("");
+    } else if (tipo === "ninguna") {
+      setForm((prev) => ({ ...prev, universidad: "No pertenece a ninguna universidad" }));
+      setOtraUniversidad("");
+    } else {
+      setForm((prev) => ({ ...prev, universidad: "" }));
+    }
+  };
+
+  const handleOtraUniversidad = (e) => {
+    const val = e.target.value;
+    setOtraUniversidad(val);
+    setForm((prev) => ({ ...prev, universidad: val }));
+  };
+
   const validarContacto = () => {
     const { contacto } = form;
     if (!contacto) return "El campo de contacto es obligatorio";
     if (tipoContacto === "telefono") {
       const soloNumeros = contacto.replace(/\D/g, "");
-      if (soloNumeros.length < 7 || soloNumeros.length > 15) {
-        return "Ingresa un número de teléfono válido (7-15 dígitos)";
+      if (soloNumeros.length !== 10) {
+        return "Ingresa un número de teléfono válido de 10 dígitos";
       }
-      if (!/^\+?[0-9]+$/.test(contacto.trim())) {
-        return "El teléfono solo debe contener números (puede empezar con +)";
+      if (!/^[0-9]{10}$/.test(soloNumeros)) {
+        return "El teléfono debe contener exactamente 10 dígitos";
       }
     } else if (tipoContacto === "correo") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -622,6 +653,14 @@ function SeccionPublicar({ onPublicado }) {
     if (!tipoContacto) {
       setModalError("⚠️ Selecciona si tu contacto es por teléfono o correo electrónico.");
       return;
+    }
+
+    if (tipoContacto === "telefono") {
+      const soloNumeros = contacto.replace(/\D/g, "");
+      if (soloNumeros.length !== 10) {
+        setModalError("❌ El número de teléfono debe tener exactamente 10 dígitos (formato Colombia).");
+        return;
+      }
     }
 
     const errorContacto = validarContacto();
@@ -675,6 +714,8 @@ function SeccionPublicar({ onPublicado }) {
         setModalExito(true);
         setForm(initialPublicar);
         setTipoContacto("");
+        setTipoUniversidad("");
+        setOtraUniversidad("");
         onPublicado();
       } else {
         setModalError("❌ Error: " + (data.error || "No se pudo publicar el servicio."));
@@ -692,19 +733,20 @@ function SeccionPublicar({ onPublicado }) {
 
   return (
     <section className="seccion section-dynamic" id="publicar">
+      <div className="bg-canvas bg-canvas-nodes" />
       <div className="floating-shapes-small">
         <div className="shape-sm shape-sm-1" />
         <div className="shape-sm shape-sm-2" />
       </div>
       <div className="container">
         <div className="publicar-wrapper">
-          <p className="label-seccion">Nuevo servicio</p>
-          <h2>Publicar servicio</h2>
-          <p className="seccion-desc">
+          <p className="label-seccion reveal">Nuevo servicio</p>
+          <h2 className="reveal delay-1">Publicar servicio</h2>
+          <p className="seccion-desc reveal delay-2">
             Comparte tu talento con la comunidad universitaria
           </p>
 
-          <div className="caja-formulario publicar-form-dinamico">
+          <div className="caja-formulario publicar-form-dinamico reveal delay-3">
             <fieldset>
               <legend className="legend-custom">
                 📌 Información del servicio
@@ -776,21 +818,56 @@ function SeccionPublicar({ onPublicado }) {
                     onChange={handleChange}
                   />
                 </div>
-                <div className="form-grupo">
+              </div>
+            </fieldset>
+
+            <fieldset className="universidad-fieldset">
+              <legend className="legend-custom">
+                🎓 Universidad
+              </legend>
+
+              <div className="universidad-type-buttons">
+                <button
+                  type="button"
+                  className={`universidad-type-btn ${tipoUniversidad === "upc" ? "active" : ""}`}
+                  onClick={() => handleTipoUniversidad("upc")}
+                >
+                  <span className="universidad-icon">🏛️</span>
+                  <span>Universidad Popular del Cesar</span>
+                </button>
+                <button
+                  type="button"
+                  className={`universidad-type-btn ${tipoUniversidad === "otra" ? "active" : ""}`}
+                  onClick={() => handleTipoUniversidad("otra")}
+                >
+                  <span className="universidad-icon">🏫</span>
+                  <span>Otra universidad</span>
+                </button>
+                <button
+                  type="button"
+                  className={`universidad-type-btn ${tipoUniversidad === "ninguna" ? "active" : ""}`}
+                  onClick={() => handleTipoUniversidad("ninguna")}
+                >
+                  <span className="universidad-icon">🌐</span>
+                  <span>No pertenezco a ninguna</span>
+                </button>
+              </div>
+
+              {tipoUniversidad === "otra" && (
+                <div className="form-grupo otra-universidad-animado" style={{ marginTop: "16px" }}>
                   <label className="form-label">
-                    🏫 Tu universidad{" "}
+                    ¿Cuál universidad?{" "}
                     <span style={{ color: "var(--teal)" }}>*</span>
                   </label>
                   <input
                     type="text"
-                    name="universidad"
                     className="form-input"
                     placeholder="Ej: Universidad Nacional de Colombia"
-                    value={form.universidad}
-                    onChange={handleChange}
+                    value={otraUniversidad}
+                    onChange={handleOtraUniversidad}
                   />
                 </div>
-              </div>
+              )}
             </fieldset>
 
             <fieldset className="contacto-fieldset">
@@ -825,20 +902,26 @@ function SeccionPublicar({ onPublicado }) {
               {tipoContacto && (
                 <div className="form-grupo contacto-input-animado">
                   <label className="form-label">
-                    {tipoContacto === "telefono" ? "📱 Número de WhatsApp" : "📧 Correo electrónico"}{" "}
+                    {tipoContacto === "telefono" ? "📱 Número de WhatsApp (10 dígitos)" : "📧 Correo electrónico"}{" "}
                     <span style={{ color: "var(--teal)" }}>*</span>
                   </label>
                   <div className="input-with-icon">
                     <span className="input-prefix">
-                      {tipoContacto === "telefono" ? "+" : "@"}
+                      {tipoContacto === "telefono" ? "+57" : "@"}
                     </span>
                     <input
                       type={tipoContacto === "telefono" ? "tel" : "email"}
                       name="contacto"
                       className="form-input"
-                      placeholder={tipoContacto === "telefono" ? "57 300 123 4567" : "tucorreo@email.com"}
+                      placeholder={tipoContacto === "telefono" ? "300 123 4567" : "tucorreo@email.com"}
                       value={form.contacto}
-                      onChange={handleChange}
+                      onChange={(e) => {
+                        const val = tipoContacto === "telefono"
+                          ? e.target.value.replace(/[^\d]/g, "").slice(0, 10)
+                          : e.target.value;
+                        setForm(prev => ({ ...prev, contacto: val }));
+                      }}
+                      maxLength={tipoContacto === "telefono" ? 10 : undefined}
                     />
                   </div>
                   {tipoContacto === "correo" && form.contacto && (
@@ -847,8 +930,8 @@ function SeccionPublicar({ onPublicado }) {
                     </span>
                   )}
                   {tipoContacto === "telefono" && form.contacto && (
-                    <span className={`validation-hint ${/^\+?[0-9]{7,15}$/.test(form.contacto.replace(/\s/g, "")) ? "valid" : "invalid"}`}>
-                      {form.contacto.replace(/\D/g, "").length}/15 dígitos
+                    <span className={`validation-hint ${form.contacto.length === 10 ? "valid" : "invalid"}`}>
+                      {form.contacto.length}/10 dígitos
                     </span>
                   )}
                 </div>
@@ -920,7 +1003,7 @@ function SeccionPublicar({ onPublicado }) {
                 <button
                   type="button"
                   className="btn btn-borde"
-                  onClick={() => { setForm(initialPublicar); setTipoContacto(""); }}
+                  onClick={() => { setForm(initialPublicar); setTipoContacto(""); setTipoUniversidad(""); setOtraUniversidad(""); }}
                 >
                   🗑️ Limpiar
                 </button>
@@ -1291,12 +1374,13 @@ function SeccionSolicitudes() {
 
   return (
     <section className="seccion section-dynamic" id="solicitudes">
+      <div className="bg-canvas bg-canvas-code" />
       <div className="container">
-        <p className="label-seccion">🔔 Bandeja</p>
-        <h2>Mis solicitudes</h2>
+        <p className="label-seccion reveal">🔔 Bandeja</p>
+        <h2 className="reveal delay-1">Mis solicitudes</h2>
 
         {/* Tabs de navegación entre enviadas y recibidas */}
-        <div style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
+        <div className="reveal delay-2" style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
           {[
             ["enviadas", "📤 Enviadas"],
             ["recibidas", "📥 Recibidas"],
@@ -1650,6 +1734,24 @@ export default function HomePrincipal() {
   useEffect(() => {
     cargarServicios();
   }, [cargarServicios]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
+    );
+
+    const revealElements = document.querySelectorAll(".reveal, .reveal-left, .reveal-right, .reveal-scale");
+    revealElements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
 
   // Al cerrar sesión se limpia todo el localStorage y se redirige al home de invitado
   const handleCerrarSesion = () => {
