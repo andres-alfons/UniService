@@ -26,35 +26,45 @@ public class SolicitudesController : ControllerBase
     {
         try
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
             using var cmd = new SqlCommand("sp_GestionarSolicitud", conn);
             cmd.CommandType = CommandType.StoredProcedure;
 
-            cmd.Parameters.AddWithValue("@id_cliente", dto.id_cliente);
-            cmd.Parameters.AddWithValue("@id_proveedor", dto.id_proveedor);
-            cmd.Parameters.AddWithValue("@id_servicio", dto.id_servicio);
+            cmd.Parameters.Add("@id_cliente", SqlDbType.Int).Value = dto.id_cliente;
+            cmd.Parameters.Add("@id_proveedor", SqlDbType.Int).Value = dto.id_proveedor;
+            cmd.Parameters.Add("@id_servicio", SqlDbType.Int).Value = dto.id_servicio;
 
-            cmd.Parameters.AddWithValue("@tipo_servicio", dto.tipo_servicio ?? "");
-            cmd.Parameters.AddWithValue("@tema", dto.tema ?? "");
-            cmd.Parameters.AddWithValue("@descripcion", dto.descripcion ?? "");
+            cmd.Parameters.Add("@tipo_servicio", SqlDbType.NVarChar).Value = dto.tipo_servicio ?? "";
+            cmd.Parameters.Add("@tema", SqlDbType.NVarChar).Value = dto.tema ?? "";
+            cmd.Parameters.Add("@descripcion", SqlDbType.NVarChar).Value = dto.descripcion ?? "";
 
-            cmd.Parameters.AddWithValue("@fecha_deseada", dto.fecha_deseada);
+            cmd.Parameters.Add("@fecha_deseada", SqlDbType.Date).Value = dto.fecha_deseada;
 
-            cmd.Parameters.AddWithValue("@hora_deseada",
-                dto.hora_deseada.HasValue ? (object)dto.hora_deseada.Value : DBNull.Value
-            );
+            cmd.Parameters.Add("@hora_deseada", SqlDbType.Time).Value =
+                dto.hora_deseada.HasValue
+                    ? (object)dto.hora_deseada.Value
+                    : DBNull.Value;
 
-            cmd.Parameters.AddWithValue("@duracion", dto.duracion ?? "");
-            cmd.Parameters.AddWithValue("@modalidad", dto.modalidad ?? "");
+            cmd.Parameters.Add("@duracion", SqlDbType.NVarChar).Value = dto.duracion ?? "";
+            cmd.Parameters.Add("@modalidad", SqlDbType.NVarChar).Value = dto.modalidad ?? "";
 
-            cmd.Parameters.AddWithValue("@metodo_pago", dto.metodo_pago ?? "");
-            cmd.Parameters.AddWithValue("@presupuesto", dto.presupuesto);
-            cmd.Parameters.AddWithValue("@pago_anticipado", dto.pago_anticipado);
+            cmd.Parameters.Add("@metodo_pago", SqlDbType.NVarChar).Value = dto.metodo_pago ?? "";
 
-            cmd.Parameters.AddWithValue("@urgencia", dto.urgencia ?? "");
-            cmd.Parameters.AddWithValue("@archivo", dto.archivo ?? (object)DBNull.Value);
+            cmd.Parameters.Add("@presupuesto", SqlDbType.Decimal).Value =
+                dto.presupuesto;
+
+            cmd.Parameters.Add("@pago_anticipado", SqlDbType.Decimal).Value =
+                dto.pago_anticipado;
+
+            cmd.Parameters.Add("@urgencia", SqlDbType.NVarChar).Value = dto.urgencia ?? "";
+
+            cmd.Parameters.Add("@archivo", SqlDbType.NVarChar).Value =
+                dto.archivo ?? (object)DBNull.Value;
 
             using var reader = await cmd.ExecuteReaderAsync();
 
@@ -63,7 +73,8 @@ public class SolicitudesController : ControllerBase
                 var resultado = reader["Resultado"]?.ToString();
                 var idSolicitud = reader["id_solicitud"]?.ToString();
 
-                if (resultado != null && resultado.Contains("exitosamente"))
+                if (!string.IsNullOrEmpty(resultado) &&
+                    resultado.Contains("exitosamente", StringComparison.OrdinalIgnoreCase))
                 {
                     try
                     {
@@ -71,17 +82,25 @@ public class SolicitudesController : ControllerBase
                         await connEmail.OpenAsync();
 
                         var cmdEmail = new SqlCommand(@"
-                            SELECT u.email AS email_proveedor, u.nombre AS nombre_proveedor,
-                                   c.nombre AS nombre_cliente, se.titulo AS titulo_servicio
+                            SELECT 
+                                u.email AS email_proveedor,
+                                u.nombre AS nombre_proveedor,
+                                c.nombre AS nombre_cliente,
+                                se.titulo AS titulo_servicio
                             FROM usuarios u
-                            INNER JOIN servicios se ON u.id_usuario = se.id_proveedor
-                            INNER JOIN usuarios c ON c.id_usuario = @id_cliente
+                            INNER JOIN servicios se 
+                                ON se.id_servicio = @id_servicio
+                            INNER JOIN usuarios c 
+                                ON c.id_usuario = @id_cliente
                             WHERE u.id_usuario = @id_proveedor
                         ", connEmail);
-                        cmdEmail.Parameters.AddWithValue("@id_proveedor", dto.id_proveedor);
-                        cmdEmail.Parameters.AddWithValue("@id_cliente", dto.id_cliente);
+
+                        cmdEmail.Parameters.Add("@id_proveedor", SqlDbType.Int).Value = dto.id_proveedor;
+                        cmdEmail.Parameters.Add("@id_cliente", SqlDbType.Int).Value = dto.id_cliente;
+                        cmdEmail.Parameters.Add("@id_servicio", SqlDbType.Int).Value = dto.id_servicio;
 
                         using var readerEmail = await cmdEmail.ExecuteReaderAsync();
+
                         if (await readerEmail.ReadAsync())
                         {
                             var emailProveedor = readerEmail["email_proveedor"]?.ToString();
@@ -89,7 +108,7 @@ public class SolicitudesController : ControllerBase
                             var nombreCliente = readerEmail["nombre_cliente"]?.ToString();
                             var tituloServicio = readerEmail["titulo_servicio"]?.ToString();
 
-                            if (!string.IsNullOrEmpty(emailProveedor))
+                            if (!string.IsNullOrWhiteSpace(emailProveedor))
                             {
                                 _ = _emailService.EnviarNotificacionSolicitud(
                                     emailProveedor,
@@ -98,14 +117,15 @@ public class SolicitudesController : ControllerBase
                                     tituloServicio ?? "Tu servicio",
                                     dto.tipo_servicio ?? "No especificado",
                                     dto.descripcion ?? "",
-                                    dto.presupuesto?.ToString() ?? "",
+                                    dto.presupuesto.ToString(),
                                     dto.urgencia ?? ""
                                 );
                             }
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        Console.WriteLine($"Error enviando correo: {ex.Message}");
                     }
                 }
 
@@ -116,11 +136,17 @@ public class SolicitudesController : ControllerBase
                 });
             }
 
-            return BadRequest(new { message = "No se pudo crear la solicitud" });
+            return BadRequest(new
+            {
+                message = "No se pudo crear la solicitud"
+            });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { error = ex.Message });
+            return StatusCode(500, new
+            {
+                error = ex.Message
+            });
         }
     }
 
@@ -134,17 +160,23 @@ public class SolicitudesController : ControllerBase
         await conn.OpenAsync();
 
         var cmd = new SqlCommand(@"
-            SELECT s.id_solicitud, s.estado, s.descripcion,
-                   u.nombre AS nombre_proveedor,
-                   se.titulo AS titulo_servicio, se.icono
+            SELECT 
+                s.id_solicitud,
+                s.estado,
+                s.descripcion,
+                u.nombre AS nombre_proveedor,
+                se.titulo AS titulo_servicio,
+                se.icono
             FROM solicitudes s
-            INNER JOIN usuarios u ON s.id_proveedor = u.id_usuario
-            INNER JOIN servicios se ON s.id_servicio = se.id_servicio
+            INNER JOIN usuarios u 
+                ON s.id_proveedor = u.id_usuario
+            INNER JOIN servicios se 
+                ON s.id_servicio = se.id_servicio
             WHERE s.id_cliente = @id
             ORDER BY s.id_solicitud DESC
         ", conn);
 
-        cmd.Parameters.AddWithValue("@id", id);
+        cmd.Parameters.Add("@id", SqlDbType.Int).Value = id;
 
         using var reader = await cmd.ExecuteReaderAsync();
 
@@ -154,7 +186,10 @@ public class SolicitudesController : ControllerBase
             {
                 id_solicitud = reader["id_solicitud"],
                 estado = reader["estado"],
-                descripcion = reader["descripcion"] == DBNull.Value ? "" : reader["descripcion"].ToString(),
+                descripcion = reader["descripcion"] == DBNull.Value
+                    ? ""
+                    : reader["descripcion"].ToString(),
+
                 nombre_proveedor = reader["nombre_proveedor"],
                 titulo_servicio = reader["titulo_servicio"],
                 icono = reader["icono"]
@@ -174,18 +209,25 @@ public class SolicitudesController : ControllerBase
         await conn.OpenAsync();
 
         var cmd = new SqlCommand(@"
-            SELECT s.id_solicitud, s.estado, s.descripcion,
-                   u.nombre AS nombre_cliente,
-                   se.titulo AS titulo_servicio, se.icono,
-                   s.motivo_rechazo, s.contraoferta
+            SELECT 
+                s.id_solicitud,
+                s.estado,
+                s.descripcion,
+                u.nombre AS nombre_cliente,
+                se.titulo AS titulo_servicio,
+                se.icono,
+                s.motivo_rechazo,
+                s.contraoferta
             FROM solicitudes s
-            INNER JOIN usuarios u ON s.id_cliente = u.id_usuario
-            INNER JOIN servicios se ON s.id_servicio = se.id_servicio
+            INNER JOIN usuarios u 
+                ON s.id_cliente = u.id_usuario
+            INNER JOIN servicios se 
+                ON s.id_servicio = se.id_servicio
             WHERE s.id_proveedor = @id
             ORDER BY s.id_solicitud DESC
         ", conn);
 
-        cmd.Parameters.AddWithValue("@id", id);
+        cmd.Parameters.Add("@id", SqlDbType.Int).Value = id;
 
         using var reader = await cmd.ExecuteReaderAsync();
 
@@ -195,87 +237,127 @@ public class SolicitudesController : ControllerBase
             {
                 id_solicitud = reader["id_solicitud"],
                 estado = reader["estado"],
-                descripcion = reader["descripcion"] == DBNull.Value ? "" : reader["descripcion"].ToString(),
+
+                descripcion = reader["descripcion"] == DBNull.Value
+                    ? ""
+                    : reader["descripcion"].ToString(),
+
                 nombre_cliente = reader["nombre_cliente"],
                 titulo_servicio = reader["titulo_servicio"],
                 icono = reader["icono"],
-                motivo_rechazo = reader["motivo_rechazo"] == DBNull.Value ? "" : reader["motivo_rechazo"].ToString(),
-                contraoferta = reader["contraoferta"] == DBNull.Value ? "" : reader["contraoferta"].ToString(),
+
+                motivo_rechazo = reader["motivo_rechazo"] == DBNull.Value
+                    ? ""
+                    : reader["motivo_rechazo"].ToString(),
+
+                contraoferta = reader["contraoferta"] == DBNull.Value
+                    ? null
+                    : reader["contraoferta"]
             });
         }
 
         return Ok(lista);
     }
 
-    // 🔹 RESPONDER SOLICITUD (ACEPTAR / RECHAZAR)
+    // 🔹 RESPONDER SOLICITUD
     [HttpPost("responder")]
     public async Task<IActionResult> Responder([FromBody] ResponderSolicitudDTO dto)
     {
         using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
         await conn.OpenAsync();
 
-        string estado = dto.accion == "aceptar" ? "Aceptada" : "Rechazada";
-        int fueAceptada = dto.accion == "aceptar" ? 1 : 0;
+        bool aceptar = dto.accion.Equals(
+            "aceptar",
+            StringComparison.OrdinalIgnoreCase
+        );
+
+        string estado = aceptar ? "Aceptada" : "Rechazada";
+        int fueAceptada = aceptar ? 1 : 0;
 
         var cmd = new SqlCommand(@"
             UPDATE solicitudes
-            SET estado = @estado,
+            SET 
+                estado = @estado,
                 motivo_rechazo = @motivo,
                 contraoferta = @contraoferta,
                 fue_aceptada = @fue_aceptada
             WHERE id_solicitud = @id
         ", conn);
 
-        cmd.Parameters.AddWithValue("@estado", estado);
-        cmd.Parameters.AddWithValue("@motivo", dto.motivo_rechazo ?? (object)DBNull.Value);
-        cmd.Parameters.AddWithValue("@contraoferta", dto.contraoferta ?? (object)DBNull.Value);
-        cmd.Parameters.AddWithValue("@fue_aceptada", fueAceptada);
-        cmd.Parameters.AddWithValue("@id", dto.id_solicitud);
+        cmd.Parameters.Add("@estado", SqlDbType.NVarChar).Value = estado;
+
+        cmd.Parameters.Add("@motivo", SqlDbType.NVarChar).Value =
+            dto.motivo_rechazo ?? (object)DBNull.Value;
+
+        cmd.Parameters.Add("@contraoferta", SqlDbType.NVarChar).Value =
+            dto.contraoferta ?? (object)DBNull.Value;
+
+        cmd.Parameters.Add("@fue_aceptada", SqlDbType.Int).Value = fueAceptada;
+        cmd.Parameters.Add("@id", SqlDbType.Int).Value = dto.id_solicitud;
 
         await cmd.ExecuteNonQueryAsync();
 
-        return Ok(new { message = "Solicitud actualizada" });
+        return Ok(new
+        {
+            message = "Solicitud actualizada"
+        });
     }
-
 
     // 🔹 VERIFICAR SI YA EXISTE SOLICITUD
     [HttpGet("verificar")]
-    public async Task<IActionResult> Verificar([FromQuery] int id_cliente, [FromQuery] int id_servicio)
+    public async Task<IActionResult> Verificar(
+        [FromQuery] int id_cliente,
+        [FromQuery] int id_servicio
+    )
     {
         using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
         await conn.OpenAsync();
 
         var cmd = new SqlCommand(@"
-        SELECT COUNT(*) FROM solicitudes
-        WHERE id_cliente = @id_cliente AND id_servicio = @id_servicio
-        AND estado NOT IN ('Rechazada', 'Cancelada')
-    ", conn);
+            SELECT COUNT(*)
+            FROM solicitudes
+            WHERE id_cliente = @id_cliente
+            AND id_servicio = @id_servicio
+            AND estado NOT IN ('Rechazada', 'Cancelada')
+        ", conn);
 
-        cmd.Parameters.AddWithValue("@id_cliente", id_cliente);
-        cmd.Parameters.AddWithValue("@id_servicio", id_servicio);
+        cmd.Parameters.Add("@id_cliente", SqlDbType.Int).Value = id_cliente;
+        cmd.Parameters.Add("@id_servicio", SqlDbType.Int).Value = id_servicio;
 
         var count = (int)await cmd.ExecuteScalarAsync();
-        return Ok(new { existe = count > 0 });
+
+        return Ok(new
+        {
+            existe = count > 0
+        });
     }
 
-    // 🔹 ELIMINAR SOLICITUD
+    // 🔹 CANCELAR SOLICITUD
     [HttpDelete("eliminar")]
-    public async Task<IActionResult> Eliminar([FromQuery] int id_cliente, [FromQuery] int id_servicio)
+    public async Task<IActionResult> Eliminar(
+        [FromQuery] int id_cliente,
+        [FromQuery] int id_servicio
+    )
     {
         using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
         await conn.OpenAsync();
 
         var cmd = new SqlCommand(@"
-        DELETE FROM solicitudes
-        WHERE id_cliente = @id_cliente AND id_servicio = @id_servicio
-        AND estado NOT IN ('Rechazada', 'Cancelada')
-    ", conn);
+            UPDATE solicitudes
+            SET estado = 'Cancelada'
+            WHERE id_cliente = @id_cliente
+            AND id_servicio = @id_servicio
+            AND estado NOT IN ('Rechazada', 'Cancelada')
+        ", conn);
 
-        cmd.Parameters.AddWithValue("@id_cliente", id_cliente);
-        cmd.Parameters.AddWithValue("@id_servicio", id_servicio);
+        cmd.Parameters.Add("@id_cliente", SqlDbType.Int).Value = id_cliente;
+        cmd.Parameters.Add("@id_servicio", SqlDbType.Int).Value = id_servicio;
 
         await cmd.ExecuteNonQueryAsync();
-        return Ok(new { message = "Solicitud eliminada" });
-    }
 
+        return Ok(new
+        {
+            message = "Solicitud cancelada"
+        });
+    }
 }
