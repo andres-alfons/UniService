@@ -900,24 +900,27 @@ export default function Servicio() {
 
               {/* Botón de contacto fuera del Link para evitar el error de anidamiento de <a> */}
               {servicio.contacto && (
-                <a
-                  href={
-                    // Si el contacto tiene @ se trata como email, de lo contrario como WhatsApp
-                    servicio.contacto.includes("@")
-                      ? `mailto:${servicio.contacto}`
-                      : `https://wa.me/57${servicio.contacto.replace(/\D/g, "")}`
-                  }
-                  className="btn-primary"
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    display: "block",
-                    textAlign: "center",
-                    marginBottom: "12px",
-                  }}
-                >
-                  Contactar Proveedor
-                </a>
+                <div className="contacto-botones">
+                  {servicio.contacto.includes("@") ? (
+                    <a
+                      href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(servicio.contacto)}&su=${encodeURIComponent("Consulta sobre: " + (servicio.titulo || "tu servicio"))}`}
+                      className="btn-primary btn-contacto btn-gmail"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      📧 Contactar por Gmail
+                    </a>
+                  ) : (
+                    <a
+                      href={`https://wa.me/57${servicio.contacto.replace(/\D/g, "")}?text=${encodeURIComponent("Hola, vi tu servicio \"" + (servicio.titulo || "") + "\" en UniService y me interesa. ¿Podrías darme más información?")}` }
+                      className="btn-primary btn-contacto btn-whatsapp"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      💬 Contactar por WhatsApp
+                    </a>
+                  )}
+                </div>
               )}
             </div>
 

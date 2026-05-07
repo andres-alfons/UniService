@@ -2093,3 +2093,285 @@ html {
     max-width: 350px;
   }
 }
+
+/* ═══════════════════════════════════════════
+   PUBLICAR FORMULARIO DINÁMICO
+   ═══════════════════════════════════════════ */
+
+.publicar-form-dinamico fieldset {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(14, 165, 160, 0.15);
+}
+
+.publicar-form-dinamico fieldset:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.contacto-fieldset {
+  background: rgba(14, 165, 160, 0.03);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0 !important;
+  border: 1px solid rgba(14, 165, 160, 0.1);
+}
+
+.contacto-type-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.contacto-type-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border: 2px solid var(--borde);
+  border-radius: 12px;
+  background: var(--bg2);
+  color: var(--texto2);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: "Poppins", sans-serif;
+}
+
+.contacto-type-btn:hover {
+  border-color: var(--teal);
+  background: rgba(14, 165, 160, 0.08);
+  transform: translateY(-2px);
+}
+
+.contacto-type-btn.active {
+  background: linear-gradient(135deg, var(--teal), var(--teal2));
+  border-color: var(--teal);
+  color: white;
+  box-shadow: 0 6px 16px rgba(14, 165, 160, 0.35);
+  transform: translateY(-2px);
+  font-weight: 600;
+}
+
+.contacto-icon {
+  font-size: 1.3rem;
+}
+
+.contacto-input-animado {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-prefix {
+  position: absolute;
+  left: 16px;
+  color: var(--teal);
+  font-weight: 700;
+  font-size: 1rem;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.input-with-icon .form-input {
+  padding-left: 36px;
+}
+
+.validation-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.validation-hint.valid {
+  color: #4ac7b6;
+}
+
+.validation-hint.invalid {
+  color: #f87171;
+}
+
+.char-counter {
+  font-size: 0.72rem;
+  color: var(--texto3);
+  text-align: right;
+  margin-top: 4px;
+}
+
+.btn-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(7, 13, 22, 0.3);
+  border-top-color: var(--bg);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ═══════════════════════════════════════════
+   MODALES DE ÉXITO Y ERROR
+   ═══════════════════════════════════════════ */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 40px 32px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 auto 20px;
+}
+
+.success-icon {
+  background: rgba(74, 199, 182, 0.15);
+  color: #4ac7b6;
+  border: 2px solid rgba(74, 199, 182, 0.3);
+}
+
+.error-icon {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+  border: 2px solid rgba(248, 113, 113, 0.3);
+}
+
+.modal-content h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: var(--texto);
+}
+
+.modal-content p {
+  color: var(--texto2);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.modal-content .btn {
+  width: 100%;
+  justify-content: center;
+  padding: 14px 24px;
+}
+
+/* ═══════════════════════════════════════════
+   BOTONES DE CONTACTO (WhatsApp / Gmail)
+   ═══════════════════════════════════════════ */
+
+.contacto-botones {
+  margin-bottom: 12px;
+}
+
+.btn-contacto {
+  display: block !important;
+  text-align: center;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-whatsapp {
+  background: linear-gradient(135deg, #25d366, #128c7e);
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(37, 211, 102, 0.3);
+}
+
+.btn-whatsapp:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+}
+
+.btn-gmail {
+  background: linear-gradient(135deg, #ea4335, #d93025);
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(234, 67, 53, 0.3);
+}
+
+.btn-gmail:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(234, 67, 53, 0.4);
+}
+
+/* ═══════════════════════════════════════════
+   FORM VALIDATION STATES
+   ═══════════════════════════════════════════ */
+
+.form-grupo.has-error .form-input {
+  border-color: #f87171;
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15);
+}
+
+.btn-publicar {
+  min-width: 200px;
+}
