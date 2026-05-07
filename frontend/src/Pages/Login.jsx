@@ -450,6 +450,7 @@ export default function Login() {
         // Guarda el token JWT y los datos del usuario en localStorage para mantener la sesión
         localStorage.setItem("token", data.token);
         localStorage.setItem("usuarioId", data.user.id);
+        localStorage.setItem("usuarioNombre", data.user.nombre || data.user.correo.split("@")[0]);
         localStorage.setItem("usuarioRol", data.user.id_rol);
         localStorage.setItem("logueado", "true");
 

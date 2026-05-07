@@ -715,7 +715,9 @@ export default function Servicio() {
       ? "🏛️ Universidad Popular del Cesar"
       : servicio.universidad === "No pertenece a ninguna universidad"
       ? "🌐 Independiente"
-      : `🏫 ${servicio.universidad || "No especificada"}`;
+      : servicio.universidad
+      ? `🏫 ${servicio.universidad}`
+      : "🎓 Comunidad académica";
 
   // Emojis usados como imágenes de la galería (reemplazarían imágenes reales en producción)
   const emojisGaleria = [servicio.icono || "📌", "🖥️", "⌨️", "🔧"];
@@ -892,22 +894,28 @@ export default function Servicio() {
                 style={{ textDecoration: "none" }}
               >
                 <div className="card-proveedor" style={{ cursor: "pointer" }}>
-                  <div
-                    className={`avatar-grande ${colorAvatar(servicio.proveedor)}`}
-                  >
-                    {iniciales(servicio.proveedor)}
+                  <div className="card-proveedor-glow" />
+                  <div className="card-proveedor-header">
+                    <div
+                      className={`avatar-grande ${colorAvatar(servicio.proveedor)}`}
+                    >
+                      {iniciales(servicio.proveedor)}
+                    </div>
+                    <div className="card-proveedor-info">
+                      <div
+                        className="nombre-proveedor"
+                      >
+                        {servicio.proveedor || "Proveedor anónimo"}
+                      </div>
+                      <div className="ubicacion-proveedor">{universidad}</div>
+                    </div>
                   </div>
-
-                  <div
-                    className="nombre-proveedor"
-                    style={{ transition: "color 0.2s" }}
-                    onMouseEnter={(e) => (e.target.style.color = "var(--teal)")}
-                    onMouseLeave={(e) => (e.target.style.color = "")}
-                  >
-                    {servicio.proveedor || "Proveedor anónimo"}
+                  <div className="card-proveedor-footer">
+                    <span className="badge-proveedor">
+                      ⭐ {servicio.estrellas || "0"} · {servicio.resenas || "0"} reseñas
+                    </span>
+                    <span className="badge-ver">Ver perfil →</span>
                   </div>
-
-                  <div className="ubicacion-proveedor">🏫 {universidad}</div>
                 </div>
               </Link>
 

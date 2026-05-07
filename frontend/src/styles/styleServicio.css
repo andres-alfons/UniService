@@ -263,36 +263,93 @@ body {
 
 /* ── TARJETA PROVEEDOR ── */
 .card-proveedor {
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(
     135deg,
     #0e1929 0%,
-    rgba(14, 165, 160, 0.08) 100%
+    rgba(14, 165, 160, 0.05) 50%,
+    rgba(139, 92, 246, 0.03) 100%
   );
-  border: 2px solid var(--borde);
-  border-radius: 16px;
-  padding: 32px 24px;
-  text-align: center;
+  border: 1px solid var(--borde);
+  border-radius: 20px;
+  padding: 24px;
   margin-bottom: 24px;
-  transition: all 0.3s ease;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-proveedor-glow {
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(14, 165, 160, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+  opacity: 0;
 }
 
 .card-proveedor:hover {
-  border-color: var(--teal);
-  box-shadow: 0 8px 24px rgba(14, 165, 160, 0.1);
+  border-color: rgba(14, 165, 160, 0.4);
+  box-shadow: 0 12px 40px rgba(14, 165, 160, 0.12), 0 4px 12px rgba(0, 0, 0, 0.2);
+  transform: translateY(-3px);
+}
+
+.card-proveedor:hover .card-proveedor-glow {
+  opacity: 1;
+}
+
+.card-proveedor-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
 }
 
 .avatar-grande {
-  width: 80px;
-  height: 80px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  margin: 0 auto 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 800;
   color: #fff;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-proveedor-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.nombre-proveedor {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--texto);
+  margin-bottom: 4px;
+  transition: color 0.25s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-proveedor:hover .nombre-proveedor {
+  color: var(--teal);
+}
+
+.ubicacion-proveedor {
+  color: var(--texto2);
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .ag-azul {
@@ -308,16 +365,37 @@ body {
   background: linear-gradient(135deg, #f97316, #fb923c);
 }
 
-.nombre-proveedor {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--texto);
-  margin-bottom: 4px;
+.card-proveedor-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
+  z-index: 1;
 }
-.ubicacion-proveedor {
+
+.badge-proveedor {
+  font-size: 0.82rem;
   color: var(--texto2);
-  font-size: 0.88rem;
-  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.badge-ver {
+  font-size: 0.8rem;
+  color: var(--teal);
+  font-weight: 600;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: all 0.3s ease;
+}
+
+.card-proveedor:hover .badge-ver {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 /* ── BOTONES ── */
@@ -549,7 +627,18 @@ textarea.form-input-custom {
     padding: 20px 16px;
   }
   .card-proveedor {
-    padding: 24px 16px;
+    padding: 18px 16px;
+  }
+  .card-proveedor-header {
+    gap: 12px;
+  }
+  .avatar-grande {
+    width: 52px;
+    height: 52px;
+    font-size: 1.1rem;
+  }
+  .nombre-proveedor {
+    font-size: 0.95rem;
   }
   .seccion-info {
     padding: 16px;

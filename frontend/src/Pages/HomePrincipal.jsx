@@ -116,7 +116,7 @@ const mapaCategoriaId = {
 function Navbar({ scrolled, onCerrarSesion }) {
   const [menuAbierto, setMenuAbierto] = useState(false);
   // El nombre del usuario se lee del localStorage donde se guardó al hacer login
-  const nombreUsuario = localStorage.getItem("usuario") || "Usuario";
+  const nombreUsuario = localStorage.getItem("usuarioNombre") || localStorage.getItem("usuario") || "Usuario";
 
   return (
     <nav className={`navbar-custom${scrolled ? " scrolled" : ""}`}>
@@ -1753,9 +1753,21 @@ export default function HomePrincipal() {
     return () => observer.disconnect();
   }, []);
 
-  // Al cerrar sesión se limpia todo el localStorage y se redirige al home de invitado
+  // Al cerrar sesión se limpia solo la info de sesión, no las preferencias del usuario
   const handleCerrarSesion = () => {
+    // Guardar las notificaciones leídas antes de limpiar
+    const keysToPreserve = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith("notificaciones_leidas_")) {
+        keysToPreserve.push({ key, value: localStorage.getItem(key) });
+      }
+    }
     localStorage.clear();
+    // Restaurar las notificaciones leídas
+    keysToPreserve.forEach(({ key, value }) => {
+      localStorage.setItem(key, value);
+    });
     navigate("/home-guest");
   };
 
