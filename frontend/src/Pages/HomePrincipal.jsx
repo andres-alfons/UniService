@@ -570,11 +570,35 @@ function SeccionBuscar({ serviciosTotales }) {
 function SeccionPublicar({ onPublicado }) {
   const [form, setForm] = useState(initialPublicar);
   const [loading, setLoading] = useState(false);
+  const [tipoContacto, setTipoContacto] = useState("");
+  const [errorCampo, setErrorCampo] = useState("");
+  const [modalExito, setModalExito] = useState(false);
+  const [modalError, setModalError] = useState(null);
 
-  // Actualiza solo el campo que cambió usando el atributo "name" del input
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    if (errorCampo) setErrorCampo("");
+  };
+
+  const validarContacto = () => {
+    const { contacto } = form;
+    if (!contacto) return "El campo de contacto es obligatorio";
+    if (tipoContacto === "telefono") {
+      const soloNumeros = contacto.replace(/\D/g, "");
+      if (soloNumeros.length < 7 || soloNumeros.length > 15) {
+        return "Ingresa un número de teléfono válido (7-15 dígitos)";
+      }
+      if (!/^\+?[0-9]+$/.test(contacto.trim())) {
+        return "El teléfono solo debe contener números (puede empezar con +)";
+      }
+    } else if (tipoContacto === "correo") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(contacto.trim())) {
+        return "Ingresa un correo electrónico válido (ejemplo@correo.com)";
+      }
+    }
+    return "";
   };
 
   const handleSubmit = async (e) => {
@@ -590,29 +614,33 @@ function SeccionPublicar({ onPublicado }) {
       disponibilidad,
     } = form;
 
-    // Validación básica antes de enviar al servidor
-    if (
-      !titulo ||
-      !descripcion ||
-      !categoria ||
-      !precio ||
-      !universidad ||
-      !contacto ||
-      !modalidad ||
-      !disponibilidad
-    ) {
-      alert("❌ Completa todos los campos");
+    if (!titulo || !descripcion || !categoria || !precio || !universidad || !modalidad || !disponibilidad) {
+      setModalError("⚠️ Completa todos los campos obligatorios del formulario.");
       return;
     }
 
-    // El ID del proveedor se obtiene del localStorage (guardado al hacer login)
+    if (!tipoContacto) {
+      setModalError("⚠️ Selecciona si tu contacto es por teléfono o correo electrónico.");
+      return;
+    }
+
+    const errorContacto = validarContacto();
+    if (errorContacto) {
+      setModalError(`❌ ${errorContacto}`);
+      return;
+    }
+
+    if (Number(precio) < 1000) {
+      setModalError("❌ El precio mínimo debe ser $1,000 COP.");
+      return;
+    }
+
     const proveedor = localStorage.getItem("usuarioId");
     if (!proveedor) {
-      alert("❌ Debes iniciar sesión para publicar un servicio");
+      setModalError("❌ Debes iniciar sesión para publicar un servicio.");
       return;
     }
 
-    // Convertimos los textos de modalidad y disponibilidad al valor numérico que espera la BD
     const modalidadDB =
       { "🏫 Presencial": 0, "💻 Virtual": 1, "🔄 Mixta": 2 }[modalidad] ?? 0;
     const dispDB =
@@ -622,7 +650,6 @@ function SeccionPublicar({ onPublicado }) {
         "⏰ Siempre disponible": 2,
       }[disponibilidad] ?? 0;
 
-    // Objeto con la estructura exacta que espera el endpoint POST /api/Services
     const nuevoServicio = {
       id_proveedor: Number(proveedor),
       titulo,
@@ -645,17 +672,22 @@ function SeccionPublicar({ onPublicado }) {
       });
       const data = await res.json();
       if (data.ok) {
-        alert("✅ Servicio publicado correctamente");
-        setForm(initialPublicar); // Limpiamos el formulario tras publicar
-        onPublicado(); // Recargamos la lista de servicios en el padre
+        setModalExito(true);
+        setForm(initialPublicar);
+        setTipoContacto("");
+        onPublicado();
       } else {
-        alert("❌ Error: " + (data.error || "No se pudo publicar"));
+        setModalError("❌ Error: " + (data.error || "No se pudo publicar el servicio."));
       }
     } catch {
-      alert("❌ Error de conexión con el servidor");
+      setModalError("❌ Error de conexión con el servidor. Verifica tu internet e intenta de nuevo.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const cerrarModalExito = () => {
+    setModalExito(false);
   };
 
   return (
@@ -672,14 +704,14 @@ function SeccionPublicar({ onPublicado }) {
             Comparte tu talento con la comunidad universitaria
           </p>
 
-          <div className="caja-formulario">
+          <div className="caja-formulario publicar-form-dinamico">
             <fieldset>
               <legend className="legend-custom">
                 📌 Información del servicio
               </legend>
 
               <div className="form-grid cols-1">
-                <div className="form-grupo">
+                <div className={`form-grupo ${errorCampo === "titulo" ? "has-error" : ""}`}>
                   <label className="form-label">
                     ✍️ Título del servicio{" "}
                     <span style={{ color: "var(--teal)" }}>*</span>
@@ -706,6 +738,7 @@ function SeccionPublicar({ onPublicado }) {
                     value={form.descripcion}
                     onChange={handleChange}
                   />
+                  <span className="char-counter">{form.descripcion.length} / 500</span>
                 </div>
               </div>
 
@@ -720,7 +753,8 @@ function SeccionPublicar({ onPublicado }) {
                     value={form.categoria}
                     onChange={handleChange}
                   >
-                    {CATEGORIAS.map((c) => (
+                    <option value="">Selecciona una categoría</option>
+                    {CATEGORIAS.filter(c => c.valor !== "").map((c) => (
                       <option key={c.valor} value={c.valor}>
                         {c.label}
                       </option>
@@ -756,21 +790,75 @@ function SeccionPublicar({ onPublicado }) {
                     onChange={handleChange}
                   />
                 </div>
-                <div className="form-grupo">
-                  <label className="form-label">
-                    📱 Contacto (WhatsApp/Email){" "}
-                    <span style={{ color: "var(--teal)" }}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="contacto"
-                    className="form-input"
-                    placeholder="Ej: +57 300 123 4567 o correo@email.com"
-                    value={form.contacto}
-                    onChange={handleChange}
-                  />
+              </div>
+            </fieldset>
+
+            <fieldset className="contacto-fieldset">
+              <legend className="legend-custom">
+                📞 Información de contacto
+              </legend>
+
+              <div className="contacto-type-selector">
+                <p className="form-label" style={{ marginBottom: "12px" }}>
+                  ¿Cómo quieres recibir consultas? <span style={{ color: "var(--teal)" }}>*</span>
+                </p>
+                <div className="contacto-type-buttons">
+                  <button
+                    type="button"
+                    className={`contacto-type-btn ${tipoContacto === "telefono" ? "active" : ""}`}
+                    onClick={() => { setTipoContacto("telefono"); setForm(prev => ({ ...prev, contacto: "" })); }}
+                  >
+                    <span className="contacto-icon">📱</span>
+                    <span>WhatsApp</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`contacto-type-btn ${tipoContacto === "correo" ? "active" : ""}`}
+                    onClick={() => { setTipoContacto("correo"); setForm(prev => ({ ...prev, contacto: "" })); }}
+                  >
+                    <span className="contacto-icon">📧</span>
+                    <span>Correo electrónico</span>
+                  </button>
                 </div>
               </div>
+
+              {tipoContacto && (
+                <div className="form-grupo contacto-input-animado">
+                  <label className="form-label">
+                    {tipoContacto === "telefono" ? "📱 Número de WhatsApp" : "📧 Correo electrónico"}{" "}
+                    <span style={{ color: "var(--teal)" }}>*</span>
+                  </label>
+                  <div className="input-with-icon">
+                    <span className="input-prefix">
+                      {tipoContacto === "telefono" ? "+" : "@"}
+                    </span>
+                    <input
+                      type={tipoContacto === "telefono" ? "tel" : "email"}
+                      name="contacto"
+                      className="form-input"
+                      placeholder={tipoContacto === "telefono" ? "57 300 123 4567" : "tucorreo@email.com"}
+                      value={form.contacto}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  {tipoContacto === "correo" && form.contacto && (
+                    <span className={`validation-hint ${/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.contacto) ? "valid" : "invalid"}`}>
+                      {/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.contacto) ? "✓ Correo válido" : "✗ Formato: ejemplo@correo.com"}
+                    </span>
+                  )}
+                  {tipoContacto === "telefono" && form.contacto && (
+                    <span className={`validation-hint ${/^\+?[0-9]{7,15}$/.test(form.contacto.replace(/\s/g, "")) ? "valid" : "invalid"}`}>
+                      {form.contacto.replace(/\D/g, "").length}/15 dígitos
+                    </span>
+                  )}
+                </div>
+              )}
+            </fieldset>
+
+            <fieldset>
+              <legend className="legend-custom">
+                📍 Configuración del servicio
+              </legend>
 
               <div className="form-grupo" style={{ marginBottom: "20px" }}>
                 <p className="form-label">
@@ -817,24 +905,56 @@ function SeccionPublicar({ onPublicado }) {
               <div className="form-btns">
                 <button
                   type="button"
-                  className="btn btn-verde"
+                  className="btn btn-verde btn-publicar"
                   onClick={handleSubmit}
                   disabled={loading}
                 >
-                  {loading ? "Publicando..." : "✓ Publicar servicio"}
+                  {loading ? (
+                    <span className="btn-loading">
+                      <span className="spinner" /> Publicando...
+                    </span>
+                  ) : (
+                    "✓ Publicar servicio"
+                  )}
                 </button>
                 <button
                   type="button"
                   className="btn btn-borde"
-                  onClick={() => setForm(initialPublicar)}
+                  onClick={() => { setForm(initialPublicar); setTipoContacto(""); }}
                 >
-                  🗑️ Limpiar formulario
+                  🗑️ Limpiar
                 </button>
               </div>
             </fieldset>
           </div>
         </div>
       </div>
+
+      {modalExito && (
+        <div className="modal-overlay" onClick={cerrarModalExito}>
+          <div className="modal-content modal-exito" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-icon success-icon">✓</div>
+            <h3>¡Servicio publicado con éxito!</h3>
+            <p>Tu servicio ya está visible para la comunidad universitaria.</p>
+            <button className="btn btn-verde" onClick={cerrarModalExito}>
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
+
+      {modalError && (
+        <div className="modal-overlay" onClick={() => setModalError(null)}>
+          <div className="modal-content modal-error" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-icon error-icon">✕</div>
+            <h3>Error al publicar</h3>
+            <p>{modalError}</p>
+            <button className="btn btn-borde" onClick={() => setModalError(null)}>
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
@@ -1311,11 +1431,35 @@ function NotificacionesFlotantes() {
 
   const usuarioId = localStorage.getItem("usuarioId");
 
+  const getReadStorageKey = () => `notificaciones_leidas_${usuarioId}`;
+  const getDismissedStorageKey = () => `notificaciones_dismissed_${usuarioId}`;
+
+  const obtenerLeidas = () => {
+    try {
+      const stored = localStorage.getItem(getReadStorageKey());
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const guardarLeida = (id) => {
+    try {
+      const leidas = obtenerLeidas();
+      leidas[id] = true;
+      localStorage.setItem(getReadStorageKey(), JSON.stringify(leidas));
+    } catch {
+      console.error("Error al guardar notificación leída");
+    }
+  };
+
   useEffect(() => {
     if (!usuarioId) return;
     setCargando(true);
 
     const cargarNotificaciones = () => {
+      const leidas = obtenerLeidas();
+
       Promise.all([
         fetch(`${API_SOLICITUD}/recibidas/${usuarioId}`).then((r) => r.json()),
         fetch(`${API_SOLICITUD}/enviadas/${usuarioId}`).then((r) => r.json()),
@@ -1328,24 +1472,27 @@ function NotificacionesFlotantes() {
 
           recibidasArr.forEach((sol) => {
             if (sol.estado === "Pendiente") {
+              const id = `rec-${sol.id_solicitud}`;
               notifs.push({
-                id: `rec-${sol.id_solicitud}`,
+                id,
                 texto: `📩 Nueva solicitud de ${sol.nombre_cliente || "un estudiante"} para "${sol.titulo_servicio || "tu servicio"}"`,
-                leida: false,
+                leida: !!leidas[id],
                 tipo: "recibida",
               });
             } else if (sol.estado === "Aceptada") {
+              const id = `rec-acept-${sol.id_solicitud}`;
               notifs.push({
-                id: `rec-acept-${sol.id_solicitud}`,
+                id,
                 texto: `✅ ${sol.nombre_cliente || "El cliente"} aceptó tu respuesta para "${sol.titulo_servicio || "tu servicio"}"`,
-                leida: true,
+                leida: !!leidas[id],
                 tipo: "info",
               });
             } else if (sol.estado === "Rechazada") {
+              const id = `rec-rech-${sol.id_solicitud}`;
               notifs.push({
-                id: `rec-rech-${sol.id_solicitud}`,
+                id,
                 texto: `❌ ${sol.nombre_cliente || "El cliente"} rechazó la solicitud para "${sol.titulo_servicio || "tu servicio"}"`,
-                leida: true,
+                leida: !!leidas[id],
                 tipo: "info",
               });
             }
@@ -1353,23 +1500,28 @@ function NotificacionesFlotantes() {
 
           enviadasArr.forEach((sol) => {
             if (sol.estado === "Aceptada") {
+              const id = `env-acept-${sol.id_solicitud}`;
               notifs.push({
-                id: `env-acept-${sol.id_solicitud}`,
+                id,
                 texto: `✅ Tu solicitud para "${sol.titulo_servicio || "el servicio"}" fue aceptada por ${sol.nombre_proveedor || "el proveedor"}`,
-                leida: false,
+                leida: !!leidas[id],
                 tipo: "enviada",
               });
             } else if (sol.estado === "Rechazada") {
+              const id = `env-rech-${sol.id_solicitud}`;
               notifs.push({
-                id: `env-rech-${sol.id_solicitud}`,
+                id,
                 texto: `❌ Tu solicitud para "${sol.titulo_servicio || "el servicio"}" fue rechazada${sol.motivo_rechazo ? ": " + sol.motivo_rechazo : ""}`,
-                leida: false,
+                leida: !!leidas[id],
                 tipo: "enviada",
               });
             }
           });
 
-          notifs.sort((a, b) => b.leida - a.leida);
+          notifs.sort((a, b) => {
+            if (a.leida !== b.leida) return a.leida ? 1 : -1;
+            return b.id.localeCompare(a.id);
+          });
           setNotificaciones(notifs);
         })
         .catch(console.error)
@@ -1385,6 +1537,7 @@ function NotificacionesFlotantes() {
   }, [usuarioId]);
 
   const marcarLeida = (id) => {
+    guardarLeida(id);
     setNotificaciones((prev) =>
       prev.map((n) => (n.id === id ? { ...n, leida: true } : n)),
     );
@@ -1395,6 +1548,9 @@ function NotificacionesFlotantes() {
       "¿Estás seguro de que deseas eliminar todas las notificaciones? Esta acción no se puede deshacer.",
     );
     if (confirmar) {
+      try {
+        localStorage.removeItem(getReadStorageKey());
+      } catch {}
       setNotificaciones([]);
     }
   };
