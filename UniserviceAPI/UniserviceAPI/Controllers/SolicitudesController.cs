@@ -76,10 +76,11 @@ public class SolicitudesController : ControllerBase
                             FROM usuarios u
                             INNER JOIN servicios se ON u.id_usuario = se.id_proveedor
                             INNER JOIN usuarios c ON c.id_usuario = @id_cliente
-                            WHERE u.id_usuario = @id_proveedor
+                            WHERE u.id_usuario = @id_proveedor AND se.id_servicio = @id_servicio
                         ", connEmail);
                         cmdEmail.Parameters.AddWithValue("@id_proveedor", dto.id_proveedor);
                         cmdEmail.Parameters.AddWithValue("@id_cliente", dto.id_cliente);
+                        cmdEmail.Parameters.AddWithValue("@id_servicio", dto.id_servicio);
 
                         using var readerEmail = await cmdEmail.ExecuteReaderAsync();
                         if (await readerEmail.ReadAsync())
@@ -91,16 +92,23 @@ public class SolicitudesController : ControllerBase
 
                             if (!string.IsNullOrEmpty(emailProveedor))
                             {
-                                _ = _emailService.EnviarNotificacionSolicitud(
-                                    emailProveedor,
-                                    nombreProveedor ?? "Proveedor",
-                                    nombreCliente ?? "Un estudiante",
-                                    tituloServicio ?? "Tu servicio",
-                                    dto.tipo_servicio ?? "No especificado",
-                                    dto.descripcion ?? "",
-                                    dto.presupuesto?.ToString() ?? "",
-                                    dto.urgencia ?? ""
-                                );
+                                try
+                                {
+                                    await _emailService.EnviarNotificacionSolicitud(
+                                        emailProveedor,
+                                        nombreProveedor ?? "Proveedor",
+                                        nombreCliente ?? "Un estudiante",
+                                        tituloServicio ?? "Tu servicio",
+                                        dto.tipo_servicio ?? "No especificado",
+                                        dto.descripcion ?? "",
+                                        dto.presupuesto?.ToString() ?? "",
+                                        dto.urgencia ?? ""
+                                    );
+                                }
+                                catch (Exception emailEx)
+                                {
+                                    Console.WriteLine($"❌ Error enviando correo: {emailEx.Message}");
+                                }
                             }
                         }
                     }
