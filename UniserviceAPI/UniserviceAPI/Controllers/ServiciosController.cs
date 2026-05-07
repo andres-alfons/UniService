@@ -246,23 +246,35 @@ public class ServicesController : ControllerBase
 
     private string MapModalidad(object value)
     {
-        return value?.ToString() switch
+        if (value == null || value == DBNull.Value) return "🏫 Presencial";
+
+        string str = value.ToString();
+        return str switch
         {
             "0" => "🏫 Presencial",
             "1" => "💻 Virtual",
             "2" => "🔄 Mixta",
-            _ => "No definido"
+            "Presencial" => "🏫 Presencial",
+            "Virtual" => "💻 Virtual",
+            "Mixta" => "🔄 Mixta",
+            _ => "🏫 Presencial"
         };
     }
 
     private string MapDisponibilidad(object value)
     {
-        return value?.ToString() switch
+        if (value == null || value == DBNull.Value) return "📆 Entre semana";
+
+        string str = value.ToString();
+        return str switch
         {
             "0" => "📆 Entre semana",
             "1" => "🎉 Fines de semana",
             "2" => "⏰ Siempre disponible",
-            _ => "No definido"
+            "Entre semana" => "📆 Entre semana",
+            "Fines de semana" => "🎉 Fines de semana",
+            "Siempre disponible" => "⏰ Siempre disponible",
+            _ => "📆 Entre semana"
         };
     }
 
