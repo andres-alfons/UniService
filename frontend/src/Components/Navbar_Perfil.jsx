@@ -4,7 +4,7 @@ import "../styles/styleHome.css";
 
 function Navbar({ onCerrarSesion }) {
   const [menuAbierto, setMenuAbierto] = useState(false);
-  const nombreUsuario = localStorage.getItem("usuario") || "Usuario";
+  const nombreUsuario = localStorage.getItem("usuarioNombre") || localStorage.getItem("usuario") || "Usuario";
 
   return (
     <nav className="navbar-custom">
