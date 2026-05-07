@@ -401,8 +401,15 @@ const Perfil = () => {
                   style={{ cursor: esPerfilExterno ? "default" : "pointer" }}
                 >
                   <div className="avatar-ring"></div>
-                  <img src={userData.avatar} alt="Avatar" className="avatar" />
-                  {/* Indicador de estado online/offline según el campo "estado" de la BD */}
+                  <img
+                    src={userData.avatar}
+                    alt="Avatar"
+                    className="avatar"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null; // evita bucle infinito
+                      e.currentTarget.src = "/src/img/default-avatar.png";
+                    }}
+                  />
                   <div
                     className={`status-badge ${estaConectado ? "online" : "busy"}`}
                   ></div>

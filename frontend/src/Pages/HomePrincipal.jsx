@@ -484,11 +484,10 @@ function SeccionBuscar({ serviciosTotales }) {
             style={{ maxWidth: "700px", margin: "30px auto" }}
           >
             <div className="search-input-wrapper">
-              <span className="search-icon">🔍</span>
               <input
                 type="text"
                 className="search-input"
-                placeholder="¿Qué necesitas hoy? (Ej: Álgebra, Logo, Habitación...)"
+                placeholder="🔍 ¿Qué necesitas hoy? (Ej: Álgebra, Logo, Habitación...)"
                 value={busqueda}
                 onChange={handleBusqueda}
               />
@@ -821,7 +820,7 @@ function SeccionPublicar({ onPublicado }) {
               </div>
             </fieldset>
 
-            <fieldset className="universidad-fieldset">
+            <fieldset className="contacto-fieldset">
               <legend className="legend-custom">
                 🎓 Universidad
               </legend>
