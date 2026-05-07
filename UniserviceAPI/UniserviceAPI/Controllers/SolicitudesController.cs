@@ -94,6 +94,7 @@ public class SolicitudesController : ControllerBase
                             {
                                 try
                                 {
+                                    Console.WriteLine("ENTRÓ AL ENVÍO DE CORREO");
                                     await _emailService.EnviarNotificacionSolicitud(
                                         emailProveedor,
                                         nombreProveedor ?? "Proveedor",
@@ -101,7 +102,7 @@ public class SolicitudesController : ControllerBase
                                         tituloServicio ?? "Tu servicio",
                                         dto.tipo_servicio ?? "No especificado",
                                         dto.descripcion ?? "",
-                                        dto.presupuesto?.ToString() ?? "",
+                                        dto.presupuesto.ToString(),
                                         dto.urgencia ?? ""
                                     );
                                 }

@@ -60,7 +60,7 @@ namespace UniserviceAPI.Services
                         <div style='text-align: center; margin: 25px 0;'>
                             <a href='https://localhost:5173/home#solicitudes'
                                style='background: #4ac7b6; color: #0a1929; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold;'>
-                                Ver solicitudes en UniService
+                                Ver solicitudes
                             </a>
                         </div>
                         <p style='color: #888; font-size: 12px; margin-top: 20px;'>
