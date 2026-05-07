@@ -105,21 +105,21 @@ function Hero() {
   return (
     <section className="hero" id="inicio">
       <div className="container">
-        <p className="label-seccion">Plataforma Universitaria</p>
-        <h1>
+        <p className="label-seccion reveal">Plataforma Universitaria</p>
+        <h1 className="reveal delay-1">
           Intercambia <span className="acento">servicios</span>
           <br />
           entre estudiantes
         </h1>
-        <p className="hero-desc">
+        <p className="hero-desc reveal delay-2">
           Tutorías, ensayos, proyectos, diseño, programación y arriendo de
           habitaciones — todo para la comunidad universitaria.
         </p>
         <div className="hero-btns">
-          <a href="#buscar" className="btn btn-verde">
+          <a href="#buscar" className="btn btn-verde reveal delay-3">
             🔍 Explorar servicios
           </a>
-          <a href="/login" className="btn btn-borde">
+          <a href="/login" className="btn btn-borde reveal delay-3">
             ➕ Publicar mi servicio
           </a>
         </div>
@@ -135,8 +135,10 @@ function TarjetaServicio({ servicio }) {
     : 0;
   const universidad =
     servicio.universidad === 1 || servicio.universidad === "1"
-      ? "Universidad Popular del Cesar"
-      : servicio.universidad || "Universidad no especificada";
+      ? "🏛️ Universidad Popular del Cesar"
+      : servicio.universidad === "No pertenece a ninguna universidad"
+      ? "🌐 Independiente"
+      : `🏫 ${servicio.universidad || "Universidad no especificada"}`;
 
   return (
     <a
@@ -173,7 +175,7 @@ function TarjetaServicio({ servicio }) {
           </span>
         </div>
         <div className="texto-fecha">
-          {formatearFecha(servicio.fecha_publicacion)}
+          {formatearFecha(servicio.fecha_publicacion) || ""}
         </div>
         <div className="card-footer">
           <div>
@@ -191,23 +193,24 @@ function TarjetaServicio({ servicio }) {
 function SeccionRecientes({ servicios, cargando }) {
   return (
     <section className="seccion" id="recientes">
+      <div className="bg-canvas bg-canvas-circuit" />
       <div className="container">
-        <p className="label-seccion">🕐 Recién publicados</p>
-        <h2>Servicios más recientes</h2>
-        <p className="seccion-desc">
+        <p className="label-seccion reveal">🕐 Recién publicados</p>
+        <h2 className="reveal delay-1">Servicios más recientes</h2>
+        <p className="seccion-desc reveal delay-2">
           Los últimos servicios añadidos por la comunidad
         </p>
 
         {cargando ? (
           <p
-            className="texto-muted"
+            className="texto-muted reveal delay-3"
             style={{ textAlign: "center", padding: "40px 0" }}
           >
             Cargando servicios...
           </p>
         ) : servicios.length === 0 ? (
           <p
-            className="texto-muted"
+            className="texto-muted reveal delay-3"
             style={{ textAlign: "center", padding: "40px 0" }}
           >
             Aún no hay servicios publicados.
@@ -228,10 +231,11 @@ function SeccionTop({ top3 }) {
   const medallas = ["🥇", "🥈", "🥉"];
   return (
     <section className="seccion seccion-oscura" id="mejor-calificados">
+      <div className="bg-canvas bg-canvas-stars" />
       <div className="container">
-        <p className="label-seccion">🏆 Top valorados</p>
-        <h2>Servicios mejor calificados ⭐</h2>
-        <p className="seccion-desc">
+        <p className="label-seccion reveal">🏆 Top valorados</p>
+        <h2 className="reveal delay-1">Servicios mejor calificados ⭐</h2>
+        <p className="seccion-desc reveal delay-2">
           Ordenados por satisfacción de los usuarios
         </p>
 
@@ -240,7 +244,7 @@ function SeccionTop({ top3 }) {
             <a
               key={s.id_servicio}
               href={`/login?id=${s.id_servicio}`}
-              className="top-card"
+              className={`top-card reveal-scale delay-${i + 1}`}
             >
               <div className="top-card-rank">
                 <span className="rank-number">{i + 1}</span>
@@ -251,8 +255,10 @@ function SeccionTop({ top3 }) {
                 <h5>{s.titulo}</h5>
                 <p className="top-card-meta">
                   {s.universidad === 1 || s.universidad === "1"
-                    ? "Universidad Popular del Cesar"
-                    : s.universidad || "Universidad no especificada"}
+                    ? "🏛️ Universidad Popular del Cesar"
+                    : s.universidad === "No pertenece a ninguna universidad"
+                    ? "🌐 Independiente"
+                    : `🏫 ${s.universidad || "Universidad no especificada"}`}
                 </p>
                 <div className="top-card-rating">
                   <span className="stars estrellas">
@@ -260,7 +266,7 @@ function SeccionTop({ top3 }) {
                   </span>
                   <span className="rating-text">
                     {Array.isArray(s.estrellas) ? s.estrellas.length : 0}{" "}
-                    reseñas
+                    puntuaciones
                   </span>
                 </div>
                 <div className="top-card-footer">
@@ -382,39 +388,45 @@ function SeccionBuscar({ serviciosTotales }) {
 
   return (
     <section className="seccion seccion-oscura" id="buscar">
+      <div className="bg-canvas bg-canvas-grid-lines" />
+      {/* Header búsqueda */}
       <header
         className="seccion"
         style={{ paddingBottom: 0, paddingTop: 0, background: "transparent" }}
       >
         <div className="container" style={{ textAlign: "center" }}>
-          <p className="label-seccion">Marketplace Universitario</p>
-          <h1 style={{ fontSize: "2.5rem" }}>
+          <p className="label-seccion reveal">Marketplace Universitario</p>
+          <h1 className="reveal delay-1" style={{ fontSize: "2.5rem" }}>
             Todos los <span className="acento">servicios</span>
           </h1>
           <div
-            className="caja-formulario"
+            className="search-container reveal delay-2"
             style={{ maxWidth: "700px", margin: "30px auto" }}
           >
-            <input
-              type="text"
-              className="form-input"
-              placeholder="¿Qué necesitas hoy? (Ej: Álgebra, Logo, Habitación...)"
-              value={busqueda}
-              onChange={handleBusqueda}
-            />
+            <div className="search-input-wrapper">
+              <span className="search-icon">🔍</span>
+              <input
+                type="text"
+                className="search-input"
+                placeholder="¿Qué necesitas hoy? (Ej: Álgebra, Logo, Habitación...)"
+                value={busqueda}
+                onChange={handleBusqueda}
+              />
+            </div>
           </div>
         </div>
       </header>
 
+      {/* Chips de categoría: filtros visuales rápidos */}
       <div
-        className="container chips-container"
+        className="container chips-container-enhanced"
         id="filtros-categorias"
         style={{ marginBottom: "24px" }}
       >
         {CHIPS_CATEGORIA.map((chip) => (
           <button
             key={chip.valor}
-            className={`chip${categoriaActual === chip.valor ? " activo" : ""}`}
+            className={`chip-enhanced${categoriaActual === chip.valor ? " activo" : ""}`}
             onClick={(e) => handleCategoria(chip.valor, e)}
             type="button"
           >
@@ -424,7 +436,7 @@ function SeccionBuscar({ serviciosTotales }) {
       </div>
 
       <div className="container">
-        <div className="sort-bar">
+        <div className="sort-bar reveal">
           <p className="texto-muted">
             Resultados:{" "}
             <strong className="texto-claro">{resultados.length}</strong>
@@ -463,7 +475,11 @@ function SeccionBuscar({ serviciosTotales }) {
           )}
         </div>
 
-        <div style={{ textAlign: "center", marginTop: "32px" }}>
+        {/* Botón mostrar más */}
+        <div
+          id="contenedor-boton"
+          style={{ textAlign: "center", marginTop: "32px" }}
+        >
           {resultados.length >= mostrados && (
             <button
               type="button"
@@ -498,6 +514,7 @@ function Footer() {
             <div className="links-grid">
               <a href="#inicio">Inicio</a>
               <a href="#buscar">Buscar servicios</a>
+              <a href="/login">Publicar servicio</a>
             </div>
           </div>
           <div className="col-6 col-md-2">
@@ -552,6 +569,25 @@ export default function HomeGuest() {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Scroll reveal observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
+    );
+
+    const revealElements = document.querySelectorAll(".reveal, .reveal-left, .reveal-right, .reveal-scale");
+    revealElements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
   }, []);
 
   // Cargar servicios
