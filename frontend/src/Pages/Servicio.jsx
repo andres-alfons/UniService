@@ -888,7 +888,7 @@ export default function Servicio() {
                     universidad: universidad,
                     contacto: servicio.contacto,
                     estrellas: servicio.estrellas,
-                    resenas: servicio.resenas,
+                    resenas: Array.isArray(servicio.resenas) ? servicio.resenas.length : (servicio.resenas ?? 0),
                   },
                 }}
                 style={{ textDecoration: "none" }}
@@ -912,7 +912,7 @@ export default function Servicio() {
                   </div>
                   <div className="card-proveedor-footer">
                     <span className="badge-proveedor">
-                      ⭐ {servicio.estrellas || "0"} · {servicio.resenas || "0"} reseñas
+                      ⭐ {servicio.estrellas || "0"} · {Array.isArray(servicio.resenas) ? servicio.resenas.length : (servicio.resenas ?? 0)} reseñas
                     </span>
                     <span className="badge-ver">Ver perfil →</span>
                   </div>
