@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import "../styles/styleLogin.css";
 import { useNavigate } from "react-router-dom";
 import logoIcon from "../img/logo_color_noBG.png";
+import AdminModal from "./Login/ModalAdmin";
+import ResetPasswordModal from "./Login/ModalRecuperarClave";
+import VerificationCodeModal from "./Login/ModalVerificarCodigo";
+import NotificationModal from "./Login/ModalNotificacion";
 
 // ══════════════════════════════════════════════════════════════════
 // CREDENCIALES DE ADMINISTRADOR HARDCODEADAS
@@ -791,448 +795,47 @@ export default function Login() {
         </div>
       </div>
 
-      {/* ══════════════════════════════════════════
-          MODAL: PUERTA DE ACCESO ADMIN
-          Aparece cuando se detecta un admin. Pide la contraseña maestra
-          antes de permitir el acceso al panel de administración.
-          Tiene animación de entrada y de shake al fallar.
-      ══════════════════════════════════════════ */}
-      {modalAdmin && (
-        <div
-          className="modal-overlay"
-          style={{ zIndex: 9999, backdropFilter: "blur(8px)" }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()} // Evita cerrar el modal al hacer clic dentro
-            style={{
-              background: "linear-gradient(160deg, #0d0d1a 0%, #0a0a16 100%)",
-              border: "1px solid rgba(239,68,68,0.35)",
-              borderRadius: "20px",
-              padding: "44px 40px 36px",
-              maxWidth: "460px",
-              width: "90%",
-              boxShadow:
-                "0 0 60px rgba(239,68,68,0.15), 0 24px 48px rgba(0,0,0,0.6)",
-              // Alterna entre animación de entrada normal y animación de shake según el estado
-              animation: adminShake
-                ? "adminShake 0.45s ease"
-                : "adminEntrada 0.3s ease",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            {/* Barra decorativa roja en la parte superior del modal */}
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                height: "3px",
-                background: "linear-gradient(90deg, #EF4444, #DC2626, #EF4444)",
-              }}
-            />
+      <AdminModal
+        visible={modalAdmin}
+        adminMasterInput={adminMasterInput}
+        setAdminMasterInput={setAdminMasterInput}
+        adminError={adminError}
+        adminBloqueado={adminBloqueado}
+        adminShake={adminShake}
+        adminIntentos={adminIntentos}
+        onConfirmar={handleAdminConfirmar}
+        onCancelar={cerrarModalAdmin}
+      />
 
-            <div
-              style={{
-                fontSize: "3.5rem",
-                textAlign: "center",
-                marginBottom: "16px",
-                filter: "drop-shadow(0 0 16px rgba(239,68,68,0.5))",
-              }}
-            >
-              ⚠️
-            </div>
+      <ResetPasswordModal
+        resetPaso={resetPaso}
+        resetCorreo={resetCorreo}
+        setResetCorreo={setResetCorreo}
+        resetCodigo={resetCodigo}
+        setResetCodigo={setResetCodigo}
+        resetPass={resetPass}
+        setResetPass={setResetPass}
+        resetPass2={resetPass2}
+        setResetPass2={setResetPass2}
+        resetCargando={resetCargando}
+        onEnviarCodigo={handleResetEnviarCodigo}
+        onReenviarCodigo={handleResetReenviarCodigo}
+        onVerificarCodigo={handleResetVerificarCodigo}
+        onGuardar={handleResetGuardar}
+        onCerrar={cerrarModalReset}
+      />
 
-            <p
-              style={{
-                fontFamily: "'Syne', sans-serif",
-                fontSize: "2rem",
-                fontWeight: 800,
-                color: "#e00a0ae9",
-                textAlign: "center",
-                margin: "0 0 10px",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              Zona restringida
-            </p>
-            <br />
+      <VerificationCodeModal
+        visible={mostrarModalCodigo}
+        correoReg={correoReg}
+        codigoInput={codigoInput}
+        setCodigoInput={setCodigoInput}
+        onVerificar={handleVerificarCodigo}
+        onReenviar={handleEnviarCodigo}
+        onCerrar={() => setMostrarModalCodigo(false)}
+      />
 
-            <div
-              style={{
-                background: "rgba(239,68,68,0.08)",
-                border: "1px solid rgba(239,68,68,0.2)",
-                borderRadius: "10px",
-                padding: "12px 16px",
-                marginBottom: "24px",
-              }}
-            >
-              <p
-                style={{
-                  fontSize: "0.83rem",
-                  color: "rgba(255,255,255,0.7)",
-                  textAlign: "center",
-                  margin: 0,
-                  lineHeight: 1.6,
-                }}
-              >
-                Estás intentando acceder a una{" "}
-                <strong style={{ color: "#EF4444" }}>
-                  cuenta de administrador
-                </strong>
-                . Para continuar, introduce la contraseña exclusiva de admins.
-              </p>
-            </div>
-
-            {/* Input para la contraseña maestra — se deshabilita si fue bloqueado */}
-            <input
-              type="password"
-              placeholder="Contraseña de administradores"
-              value={adminMasterInput}
-              onChange={(e) => setAdminMasterInput(e.target.value)}
-              // Permite confirmar con Enter además del botón
-              onKeyDown={(e) =>
-                e.key === "Enter" && !adminBloqueado && handleAdminConfirmar()
-              }
-              disabled={adminBloqueado}
-              style={{
-                width: "100%",
-                background: adminBloqueado
-                  ? "rgba(239,68,68,0.05)"
-                  : "rgba(255,255,255,0.06)",
-                border: `1px solid ${adminError && !adminBloqueado ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.12)"}`,
-                borderRadius: "10px",
-                color: "#fff",
-                padding: "13px 16px",
-                fontSize: "0.9rem",
-                outline: "none",
-                marginBottom: "12px",
-                boxSizing: "border-box",
-                cursor: adminBloqueado ? "not-allowed" : "text",
-                letterSpacing: adminMasterInput ? "0.15em" : "normal",
-              }}
-            />
-
-            {/* Indicador visual de intentos: 3 puntos que se llenan de rojo con cada fallo */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "8px",
-                marginBottom: "16px",
-              }}
-            >
-              {[1, 2, 3].map((n) => (
-                <div
-                  key={n}
-                  style={{
-                    width: "10px",
-                    height: "10px",
-                    borderRadius: "50%",
-                    background:
-                      n <= adminIntentos ? "#EF4444" : "rgba(255,255,255,0.1)",
-                    boxShadow:
-                      n <= adminIntentos
-                        ? "0 0 8px rgba(239,68,68,0.6)"
-                        : "none",
-                    transition: "all 0.3s",
-                  }}
-                />
-              ))}
-            </div>
-
-            {/* Mensaje de error debajo de los puntos (visible solo si hay error) */}
-            {adminError && (
-              <p
-                style={{
-                  color: adminBloqueado ? "#F87171" : "#FCA5A5",
-                  fontSize: "0.8rem",
-                  textAlign: "center",
-                  margin: "0 0 16px",
-                  fontWeight: 600,
-                }}
-              >
-                {adminError}
-              </p>
-            )}
-
-            {/* Si no está bloqueado muestra el botón de confirmar, si está bloqueado muestra mensaje */}
-            {!adminBloqueado ? (
-              <button
-                type="button"
-                onClick={handleAdminConfirmar}
-                style={{
-                  width: "100%",
-                  background: "linear-gradient(135deg, #EF4444, #DC2626)",
-                  border: "none",
-                  borderRadius: "10px",
-                  color: "#fff",
-                  padding: "13px",
-                  fontSize: "0.9rem",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  marginBottom: "10px",
-                  fontFamily: "'DM Sans', sans-serif",
-                  boxShadow: "0 4px 20px rgba(239,68,68,0.3)",
-                }}
-              >
-                Verificar y acceder al panel
-              </button>
-            ) : (
-              <div
-                style={{
-                  background: "rgba(239,68,68,0.08)",
-                  border: "1px solid rgba(239,68,68,0.25)",
-                  borderRadius: "10px",
-                  padding: "12px",
-                  textAlign: "center",
-                  marginBottom: "10px",
-                  fontSize: "0.82rem",
-                  color: "#F87171",
-                }}
-              >
-                🔒 Acceso bloqueado por intentos fallidos
-              </div>
-            )}
-
-            {/* Botón para cancelar y salir del modal sin acceder */}
-            <button
-              type="button"
-              onClick={cerrarModalAdmin}
-              style={{
-                width: "100%",
-                background: "transparent",
-                border: "1px solid rgba(255,255,255,0.12)",
-                borderRadius: "10px",
-                color: "rgba(255,255,255,0.45)",
-                padding: "10px",
-                fontSize: "0.82rem",
-                cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif",
-              }}
-            >
-              Cancelar
-            </button>
-          </div>
-
-          {/* Definición de las animaciones CSS del modal admin */}
-          <style>{`
-            @keyframes adminEntrada {
-              from { opacity: 0; transform: scale(0.94) translateY(12px); }
-              to   { opacity: 1; transform: scale(1)    translateY(0); }
-            }
-            @keyframes adminShake {
-              0%,100% { transform: translateX(0); }
-              20%      { transform: translateX(-8px); }
-              40%      { transform: translateX(8px); }
-              60%      { transform: translateX(-6px); }
-              80%      { transform: translateX(6px); }
-            }
-          `}</style>
-        </div>
-      )}
-
-      {/* ══════════════════════════════════════════
-          MODAL: OLVIDÉ MI CONTRASEÑA
-          Renderiza un contenido diferente según el paso actual (resetPaso):
-          - "correo" → formulario para ingresar el correo
-          - "codigo" → formulario para ingresar el código recibido
-          - "nueva"  → formulario para escribir la nueva contraseña
-      ══════════════════════════════════════════ */}
-      {resetPaso && (
-        <div className="modal-overlay" onClick={cerrarModalReset}>
-          {/* stopPropagation evita que el clic dentro del modal lo cierre */}
-          <div className="modal-codigo" onClick={(e) => e.stopPropagation()}>
-            {/* PASO 1: Ingresar correo para recibir el código */}
-            {resetPaso === "correo" && (
-              <>
-                <div className="modal-codigo-icon">🔑</div>
-                <h3>¿Olvidaste tu contraseña?</h3>
-                <p>
-                  Ingresa tu correo y te enviaremos un código de verificación
-                </p>
-                <input
-                  type="email"
-                  className="input-codigo"
-                  style={{
-                    letterSpacing: "normal",
-                    fontSize: "0.9rem",
-                    textAlign: "left",
-                    padding: "12px 14px",
-                  }}
-                  placeholder="tu@correo.com"
-                  value={resetCorreo}
-                  onChange={(e) => setResetCorreo(e.target.value)}
-                />
-                <button
-                  className="btn-principal"
-                  onClick={handleResetEnviarCodigo}
-                  disabled={resetCargando}
-                >
-                  {resetCargando
-                    ? "Enviando..."
-                    : "Enviar código de verificación"}
-                </button>
-                <button className="btn-cerrar-modal" onClick={cerrarModalReset}>
-                  Cancelar
-                </button>
-              </>
-            )}
-
-            {/* PASO 2: Ingresar el código recibido por correo */}
-            {resetPaso === "codigo" && (
-              <>
-                <div className="modal-codigo-icon">📧</div>
-                <h3>Revisa tu correo</h3>
-                <p>
-                  Enviamos un código de 6 dígitos a{" "}
-                  <strong>{resetCorreo}</strong>
-                </p>
-                {/* Solo acepta dígitos, reemplaza cualquier otro carácter */}
-                <input
-                  type="text"
-                  maxLength={6}
-                  placeholder="000000"
-                  className="input-codigo"
-                  value={resetCodigo}
-                  onChange={(e) =>
-                    setResetCodigo(e.target.value.replace(/\D/g, ""))
-                  }
-                />
-                <button
-                  className="btn-principal"
-                  onClick={handleResetVerificarCodigo}
-                  disabled={resetCargando}
-                >
-                  {resetCargando ? "Verificando..." : "Confirmar código"}
-                </button>
-                <button
-                  className="btn-reenviar"
-                  onClick={handleResetReenviarCodigo}
-                  disabled={resetCargando}
-                >
-                  Reenviar código
-                </button>
-                <button className="btn-cerrar-modal" onClick={cerrarModalReset}>
-                  Cancelar
-                </button>
-              </>
-            )}
-
-            {/* PASO 3: Escribir y confirmar la nueva contraseña */}
-            {resetPaso === "nueva" && (
-              <>
-                <div className="modal-codigo-icon">🔒</div>
-                <h3>Nueva contraseña</h3>
-                <p>Elige una contraseña segura de mínimo 8 caracteres</p>
-                <input
-                  type="password"
-                  className="input-codigo"
-                  style={{
-                    letterSpacing: "normal",
-                    fontSize: "0.9rem",
-                    textAlign: "left",
-                    padding: "12px 14px",
-                  }}
-                  placeholder="Nueva contraseña"
-                  value={resetPass}
-                  onChange={(e) => setResetPass(e.target.value)}
-                />
-                <input
-                  type="password"
-                  className="input-codigo"
-                  style={{
-                    letterSpacing: "normal",
-                    fontSize: "0.9rem",
-                    textAlign: "left",
-                    padding: "12px 14px",
-                    marginTop: "10px",
-                  }}
-                  placeholder="Confirmar contraseña"
-                  value={resetPass2}
-                  onChange={(e) => setResetPass2(e.target.value)}
-                />
-                <button
-                  className="btn-principal"
-                  onClick={handleResetGuardar}
-                  disabled={resetCargando}
-                >
-                  {resetCargando ? "Guardando..." : "Guardar contraseña"}
-                </button>
-                <button className="btn-cerrar-modal" onClick={cerrarModalReset}>
-                  Cancelar
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ══════════════════════════════════════════
-          MODAL: CÓDIGO DE VERIFICACIÓN (REGISTRO)
-          Aparece después de enviar el código al correo durante el registro.
-          Permite al usuario ingresar el código de 6 dígitos recibido.
-      ══════════════════════════════════════════ */}
-      {mostrarModalCodigo && (
-        <div
-          className="modal-overlay"
-          onClick={() => setMostrarModalCodigo(false)}
-        >
-          <div className="modal-codigo" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-codigo-icon">📧</div>
-            <h3>Revisa tu correo</h3>
-            <p>
-              Enviamos un código de 6 dígitos a <strong>{correoReg}</strong>
-            </p>
-            {/* Filtra para que solo se puedan ingresar números */}
-            <input
-              type="text"
-              maxLength={6}
-              placeholder="000000"
-              value={codigoInput}
-              onChange={(e) =>
-                setCodigoInput(e.target.value.replace(/\D/g, ""))
-              }
-              className="input-codigo"
-            />
-            <button className="btn-principal" onClick={handleVerificarCodigo}>
-              Confirmar código
-            </button>
-            <button className="btn-reenviar" onClick={handleEnviarCodigo}>
-              Reenviar código
-            </button>
-            <button
-              className="btn-cerrar-modal"
-              onClick={() => setMostrarModalCodigo(false)}
-            >
-              Cancelar
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ══════════════════════════════════════════
-          MODAL GENÉRICO: NOTIFICACIONES
-          Se usa para mostrar mensajes de éxito, error o información
-          en cualquier parte del flujo. Se cierra al hacer clic fuera o en "Cerrar".
-      ══════════════════════════════════════════ */}
-      {modal.visible && (
-        <div
-          className="modal-overlay"
-          onClick={() => setModal({ ...modal, visible: false })}
-        >
-          <div
-            className={`modal-box ${modal.tipo}`} // La clase CSS cambia según el tipo (error/success/info)
-            onClick={(e) => e.stopPropagation()}
-          >
-            <p>{modal.mensaje}</p>
-            <button onClick={() => setModal({ ...modal, visible: false })}>
-              Cerrar
-            </button>
-          </div>
-        </div>
-      )}
+      <NotificationModal modal={modal} setModal={setModal} />
     </>
   );
 }

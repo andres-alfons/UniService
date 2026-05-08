@@ -3,6 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../Components/Navbar_Perfil";
 import "../styles/styleHome.css";
 import "../styles/stylePerfil.css";
+import StatItem from "./Perfil/ElementoEstadistica";
+import MenuItem from "./Perfil/ElementoMenu";
+import InfoItem from "./Perfil/ElementoInfo";
+import QuickStatCard from "./Perfil/TarjetaRapida";
+import ProgressBar from "./Perfil/BarraProgreso";
+import ActivityItem from "./Perfil/ElementoActividad";
 
 // URL base del API de usuarios
 const API_USUARIO = "http://localhost:5165/api/users";
@@ -1074,86 +1080,4 @@ const Perfil = () => {
     </>
   );
 };
-
-// ── Subcomponentes reutilizables ──
-
-// Muestra un número grande con su etiqueta (publicaciones, seguidores, siguiendo)
-const StatItem = ({ value, label }) => (
-  <div className="stat-item">
-    <div className="stat-value">{value}</div>
-    <div className="stat-label">{label}</div>
-  </div>
-);
-
-// Ítem de menú clickeable; danger=true aplica estilo rojo (usado en "Cerrar sesión")
-const MenuItem = ({ icon, title, desc, tag, onClick, danger }) => (
-  <div
-    className="menu-item"
-    onClick={onClick}
-    style={{
-      cursor: "pointer",
-      ...(danger && { borderColor: "rgba(239, 68, 68, 0.3)" }),
-    }}
-  >
-    <div
-      className="menu-icon"
-      style={danger ? { background: "rgba(239,68,68,0.15)" } : {}}
-    >
-      {icon}
-    </div>
-    <div className="menu-text">
-      <div className="menu-title" style={danger ? { color: "#f87171" } : {}}>
-        {title}
-      </div>
-      {desc && <div className="menu-desc">{desc}</div>}
-    </div>
-    {tag && <span className="status-tag online">{tag}</span>}
-    <span className="menu-arrow" style={danger ? { color: "#f87171" } : {}}>
-      →
-    </span>
-  </div>
-);
-
-// Muestra un par label/valor en la sección de información del perfil
-const InfoItem = ({ label, value }) => (
-  <div className="info-item">
-    <div className="info-label">{label}</div>
-    <div className="info-value">{value}</div>
-  </div>
-);
-
-// Tarjeta compacta de estadística rápida dentro del modal de actividad
-const QuickStatCard = ({ icon, value, label }) => (
-  <div className="quick-stat-card">
-    <div className="quick-stat-icon">{icon}</div>
-    <div className="quick-stat-value">{value}</div>
-    <div className="quick-stat-label">{label}</div>
-  </div>
-);
-
-// Barra de progreso con porcentaje y color configurable (teal, green, yellow)
-const ProgressBar = ({ label, value, color }) => (
-  <div className="progress-item">
-    <div className="progress-header">
-      <span className="progress-label">{label}</span>
-      <span className="progress-value">{value}</span>
-    </div>
-    <div className="progress-bar">
-      <div className={`progress-fill ${color}`} style={{ width: value }}></div>
-    </div>
-  </div>
-);
-
-// Ítem de actividad reciente con ícono, texto, tiempo y badge de tipo (success, info, etc.)
-const ActivityItem = ({ icon, text, time, badge, type }) => (
-  <div className="activity-item">
-    <div className="activity-icon">{icon}</div>
-    <div className="activity-content">
-      <div className="activity-text">{text}</div>
-      <div className="activity-time">{time}</div>
-    </div>
-    <span className={`activity-badge ${type}`}>{badge}</span>
-  </div>
-);
-
 export default Perfil;
