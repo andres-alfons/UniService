@@ -135,4 +135,35 @@ public class UsersController : ControllerBase
             return StatusCode(500, new { error = "Error en SQL: " + ex.Message });
         }
     }
+
+    //METODO PARA OBTENER TODOS LOS USUARIOS (PARA ADMIN)
+    [HttpGet]
+    public async Task<IActionResult> GetAllUsers()
+    {
+        try
+        {
+            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+            string sql = "SELECT id_usuario, nombre, correo, estado, id_rol FROM usuarios";
+            using var cmd = new SqlCommand(sql, conn);
+            using var reader = await cmd.ExecuteReaderAsync();
+            var users = new List<object>();
+            while (await reader.ReadAsync())
+            {
+                users.Add(new
+                {
+                    id = (int)reader["id_usuario"],
+                    nombre = reader["nombre"]?.ToString(),
+                    correo = reader["correo"]?.ToString(),
+                    estado = reader["estado"],
+                    id_rol = (int)reader["id_rol"]
+                });
+            }
+            return Ok(users);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = "Error en SQL: " + ex.Message });
+        }
+    }
 }
