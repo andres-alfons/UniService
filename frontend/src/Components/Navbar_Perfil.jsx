@@ -43,7 +43,7 @@ function Navbar({ onCerrarSesion }) {
           </Link>
           
           <Link to="/perfil" className="nav-link-custom nav-iniciar" onClick={() => setMenuAbierto(false)}>
-            👤 {nombreUsuario}
+            <i className="bi bi-person"></i> {nombreUsuario}
           </Link>
 
           <button

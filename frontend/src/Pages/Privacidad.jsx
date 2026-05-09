@@ -95,7 +95,7 @@ const PrivacyPage = () => {
           </p>
 
           <div className="privacy-highlight">
-            🔒 Aviso: Al utilizar UniService, aceptas nuestra política de
+            <i className="bi bi-shield-lock-fill"></i> Aviso: Al utilizar UniService, aceptas nuestra política de
             privacidad y el tratamiento de tus datos conforme a lo aquí
             descrito.
           </div>
