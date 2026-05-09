@@ -44,6 +44,7 @@ public class ServicesController : ControllerBase
                 s.disponibilidad,
                 c.nombre_categoria,
                 u.nombre AS proveedor,
+                u.universidad,
                 COUNT(cal.id_calificacion)      AS num_resenas,
                 ISNULL(AVG(CAST(cal.puntuacion AS FLOAT)), 0) AS promedio_estrellas
             FROM servicios s
@@ -53,7 +54,7 @@ public class ServicesController : ControllerBase
             GROUP BY
                 s.id_servicio, s.id_proveedor, s.titulo, s.descripcion,
                 s.precio_hora, s.icono, s.fecha_publicacion, s.modalidad,
-                s.disponibilidad, c.nombre_categoria, u.nombre
+                s.disponibilidad, c.nombre_categoria, u.nombre, u.universidad
             ORDER BY s.fecha_publicacion DESC
         ", conn);
 
@@ -75,13 +76,14 @@ public class ServicesController : ControllerBase
                     titulo = reader["titulo"]?.ToString(),
                     descripcion = reader["descripcion"]?.ToString(),
                     precio_hora = reader["precio_hora"],
-                    icono = reader["icono"]?.ToString() ?? "📌",
+                    icono = reader["icono"]?.ToString() ?? "bi-pin",
                     fecha_publicacion = Convert.ToDateTime(reader["fecha_publicacion"]).ToString("yyyy-MM-dd"),
                     modalidad = MapModalidad(reader["modalidad"]),
                     disponibilidad = MapDisponibilidad(reader["disponibilidad"]),
                     nombre_categoria = reader["nombre_categoria"]?.ToString(),
                     proveedor = reader["proveedor"]?.ToString(),
-                    estrellas = estrellasArr   // ← array que ya entiende el frontend
+                    universidad = reader["universidad"]?.ToString(),
+                    estrellas = estrellasArr
                 });
             }
 

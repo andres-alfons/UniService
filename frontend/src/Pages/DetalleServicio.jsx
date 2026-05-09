@@ -181,14 +181,19 @@ export default function Servicio() {
             </div>
 
             <div className="info-principal">
-              <div className="header-servicio">
-                <div className="titulo-servicio">
-                  <h1>{servicio.titulo || "Sin título"}</h1>
-                  <span className="etiqueta" style={{ background: (COLORES_CATEGORIA[servicio.nombre_categoria] || COLORES_CATEGORIA["Otros servicios"]).bg, color: (COLORES_CATEGORIA[servicio.nombre_categoria] || COLORES_CATEGORIA["Otros servicios"]).color, border: `1px solid ${(COLORES_CATEGORIA[servicio.nombre_categoria] || COLORES_CATEGORIA["Otros servicios"]).color}33` }}>
-                    {servicio.nombre_categoria || "Categoría"}
-                  </span>
+                <div className="header-servicio">
+                  <div className="titulo-servicio">
+                    <h1>{servicio.titulo || "Sin título"}</h1>
+                    {servicio.nombre_categoria && (() => {
+                      const c = COLORES_CATEGORIA[servicio.nombre_categoria] || { bg: "rgba(148, 163, 184, 0.1)", color: "#94a3b8" };
+                      return (
+                        <span className="etiqueta" style={{ background: c.bg, color: c.color, border: `1px solid ${c.color}33` }}>
+                          {servicio.nombre_categoria}
+                        </span>
+                      );
+                    })()}
+                  </div>
                 </div>
-              </div>
 
               <div className="rating-grande">
                 <div>

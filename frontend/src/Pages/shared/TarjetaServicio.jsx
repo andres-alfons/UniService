@@ -8,23 +8,27 @@ export default function TarjetaServicio({ servicio, linkBase = "/servicio?id=" }
     ? servicio.estrellas.length
     : 0;
 
-  const colorCat = COLORES_CATEGORIA[servicio.nombre_categoria] || COLORES_CATEGORIA["Otros servicios"];
+  const colorCat = COLORES_CATEGORIA[servicio.nombre_categoria] || (servicio.nombre_categoria ? { bg: "rgba(148, 163, 184, 0.1)", color: "#94a3b8" } : null);
 
-  const universidad =
-    servicio.universidad === 1 || servicio.universidad === "1"
-      ? "Universidad Popular del Cesar"
-      : servicio.universidad === "No pertenece a ninguna universidad"
-      ? "Independiente"
-      : `${servicio.universidad || "Universidad no especificada"}`;
+  const mostrarUniversidad = () => {
+    const u = servicio.universidad;
+    if (!u || u === "No pertenece a ninguna universidad" || u === "Sin universidad") return null;
+    if (u === "1" || u === 1) return "Universidad Popular del Cesar";
+    return u;
+  };
+
+  const uniTexto = mostrarUniversidad();
 
   return (
     <a href={`${linkBase}${servicio.id_servicio}`} className="card-servicio card-3d">
       <div className="card-icono card-icono-azul"><i className={`bi ${servicio.icono?.startsWith("bi-") ? servicio.icono : "bi-pin"}`}></i></div>
       <div className="card-body-custom">
-        <span className="etiqueta" style={{ background: colorCat.bg, color: colorCat.color, border: `1px solid ${colorCat.color}33` }}>
-          {servicio.nombre_categoria || "Categoría no especificada"}
-        </span>
-        <p className="card-meta">{universidad}</p>
+        {colorCat && (
+          <span className="etiqueta" style={{ background: colorCat.bg, color: colorCat.color, border: `1px solid ${colorCat.color}33` }}>
+            {servicio.nombre_categoria}
+          </span>
+        )}
+        {uniTexto && <p className="card-meta">{uniTexto}</p>}
         <h5>{servicio.titulo || "Sin título"}</h5>
         <p className="texto-muted">{truncar(servicio.descripcion)}</p>
         <div className="card-autor">
