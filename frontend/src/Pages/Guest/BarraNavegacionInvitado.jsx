@@ -27,7 +27,7 @@ export default function Navbar({ scrolled }) {
           {[
             ["#inicio", "Inicio"],
             ["#buscar", "Buscar servicios"],
-            ["#mejor-calificados", "Top⭐"],
+            ["#mejor-calificados", "Top destacados"],
             ["#soporte", "Soporte"],
           ].map(([href, label]) => (
             <a

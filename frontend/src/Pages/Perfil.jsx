@@ -195,7 +195,7 @@ const Perfil = () => {
       descripcion: s.descripcion || "",
       precio_hora: Number(s.precio_hora) || 0,
       contacto: s.contacto || "",
-      icono: s.icono || "📌",
+      icono: s.icono || "bi-pin",
     };
 
     const res = await fetch(
@@ -294,21 +294,27 @@ const Perfil = () => {
         setUserData((prev) => ({ ...prev, avatar: result.avatarUrl }));
         setActiveModal(null);
       } else {
-        alert("❌ Error al subir: " + (result.error || "Error en el servidor"));
+        alert("Error al subir: " + (result.error || "Error en el servidor"));
       }
     } catch (err) {
       console.error("Error en subida:", err);
-      alert("❌ Error de conexión con el servidor de C#");
+      alert("Error de conexión con el servidor de C#");
     }
   };
 
   // Convierte una fecha ISO en texto legible: "mayo 2024"
   const formatearFecha = (fecha) => {
     if (!fecha) return "Fecha desconocida";
-    return new Date(fecha).toLocaleDateString("es-ES", {
-      month: "long",
-      year: "numeric",
-    });
+    try {
+      const partes = fecha.split("T")[0].split("-");
+      if (partes.length !== 3) return "Fecha desconocida";
+      return new Date(+partes[0], +partes[1] - 1, +partes[2]).toLocaleDateString("es-ES", {
+        month: "long",
+        year: "numeric",
+      });
+    } catch {
+      return "Fecha desconocida";
+    }
   };
 
   // Abrevia números grandes para que no rompan el diseño: 1200 → "1.2k"
@@ -455,29 +461,28 @@ const Perfil = () => {
                         onClick={toggleSeguir}
                         disabled={enviandoSeguimiento}
                       >
-                        {siguiendo ? "✓ Siguiendo" : "➕ Seguir"}
+                        {siguiendo ? <><i className="bi bi-check-lg"></i> Siguiendo</> : <><i className="bi bi-plus-lg"></i> Seguir</>}
                       </button>
                       <button
                         className="btn btn-secondary"
                         onClick={handleShare}
                       >
-                        🔗 Compartir
+                        <i className="bi bi-link-45deg"></i> Compartir
                       </button>
                     </>
                   ) : (
-                    // Perfil propio: se muestran Editar y Compartir
                     <>
                       <button
                         className="btn btn-primary"
                         onClick={() => setActiveModal("info")}
                       >
-                        ✏️ Editar Perfil
+                        <><i className="bi bi-pencil"></i> Editar Perfil</>
                       </button>
                       <button
                         className="btn btn-secondary"
                         onClick={handleShare}
                       >
-                        🔗 Compartir
+                        <i className="bi bi-link-45deg"></i> Compartir
                       </button>
                     </>
                   )}
@@ -489,11 +494,11 @@ const Perfil = () => {
             <div className="right-panel">
               {/* El estado verde/rojo refleja el campo "estado" real de la BD */}
               <section className="menu-section">
-                <div className="section-title">📊 Estado y Actividad</div>
+                <div className="section-title"><i className="bi bi-bar-chart-fill"></i> Estado y Actividad</div>
                 <div className="menu-list">
                   <div className="menu-item" style={{ cursor: "default" }}>
                     <div className="menu-icon">
-                      {estaConectado ? "🟢" : "🔴"}
+                      <i className={`bi bi-circle-fill ${estaConectado ? "text-success" : "text-danger"}`}></i>
                     </div>
                     <div className="menu-text">
                       <div className="menu-title">Estado actual</div>
@@ -528,28 +533,28 @@ const Perfil = () => {
 
               {/* Información del perfil */}
               <section className="menu-section">
-                <div className="section-title">📋 Información</div>
+                <div className="section-title"><i className="bi bi-clipboard-data"></i> Información</div>
                 <div className="info-grid">
-                  <InfoItem label="📧 Correo" value={userData.correo} />
+                  <InfoItem label="Correo" value={userData.correo} />
                   <InfoItem
-                    label="📅 Miembro desde"
+                    label="Miembro desde"
                     value={formatearFecha(userData.fecha_registro)}
                   />
                   <InfoItem
-                    label="🏫 Universidad"
+                    label="Universidad"
                     value={userData.universidad || "Sin universidad"}
                   />
                   {/* La reputación se calcula en el backend promediando las calificaciones recibidas */}
-                  <InfoItem label="⭐ Reputación" value={reputacionTexto} />
+                  <InfoItem label="Reputación" value={reputacionTexto} />
                   <InfoItem
-                    label="📱 Teléfono"
+                    label="Teléfono"
                     value={userData.telefono || "No disponible"}
                   />
                   {/* Acceso rápido a secciones de seguridad, solo visible para el usuario propio */}
                   {!esPerfilExterno && (
                     <div className="menu-list">
                       <MenuItem
-                        icon="🔒"
+                        icon={<i className="bi bi-shield-lock-fill"></i>}
                         title="Seguridad"
                         desc="Gestiona tu cuenta"
                         onClick={() => setActiveModal("seguridad")}
@@ -589,7 +594,7 @@ const Perfil = () => {
                             padding: "10px",
                           }}
                         >
-                          <div className="menu-icon">{s.icono || "📌"}</div>
+                          <div className="menu-icon"><i className={`bi ${s.icono?.startsWith("bi-") ? s.icono : "bi-pin"}`}></i></div>
                           <div
                             className="menu-text"
                             style={{ flex: 1, minWidth: 0, marginLeft: "10px" }}
@@ -638,7 +643,7 @@ const Perfil = () => {
                               }}
                               onClick={() => setEditando({ ...s })}
                             >
-                              ✏️
+                              <i className="bi bi-pencil"></i>
                             </button>
                             {/* Botón eliminar: guarda el ID y abre el modal de confirmación */}
                             <button
@@ -659,7 +664,7 @@ const Perfil = () => {
                               }}
                               onClick={() => setConfirmEliminar(s.id_servicio)}
                             >
-                              🗑️
+                              <i className="bi bi-trash"></i>
                             </button>
                           </div>
                         </div>
@@ -681,7 +686,7 @@ const Perfil = () => {
                     className="image-menu"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <h3 className="image-menu-title">🗑️ Eliminar servicio</h3>
+                    <h3 className="image-menu-title"><i className="bi bi-trash"></i> Eliminar servicio</h3>
                     <p
                       style={{
                         opacity: 0.7,
@@ -697,7 +702,7 @@ const Perfil = () => {
                         className="image-option"
                         onClick={() => setConfirmEliminar(null)}
                       >
-                        <span className="image-option-icon">↩️</span>
+                        <span className="image-option-icon"><i className="bi bi-arrow-return-left"></i></span>
                         <div className="image-option-text">
                           <b>Cancelar</b>
                         </div>
@@ -707,7 +712,7 @@ const Perfil = () => {
                         onClick={confirmarEliminar}
                         style={{ borderColor: "rgba(239,68,68,0.3)" }}
                       >
-                        <span className="image-option-icon">🗑️</span>
+                        <span className="image-option-icon"><i className="bi bi-trash"></i></span>
                         <div
                           className="image-option-text"
                           style={{ color: "#f87171" }}
@@ -736,7 +741,7 @@ const Perfil = () => {
                       overflowY: "auto",
                     }}
                   >
-                    <h3 className="image-menu-title">✏️ Editar servicio</h3>
+                    <h3 className="image-menu-title"><i className="bi bi-pencil"></i> Editar servicio</h3>
 
                     {/* Generamos los campos del formulario dinámicamente desde un array */}
                     {[
@@ -818,7 +823,7 @@ const Perfil = () => {
                         className="image-option"
                         onClick={() => setEditando(null)}
                       >
-                        <span className="image-option-icon">↩️</span>
+                        <span className="image-option-icon"><i className="bi bi-arrow-return-left"></i></span>
                         <div className="image-option-text">
                           <b>Cancelar</b>
                         </div>
@@ -827,7 +832,7 @@ const Perfil = () => {
                         className="image-option"
                         onClick={() => guardarEdicion(editando)}
                       >
-                        <span className="image-option-icon">💾</span>
+                        <span className="image-option-icon"><i className="bi bi-save"></i></span>
                         <div className="image-option-text">
                           <b>Guardar cambios</b>
                         </div>
@@ -847,7 +852,7 @@ const Perfil = () => {
             onClick={() => setActiveModal(null)}
           >
             <div className="image-menu" onClick={(e) => e.stopPropagation()}>
-              <h3 className="image-menu-title">✍️ Editar Perfil</h3>
+              <h3 className="image-menu-title"><i className="bi bi-pencil"></i> Editar Perfil</h3>
               <div className="image-menu-options">
                 {/* Cada botón usa prompt() para pedir el nuevo valor y llama a handleUpdate */}
 
@@ -858,7 +863,7 @@ const Perfil = () => {
                     if (n) handleUpdate("nombre", n);
                   }}
                 >
-                  <span className="image-option-icon">✏️</span>
+                  <span className="image-option-icon"><i className="bi bi-pencil"></i></span>
                   <div className="image-option-text">
                     <b>Cambiar Nombre</b>
                   </div>
@@ -874,7 +879,7 @@ const Perfil = () => {
                     if (d) handleUpdate("descripcion", d);
                   }}
                 >
-                  <span className="image-option-icon">📖</span>
+                  <span className="image-option-icon"><i className="bi bi-book"></i></span>
                   <div className="image-option-text">
                     <b>Cambiar Descripción</b>
                   </div>
@@ -890,7 +895,7 @@ const Perfil = () => {
                     if (e) handleUpdate("universidad", e);
                   }}
                 >
-                  <span className="image-option-icon">🏛️</span>
+                  <span className="image-option-icon"><i className="bi bi-buildings"></i></span>
                   <div className="image-option-text">
                     <b>Cambiar Universidad</b>
                   </div>
@@ -941,7 +946,7 @@ const Perfil = () => {
                     if (url) handleUpdate("avatar", url);
                   }}
                 >
-                  <span className="image-option-icon">🌐</span>
+                  <span className="image-option-icon"><i className="bi bi-globe2"></i></span>
                   <div className="image-option-text">
                     <b>Usar URL</b>
                   </div>
@@ -950,7 +955,7 @@ const Perfil = () => {
                   className="image-option"
                   onClick={() => FileInputRef.current?.click()}
                 >
-                  <span className="image-option-icon">📁</span>
+                  <span className="image-option-icon"><i className="bi bi-folder"></i></span>
                   <div className="image-option-text">
                     <b>Subir Imagen</b>
                   </div>
@@ -967,7 +972,7 @@ const Perfil = () => {
             onClick={() => setActiveModal(null)}
           >
             <div className="image-menu" onClick={(e) => e.stopPropagation()}>
-                <h3 className="image-menu-title">🔐 Opciones de Seguridad "FALTA IMPLEMENTAR FUNCIONALIDAD"</h3>
+                <h3 className="image-menu-title"><i className="bi bi-shield-lock-fill"></i> Opciones de Seguridad "FALTA IMPLEMENTAR FUNCIONALIDAD"</h3>
               <div className="image-menu-options">
                 {/* Cada botón usa prompt() para pedir el nuevo valor y llama a handleUpdate */}
 
@@ -978,7 +983,7 @@ const Perfil = () => {
                     if (n) handleUpdate("nombre", n);
                   }}
                 >
-                  <span className="image-option-icon">🔑</span>
+                  <span className="image-option-icon"><i className="bi bi-key-fill"></i></span>
                   <div className="image-option-text">
                     <b>Cambiar Contraseña</b>
                   </div>
@@ -1016,7 +1021,7 @@ const Perfil = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="activity-header">
-                <h2 className="activity-title">📊 Mi Actividad</h2>
+                <h2 className="activity-title"><i className="bi bi-bar-chart-fill"></i> Mi Actividad</h2>
                 <button
                   className="activity-close"
                   onClick={() => setActiveModal(null)}
@@ -1026,45 +1031,45 @@ const Perfil = () => {
               </div>
               <div className="activity-body">
                 <div className="quick-stats">
-                  <QuickStatCard icon="📝" value="12" label="Este Mes" />
-                  <QuickStatCard icon="✅" value="45" label="Completados" />
+                  <QuickStatCard icon={<i className="bi bi-pencil-square"></i>} value="12" label="Este Mes" />
+                  <QuickStatCard icon={<i className="bi bi-check-circle-fill"></i>} value="45" label="Completados" />
                   <QuickStatCard
-                    icon="⭐"
+                    icon={<i className="bi bi-star-fill"></i>}
                     value={reputacionTexto.split("/")[0]}
                     label="Calificación"
                   />
-                  <QuickStatCard icon="⏱️" value="45h" label="Tiempo Activo" />
+                  <QuickStatCard icon={<i className="bi bi-stopwatch"></i>} value="45h" label="Tiempo Activo" />
                 </div>
                 <div className="progress-section">
-                  <div className="progress-title">🏆 Logros y Metas</div>
+                  <div className="progress-title"><i className="bi bi-trophy-fill"></i> Logros y Metas</div>
                   <ProgressBar
-                    label="🎯 Meta de publicaciones"
+                    label="Meta de publicaciones"
                     value="80%"
                     color="teal"
                   />
                   <ProgressBar
-                    label="⭐ Satisfacción del cliente"
+                    label="Satisfacción del cliente"
                     value="98%"
                     color="green"
                   />
                   <ProgressBar
-                    label="📩 Tasa de respuesta"
+                    label="Tasa de respuesta"
                     value="95%"
                     color="yellow"
                   />
                 </div>
                 <div className="recent-activity">
-                  <div className="recent-title">🕐 Actividad Reciente</div>
+                  <div className="recent-title"><i className="bi bi-clock-history"></i> Actividad Reciente</div>
                   <div className="activity-list">
                     <ActivityItem
-                      icon="✅"
+                      icon={<i className="bi bi-check-circle-fill"></i>}
                       text="Completaste el servicio 'Diseño de logo'"
                       time="Hace 2 horas"
                       badge="+5★"
                       type="success"
                     />
                     <ActivityItem
-                      icon="💬"
+                      icon={<i className="bi bi-chat-dots-fill"></i>}
                       text="Nuevo mensaje de María García"
                       time="Hace 5 horas"
                       badge="Nuevo"

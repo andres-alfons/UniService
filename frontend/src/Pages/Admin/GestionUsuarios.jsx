@@ -28,7 +28,7 @@ export default function SeccionUsuarios() {
 
   const eliminar = async (id) => {
     if (
-      !confirm("⚠️ ¿Eliminar este usuario? Esta acción no se puede deshacer.")
+      !confirm("¿Eliminar este usuario? Esta acción no se puede deshacer.")
     )
       return;
     await fetch(`${API}/users/${id}`, { method: "DELETE" });
@@ -51,7 +51,7 @@ export default function SeccionUsuarios() {
         <input
           className="admin-input-search"
           type="text"
-          placeholder="🔍 Buscar usuario..."
+          placeholder="Buscar usuario..."
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
         />

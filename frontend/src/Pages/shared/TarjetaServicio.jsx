@@ -1,5 +1,6 @@
 import { formatearFecha } from "../../utils/helpers";
 import { calcularEstrellas, truncar } from "./utilidades";
+import { COLORES_CATEGORIA } from "./constantes";
 
 export default function TarjetaServicio({ servicio, linkBase = "/servicio?id=" }) {
   const estrellas = calcularEstrellas(servicio.estrellas);
@@ -7,18 +8,20 @@ export default function TarjetaServicio({ servicio, linkBase = "/servicio?id=" }
     ? servicio.estrellas.length
     : 0;
 
+  const colorCat = COLORES_CATEGORIA[servicio.nombre_categoria] || COLORES_CATEGORIA["Otros servicios"];
+
   const universidad =
     servicio.universidad === 1 || servicio.universidad === "1"
-      ? "🏛️ Universidad Popular del Cesar"
+      ? "Universidad Popular del Cesar"
       : servicio.universidad === "No pertenece a ninguna universidad"
-      ? "🌐 Independiente"
-      : `🏫 ${servicio.universidad || "Universidad no especificada"}`;
+      ? "Independiente"
+      : `${servicio.universidad || "Universidad no especificada"}`;
 
   return (
     <a href={`${linkBase}${servicio.id_servicio}`} className="card-servicio card-3d">
-      <div className="card-icono card-icono-azul">{servicio.icono || "📌"}</div>
+      <div className="card-icono card-icono-azul"><i className={`bi ${servicio.icono?.startsWith("bi-") ? servicio.icono : "bi-pin"}`}></i></div>
       <div className="card-body-custom">
-        <span className="etiqueta et-azul">
+        <span className="etiqueta" style={{ background: colorCat.bg, color: colorCat.color, border: `1px solid ${colorCat.color}33` }}>
           {servicio.nombre_categoria || "Categoría no especificada"}
         </span>
         <p className="card-meta">{universidad}</p>

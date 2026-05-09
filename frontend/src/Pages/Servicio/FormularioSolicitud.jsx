@@ -61,7 +61,7 @@ function FormSolicitud({
     const id_proveedor_num = Number(proveedorId);
 
     if (!id_cliente || !id_servicio_num || !id_proveedor_num) {
-      showModal("error", "❌ Datos inválidos");
+      showModal("error", "Datos inválidos");
       return;
     }
 
@@ -78,7 +78,7 @@ function FormSolicitud({
 
         if (res.ok) {
           setSolicitudExiste(false);
-          showModal("success", "🗑️ Solicitud eliminada");
+          showModal("success", "Solicitud eliminada");
         } else {
           showModal("error", data.error || "Error al eliminar");
         }
@@ -100,12 +100,12 @@ function FormSolicitud({
       !form.presupuesto ||
       !form.urgencia
     ) {
-      showModal("error", "❌ Completa todos los campos obligatorios");
+      showModal("error", "Completa todos los campos obligatorios");
       return;
     }
 
     if (Number(form.presupuesto) > 9999999) {
-      showModal("error", "❌ El presupuesto es demasiado grande");
+      showModal("error", "El presupuesto es demasiado grande");
       return;
     }
 
@@ -157,9 +157,9 @@ function FormSolicitud({
 
         window.dispatchEvent(new CustomEvent("solicitud-actualizada"));
 
-        showModal("success", "📩 Solicitud enviada");
+        showModal("success", "Solicitud enviada");
       } else {
-        console.log("❌ RESPUESTA COMPLETA BACKEND:", data);
+        console.log("ERROR RESPUESTA COMPLETA BACKEND:", data);
         showModal("error", data.message || data.error || "Error al enviar");
       }
     } catch (error) {
@@ -182,10 +182,10 @@ function FormSolicitud({
   return (
     <>
       <form className="form-solicitud">
-        <h3>📝 Solicitar Servicio a {proveedorNombre}</h3>
+        <h3><i className="bi bi-pencil-square"></i> Solicitar Servicio a {proveedorNombre}</h3>
 
         <div className="form-grupo-custom">
-          <label>📌 Tipo de servicio *</label>
+          <label><i className="bi bi-pin"></i> Tipo de servicio *</label>
           <select
             name="tipo_servicio"
             value={form.tipo_servicio}
@@ -202,7 +202,7 @@ function FormSolicitud({
         </div>
 
         <div className="form-grupo-custom">
-          <label>📝 Descripción *</label>
+          <label><i className="bi bi-pencil-square"></i> Descripción *</label>
           <textarea
             name="descripcion"
             value={form.descripcion}
@@ -214,7 +214,7 @@ function FormSolicitud({
 
         <div className="form-grupo-custom">
           <label className="form-label-custom">
-            <span>📅 Fecha preferida</span>
+            <span><i className="bi bi-calendar3"></i> Fecha preferida</span>
             <span style={{ color: "var(--teal)" }}>*</span>
           </label>
 
@@ -243,7 +243,7 @@ function FormSolicitud({
         </div>
 
         <div className="form-grupo-custom">
-          <label>⏰ Hora deseada *</label>
+          <label><i className="bi bi-clock"></i> Hora deseada *</label>
           <input
             type="time"
             name="hora_deseada"
@@ -254,7 +254,7 @@ function FormSolicitud({
         </div>
 
         <div className="form-grupo-custom">
-          <label>⏱️ Duración *</label>
+          <label><i className="bi bi-stopwatch"></i> Duración *</label>
           <select
             name="duracion"
             value={form.duracion}
@@ -270,7 +270,7 @@ function FormSolicitud({
         </div>
 
         <div className="form-grupo-custom">
-          <label>💻 Modalidad *</label>
+          <label><i className="bi bi-laptop"></i> Modalidad *</label>
           <select
             name="modalidad"
             value={form.modalidad}
@@ -285,7 +285,7 @@ function FormSolicitud({
         </div>
 
         <div className="form-grupo-custom">
-          <label>💳 Método de pago *</label>
+          <label><i className="bi bi-credit-card-2-front"></i> Método de pago *</label>
           <select
             name="metodo_pago"
             value={form.metodo_pago}
@@ -309,12 +309,12 @@ function FormSolicitud({
               onChange={handleChange}
             />
             <span className="checkmark"></span>
-            💵 Pago anticipado
+            <i className="bi bi-cash"></i> Pago anticipado
           </label>
         </div>
 
         <div className="form-grupo-custom">
-          <label>💰 Presupuesto *</label>
+          <label><i className="bi bi-cash-coin"></i> Presupuesto *</label>
           <input
             className="form-input-custom"
             type="text"
@@ -330,7 +330,7 @@ function FormSolicitud({
         </div>
 
         <div className="form-grupo-custom">
-          <label>⚡ Urgencia *</label>
+          <label><i className="bi bi-lightning-fill"></i> Urgencia *</label>
           <select
             name="urgencia"
             value={form.urgencia}
@@ -346,7 +346,7 @@ function FormSolicitud({
 
         <div className="form-grupo-custom">
           <label className="custom-file-upload">
-            📎 Adjuntar archivo
+            <i className="bi bi-paperclip"></i> Adjuntar archivo
             <input
               type="file"
               name="archivo"
@@ -356,7 +356,7 @@ function FormSolicitud({
           </label>
 
           {form.archivo && (
-            <p className="nombre-archivo">✅ {form.archivo.name}</p>
+            <p className="nombre-archivo"><i className="bi bi-check-circle"></i> {form.archivo.name}</p>
           )}
         </div>
 
@@ -366,7 +366,7 @@ function FormSolicitud({
           onClick={handleAccionSolicitud}
           disabled={estado === "enviando"}
         >
-          {solicitudExiste ? "🗑️ Eliminar solicitud" : "📩 Enviar solicitud"}
+          {solicitudExiste ? <><i className="bi bi-trash"></i> Eliminar solicitud</> : <><i className="bi bi-envelope"></i> Enviar solicitud</>}
         </button>
       </form>
     </>

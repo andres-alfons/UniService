@@ -64,7 +64,7 @@ export default function HomeGuest() {
   return (
     <>
       <Navbar scrolled={scrolled} />
-      <Presentacion primaryBtn={{href:"#buscar", className:"btn btn-verde reveal delay-3", label:"🔍 Explorar servicios"}} secondaryBtn={{href:"/login", className:"btn btn-borde reveal delay-3", label:"➕ Publicar mi servicio"}} />
+      <Presentacion primaryBtn={{href:"#buscar", className:"btn btn-verde reveal delay-3", label:"Explorar servicios"}} secondaryBtn={{href:"/login", className:"btn btn-borde reveal delay-3", label:"Publicar mi servicio"}} />
       <SeccionBuscar serviciosTotales={serviciosTotales} />
       <SeccionRecientes servicios={recientes} cargando={cargando} linkBase="/login?id=" />
       <SeccionDestacados top3={top3} linkBase="/login?id=" />

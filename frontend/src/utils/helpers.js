@@ -1,7 +1,9 @@
 export function formatearFecha(fechaISO) {
   if (!fechaISO) return "—";
   try {
-    const fecha = new Date(fechaISO);
+    const partes = fechaISO.split("T")[0].split("-");
+    if (partes.length !== 3) return "—";
+    const fecha = new Date(+partes[0], +partes[1] - 1, +partes[2]);
     if (isNaN(fecha.getTime())) return "—";
     return fecha.toLocaleDateString("es-CO", {
       year: "numeric", month: "long", day: "numeric"

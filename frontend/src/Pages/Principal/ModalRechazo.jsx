@@ -28,7 +28,7 @@ export default function ModalRechazo({ onConfirmar, onCancelar }) {
         }}
       >
         <h3 style={{ margin: "0 0 6px", color: "#fff" }}>
-          ❌ Rechazar solicitud
+          <><i className="bi bi-x-circle"></i> Rechazar solicitud</>
         </h3>
         <p style={{ margin: "0 0 20px", opacity: 0.6, fontSize: "0.85rem" }}>
           Explica el motivo y, si quieres, propón un precio alternativo.
@@ -70,7 +70,7 @@ export default function ModalRechazo({ onConfirmar, onCancelar }) {
             margin: "14px 0 6px",
           }}
         >
-          💰 Contraoferta (opcional)
+          <i className="bi bi-cash-coin"></i> Contraoferta (opcional)
         </label>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <span style={{ color: "#4ac7b6", fontWeight: 600 }}>$</span>

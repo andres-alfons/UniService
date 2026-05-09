@@ -20,7 +20,7 @@ function FormCalificacion({ servicioId, showModal, onNuevaResena }) {
   }, [servicioId]);
 
   const handleEnviar = async () => {
-    if (estrellas === 0) { showModal("error", "❌ Selecciona una puntuación"); return; }
+    if (estrellas === 0) { showModal("error", "Selecciona una puntuación"); return; }
     const id_cliente = Number(localStorage.getItem("usuarioId"));
     setEnviando(true);
     try {
@@ -37,7 +37,7 @@ function FormCalificacion({ servicioId, showModal, onNuevaResena }) {
       });
       const data = await res.json();
       if (res.ok) {
-        showModal("success", "⭐ ¡Reseña enviada!");
+        showModal("success", "¡Reseña enviada!");
         setPermiso(p => ({ ...p, puede: false, yaCalifico: true }));
         onNuevaResena();
       } else {
@@ -54,7 +54,7 @@ function FormCalificacion({ servicioId, showModal, onNuevaResena }) {
 
   if (permiso.yaCalifico) return (
     <div className="seccion-info" style={{ textAlign: "center", padding: "20px" }}>
-      <p style={{ color: "var(--teal)" }}>✅ Ya calificaste este servicio. ¡Gracias!</p>
+      <p style={{ color: "var(--teal)" }}><i className="bi bi-check-circle-fill"></i> Ya calificaste este servicio. ¡Gracias!</p>
     </div>
   );
 
@@ -62,7 +62,7 @@ function FormCalificacion({ servicioId, showModal, onNuevaResena }) {
 
   return (
     <div className="seccion-info">
-      <h3>⭐ Dejar una reseña</h3>
+      <h3><i className="bi bi-star-fill"></i> Dejar una reseña</h3>
 
       <div style={{ display: "flex", gap: "8px", marginBottom: "16px", fontSize: "32px" }}>
         {[1,2,3,4,5].map(n => (
@@ -91,7 +91,7 @@ function FormCalificacion({ servicioId, showModal, onNuevaResena }) {
         onClick={handleEnviar}
         disabled={enviando}
       >
-        {enviando ? "Enviando..." : "📤 Publicar reseña"}
+        {enviando ? "Enviando..." : <><i className="bi bi-send"></i> Publicar reseña</>}
       </button>
     </div>
   );

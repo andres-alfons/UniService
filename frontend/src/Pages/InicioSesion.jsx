@@ -179,7 +179,7 @@ export default function Login() {
   const handleEnviarCodigo = async () => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!correoReg || !regex.test(correoReg)) {
-      notificar("❌ Ingresa un correo válido primero");
+      notificar("Ingresa un correo válido primero");
       return;
     }
     setEnviandoCodigo(true); // Cambia el botón a "Enviando..."
@@ -193,10 +193,10 @@ export default function Login() {
         setCodigoEnviado(true);
         setMostrarModalCodigo(true); // Abre el modal para que el usuario ingrese el código
       } else {
-        notificar("❌ Error al enviar el código");
+        notificar("Error al enviar el código");
       }
     } catch {
-      notificar("❌ Error de conexión");
+      notificar("Error de conexión");
     } finally {
       setEnviandoCodigo(false); // Restaura el botón sin importar si fue exitoso o no
     }
@@ -206,7 +206,7 @@ export default function Login() {
   // Si es correcto, marca el correo como verificado y cierra el modal.
   const handleVerificarCodigo = async () => {
     if (codigoInput.length !== 6) {
-      notificar("❌ El código debe tener 6 dígitos");
+      notificar("El código debe tener 6 dígitos");
       return;
     }
     try {
@@ -219,12 +219,12 @@ export default function Login() {
       if (data.valido) {
         setCorreoVerificado(true); // Habilita el botón de crear cuenta
         setMostrarModalCodigo(false); // Cierra el modal del código
-        notificar("✅ Correo verificado con éxito", "success");
+        notificar("Correo verificado con éxito", "success");
       } else {
-        notificar("❌ Código incorrecto, intenta de nuevo");
+        notificar("Código incorrecto, intenta de nuevo");
       }
     } catch {
-      notificar("❌ Error en la verificación");
+      notificar("Error en la verificación");
     }
   };
 
@@ -237,7 +237,7 @@ export default function Login() {
   const handleResetEnviarCodigo = async () => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!resetCorreo || !regex.test(resetCorreo)) {
-      notificar("❌ Ingresa un correo válido");
+      notificar("Ingresa un correo válido");
       return;
     }
     setResetCargando(true);
@@ -253,10 +253,10 @@ export default function Login() {
       if (res.ok) {
         setResetPaso("codigo"); // Avanza al paso 2: ingresar el código
       } else {
-        notificar("❌ Error al enviar el código");
+        notificar("Error al enviar el código");
       }
     } catch {
-      notificar("❌ Error de conexión");
+      notificar("Error de conexión");
     } finally {
       setResetCargando(false);
     }
@@ -271,9 +271,9 @@ export default function Login() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo: resetCorreo }),
       });
-      notificar("📧 Código reenviado", "success");
+      notificar("Código reenviado", "success");
     } catch {
-      notificar("❌ Error al reenviar");
+      notificar("Error al reenviar");
     } finally {
       setResetCargando(false);
     }
@@ -282,7 +282,7 @@ export default function Login() {
   // PASO 2: Verifica que el código de recuperación ingresado sea correcto
   const handleResetVerificarCodigo = async () => {
     if (resetCodigo.length !== 6) {
-      notificar("❌ El código debe tener 6 dígitos");
+      notificar("El código debe tener 6 dígitos");
       return;
     }
     setResetCargando(true);
@@ -296,10 +296,10 @@ export default function Login() {
       if (data.valido) {
         setResetPaso("nueva"); // Avanza al paso 3: escribir la nueva contraseña
       } else {
-        notificar("❌ Código incorrecto o expirado");
+        notificar("Código incorrecto o expirado");
       }
     } catch {
-      notificar("❌ Error de conexión");
+      notificar("Error de conexión");
     } finally {
       setResetCargando(false);
     }
@@ -308,11 +308,11 @@ export default function Login() {
   // PASO 3: Envía la nueva contraseña al backend para guardarla en la base de datos
   const handleResetGuardar = async () => {
     if (resetPass.length < 8) {
-      notificar("❌ La contraseña debe tener mínimo 8 caracteres");
+      notificar("La contraseña debe tener mínimo 8 caracteres");
       return;
     }
     if (resetPass !== resetPass2) {
-      notificar("❌ Las contraseñas no coinciden");
+      notificar("Las contraseñas no coinciden");
       return;
     }
     setResetCargando(true);
@@ -332,7 +332,7 @@ export default function Login() {
       const data = await res.json();
       if (data.ok) {
         notificar(
-          "✅ Contraseña cambiada correctamente. Ya puedes iniciar sesión.",
+          "Contraseña cambiada correctamente. Ya puedes iniciar sesión.",
           "success",
         );
         // Limpia todos los estados del flujo de recuperación y cierra el modal
@@ -342,10 +342,10 @@ export default function Login() {
         setResetPass("");
         setResetPass2("");
       } else {
-        notificar("❌ " + (data.error || "Error al cambiar contraseña"));
+        notificar(data.error || "Error al cambiar contraseña");
       }
     } catch {
-      notificar("❌ Error de conexión");
+      notificar("Error de conexión");
     } finally {
       setResetCargando(false);
     }
@@ -382,7 +382,7 @@ export default function Login() {
     if (adminBloqueado) return; // No hace nada si ya está bloqueado
 
     if (adminMasterInput === ADMIN_MASTER_PASSWORD) {
-      notificar("🔓 Acceso concedido, Comandante", "success");
+      notificar("Acceso concedido, Comandante", "success");
       setModalAdmin(false);
 
       // Guarda en localStorage que el usuario está logueado como admin
@@ -419,11 +419,11 @@ export default function Login() {
   const handleLogin = async () => {
     // Validaciones básicas antes de llamar a la API
     if (!correo || errores.correo) {
-      notificar("❌ Ingresa un correo válido");
+      notificar("Ingresa un correo válido");
       return;
     }
     if (pass.length < 8) {
-      notificar("❌ Mínimo 8 caracteres");
+      notificar("Mínimo 8 caracteres");
       return;
     }
 
@@ -437,7 +437,7 @@ export default function Login() {
       localStorage.setItem("usuario", adminEncontrado.correo.split("@")[0]);
       localStorage.setItem("usuarioRol", 1);
       setModalAdmin(true);
-      notificar("🔑 Cuenta de administrador detectada", "info");
+      notificar("Cuenta de administrador detectada", "info");
       return; // Detiene la función aquí, no llega al fetch del backend
     }
 
@@ -466,10 +466,10 @@ export default function Login() {
           navigate("/home", { replace: true });
         }
       } else {
-        notificar("❌ " + (data.message || "Credenciales incorrectas"));
+        notificar(data.message || "Credenciales incorrectas");
       }
     } catch {
-      notificar("❌ Error de conexión con el servidor");
+      notificar("Error de conexión con el servidor");
     }
   };
 
@@ -481,7 +481,7 @@ export default function Login() {
   const handleRegister = async () => {
     // No permite registrar si el correo no fue verificado con el código
     if (!correoVerificado) {
-      notificar("❌ Debes verificar tu correo primero");
+      notificar("Debes verificar tu correo primero");
       return;
     }
     // Validación completa del formulario antes de enviar
@@ -491,7 +491,7 @@ export default function Login() {
       nombre.trim().length < 3 ||
       !terminos
     ) {
-      notificar("❌ Revisa los campos del formulario");
+      notificar("Revisa los campos del formulario");
       return;
     }
     try {
@@ -507,9 +507,9 @@ export default function Login() {
       });
       const data = await res.json();
       if (data.error) {
-        notificar("❌ " + data.error);
+        notificar(data.error);
       } else {
-        notificar("✅ Cuenta creada, ya puedes iniciar sesión", "success");
+        notificar("Cuenta creada, ya puedes iniciar sesión", "success");
         // Limpia todos los campos del formulario de registro después de crear la cuenta
         setNombre("");
         setCorreoReg("");
@@ -522,7 +522,7 @@ export default function Login() {
         setCodigoInput("");
       }
     } catch {
-      notificar("❌ Error de conexión");
+      notificar("Error de conexión");
     }
   };
 
@@ -580,15 +580,15 @@ export default function Login() {
               {/* Chips decorativos que muestran las categorías disponibles */}
               <div className="lateral-chips">
                 {[
-                  "📚 Tutorías",
-                  "💻 Programación",
-                  "✍️ Ensayos",
-                  "🎨 Diseño",
-                  "⚡ Productos",
-                  "🏠 Arriendo",
-                ].map((c) => (
-                  <span key={c} className="lateral-chip">
-                    {c}
+                  ["bi-book", "Tutorías"],
+                  ["bi-code-slash", "Programación"],
+                  ["bi-pencil", "Ensayos"],
+                  ["bi-palette", "Diseño"],
+                  ["bi-box", "Productos"],
+                  ["bi-house", "Arriendo"],
+                ].map(([icono, texto]) => (
+                  <span key={texto} className="lateral-chip">
+                    <i className={`bi ${icono}`}></i> {texto}
                   </span>
                 ))}
               </div>

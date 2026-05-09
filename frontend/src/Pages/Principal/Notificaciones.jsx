@@ -52,7 +52,7 @@ export default function NotificacionesFlotantes() {
               const id = `rec-${sol.id_solicitud}`;
               notifs.push({
                 id,
-                texto: `📩 Nueva solicitud de ${sol.nombre_cliente || "un estudiante"} para "${sol.titulo_servicio || "tu servicio"}"`,
+                texto: `Nueva solicitud de ${sol.nombre_cliente || "un estudiante"} para "${sol.titulo_servicio || "tu servicio"}"`,
                 leida: !!leidas[id],
                 tipo: "recibida",
               });
@@ -60,7 +60,7 @@ export default function NotificacionesFlotantes() {
               const id = `rec-acept-${sol.id_solicitud}`;
               notifs.push({
                 id,
-                texto: `✅ ${sol.nombre_cliente || "El cliente"} aceptó tu respuesta para "${sol.titulo_servicio || "tu servicio"}"`,
+                texto: `${sol.nombre_cliente || "El cliente"} aceptó tu respuesta para "${sol.titulo_servicio || "tu servicio"}"`,
                 leida: !!leidas[id],
                 tipo: "info",
               });
@@ -68,7 +68,7 @@ export default function NotificacionesFlotantes() {
               const id = `rec-rech-${sol.id_solicitud}`;
               notifs.push({
                 id,
-                texto: `❌ ${sol.nombre_cliente || "El cliente"} rechazó la solicitud para "${sol.titulo_servicio || "tu servicio"}"`,
+                texto: `${sol.nombre_cliente || "El cliente"} rechazó la solicitud para "${sol.titulo_servicio || "tu servicio"}"`,
                 leida: !!leidas[id],
                 tipo: "info",
               });
@@ -80,7 +80,7 @@ export default function NotificacionesFlotantes() {
               const id = `env-acept-${sol.id_solicitud}`;
               notifs.push({
                 id,
-                texto: `✅ Tu solicitud para "${sol.titulo_servicio || "el servicio"}" fue aceptada por ${sol.nombre_proveedor || "el proveedor"}`,
+                texto: `Tu solicitud para "${sol.titulo_servicio || "el servicio"}" fue aceptada por ${sol.nombre_proveedor || "el proveedor"}`,
                 leida: !!leidas[id],
                 tipo: "enviada",
               });
@@ -88,7 +88,7 @@ export default function NotificacionesFlotantes() {
               const id = `env-rech-${sol.id_solicitud}`;
               notifs.push({
                 id,
-                texto: `❌ Tu solicitud para "${sol.titulo_servicio || "el servicio"}" fue rechazada${sol.motivo_rechazo ? ": " + sol.motivo_rechazo : ""}`,
+                texto: `Tu solicitud para "${sol.titulo_servicio || "el servicio"}" fue rechazada${sol.motivo_rechazo ? ": " + sol.motivo_rechazo : ""}`,
                 leida: !!leidas[id],
                 tipo: "enviada",
               });
@@ -140,7 +140,7 @@ export default function NotificacionesFlotantes() {
         className="boton-notificaciones"
         onClick={() => setAbierto(!abierto)}
       >
-        🔔
+        <i className="bi bi-bell-fill"></i>
         {noLeidas > 0 && <span className="badge-notificaciones">{noLeidas}</span>}
       </button>
 
@@ -155,7 +155,7 @@ export default function NotificacionesFlotantes() {
               onClick={vaciarNotificaciones}
               title="Vaciar todas las notificaciones"
             >
-              🗑️
+              <i className="bi bi-trash"></i>
             </button>
           </div>
 

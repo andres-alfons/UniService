@@ -55,7 +55,7 @@ export default function SeccionReportes() {
             <div className="admin-report-card__header">
               <div className="admin-report-card__info">
                 <span className="admin-report-card__icon">
-                  {r.estado === "pendiente" ? "🚩" : "✅"}
+                  {r.estado === "pendiente" ? <i className="bi bi-flag"></i> : <i className="bi bi-check-circle"></i>}
                 </span>
                 <div>
                   <p className="admin-report-card__type">{r.tipo}</p>
@@ -74,7 +74,7 @@ export default function SeccionReportes() {
                   className="admin-btn-action admin-btn-action--success"
                   onClick={() => resolver(r.id)}
                 >
-                  ✅ Marcar resuelta
+                  <i className="bi bi-check-circle"></i> Marcar resuelta
                 </button>
                 <button className="admin-btn-action admin-btn-action--danger">
                   🚫 Tomar acción

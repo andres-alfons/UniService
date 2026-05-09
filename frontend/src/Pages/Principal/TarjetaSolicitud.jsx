@@ -25,7 +25,7 @@ export default function TarjetaSolicitud({ sol, tipo, responder, setRechazando }
         }}
       >
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <span style={{ fontSize: "1.6rem" }}>{sol.icono || "📌"}</span>
+          <span style={{ fontSize: "1.6rem" }}><i className={`bi ${sol.icono?.startsWith("bi-") ? sol.icono : "bi-pin"}`}></i></span>
           <div>
             <p style={{ margin: 0, fontWeight: 600, fontSize: "0.95rem" }}>
               {sol.titulo_servicio}
@@ -46,7 +46,7 @@ export default function TarjetaSolicitud({ sol, tipo, responder, setRechazando }
             whiteSpace: "nowrap",
           }}
         >
-          {badge.texto}
+          <><i className={`bi ${badge.icono}`}></i> {badge.texto}</>
         </span>
       </div>
 
@@ -84,7 +84,7 @@ export default function TarjetaSolicitud({ sol, tipo, responder, setRechazando }
             gap: "8px",
           }}
         >
-          <span style={{ fontSize: "1.2rem" }}>💰</span>
+          <span style={{ fontSize: "1.2rem" }}><i className="bi bi-cash-coin"></i></span>
           <div>
             <p
               style={{
@@ -118,7 +118,7 @@ export default function TarjetaSolicitud({ sol, tipo, responder, setRechazando }
             style={{ flex: 1, fontSize: "0.82rem", padding: "8px" }}
             onClick={() => responder(sol.id_solicitud, "aceptar")}
           >
-            ✅ Aceptar
+            <><i className="bi bi-check-circle"></i> Aceptar</>
           </button>
           <button
             type="button"
@@ -126,7 +126,7 @@ export default function TarjetaSolicitud({ sol, tipo, responder, setRechazando }
             style={{ flex: 1, fontSize: "0.82rem", padding: "8px" }}
             onClick={() => setRechazando(sol.id_solicitud)}
           >
-            ❌ Rechazar
+            <><i className="bi bi-x-circle"></i> Rechazar</>
           </button>
         </div>
       )}

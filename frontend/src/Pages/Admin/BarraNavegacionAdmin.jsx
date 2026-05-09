@@ -2,12 +2,12 @@ export default function NavbarAdmin({ seccionActual, setSeccion, onCerrarSesion 
   const adminNombre = localStorage.getItem("usuario") || "Administrador";
 
   const secciones = [
-    { id: "dashboard", icon: "⬛", label: "Dashboard" },
-    { id: "usuarios", icon: "👥", label: "Usuarios" },
-    { id: "servicios", icon: "📋", label: "Servicios" },
-    { id: "reportes", icon: "🚩", label: "Reportes" },
-    { id: "categorias", icon: "🏷️", label: "Categorías" },
-    { id: "logs", icon: "📜", label: "Actividad" },
+    { id: "dashboard", icon: "bi-grid-1x2-fill", label: "Dashboard" },
+    { id: "usuarios", icon: "bi-people-fill", label: "Usuarios" },
+    { id: "servicios", icon: "bi-card-checklist", label: "Servicios" },
+    { id: "reportes", icon: "bi-flag-fill", label: "Reportes" },
+    { id: "categorias", icon: "bi-tags-fill", label: "Categorías" },
+    { id: "logs", icon: "bi-journal-text", label: "Actividad" },
   ];
 
   return (
@@ -28,13 +28,13 @@ export default function NavbarAdmin({ seccionActual, setSeccion, onCerrarSesion 
             onClick={() => setSeccion(s.id)}
             className={`admin-nav__btn ${seccionActual === s.id ? "is-active" : ""}`}
           >
-            {s.icon} {s.label}
+            <i className={`bi ${s.icon}`}></i> {s.label}
           </button>
         ))}
       </div>
 
       <div className="admin-nav__user">
-        <div className="admin-nav__user-info">🛡️ {adminNombre}</div>
+        <div className="admin-nav__user-info"><i className="bi bi-shield-fill-check"></i> {adminNombre}</div>
         <button
           type="button"
           onClick={onCerrarSesion}

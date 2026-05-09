@@ -66,7 +66,7 @@ const TermsPage = () => {
           </p>
 
           <div className="terms-highlight">
-            ⚠️ Aviso: El uso de UniService implica la aceptación plena de estos
+            <i className="bi bi-exclamation-triangle-fill" style={{marginRight:"6px"}}></i> Aviso: El uso de UniService implica la aceptación plena de estos
             términos. Si no estás de acuerdo con alguna de las cláusulas aquí
             descritas, te recomendamos no utilizar nuestros servicios.
           </div>

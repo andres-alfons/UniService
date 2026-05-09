@@ -97,6 +97,20 @@ export default function SeccionBuscar({ serviciosTotales }) {
     aplicarFiltros(busqueda, categoriaActual, val, mostrados);
   };
 
+  const handleToggleOrden = () => {
+    const pares = {
+      recientes: "antiguos",
+      antiguos: "recientes",
+      "precio-menor": "precio-mayor",
+      "precio-mayor": "precio-menor",
+      "rating-mayor": "rating-menor",
+      "rating-menor": "rating-mayor",
+    };
+    const nuevo = pares[orden] || "recientes";
+    setOrden(nuevo);
+    aplicarFiltros(busqueda, categoriaActual, nuevo, mostrados);
+  };
+
   const handleMostrarMas = () => {
     const nuevo = mostrados + CANTIDAD_POR_PAGINA;
     setMostrados(nuevo);
@@ -120,7 +134,7 @@ export default function SeccionBuscar({ serviciosTotales }) {
             style={{ maxWidth: "700px", margin: "30px auto" }}
           >
             <div className="search-input-wrapper">
-              <span className="search-icon">🔍</span>
+              <span className="search-icon"><i className="bi bi-search"></i></span>
               <input
                 type="text"
                 className="search-input"
@@ -145,7 +159,7 @@ export default function SeccionBuscar({ serviciosTotales }) {
             onClick={(e) => handleCategoria(chip.valor, e)}
             type="button"
           >
-            {chip.label}
+            <i className={`bi ${chip.icono}`}></i> {chip.label}
           </button>
         ))}
       </div>
@@ -156,19 +170,23 @@ export default function SeccionBuscar({ serviciosTotales }) {
             Resultados:{" "}
             <strong className="texto-claro">{resultados.length}</strong>
           </p>
-          <select
-            className="form-input"
-            value={orden}
-            onChange={handleOrden}
-            style={{ maxWidth: "280px", padding: "10px", borderRadius: "10px" }}
-          >
-            <option value="recientes">🕒 Más recientes</option>
-            <option value="antiguos">📅 Más antiguos</option>
-            <option value="precio-menor">💲 Menor precio</option>
-            <option value="precio-mayor">💰 Mayor precio</option>
-            <option value="rating-mayor">⭐ Mejor calificación</option>
-            <option value="rating-menor">⭐ Peor calificación</option>
-          </select>
+          <div className="sort-group">
+            <select
+              className="sort-select"
+              value={orden}
+              onChange={handleOrden}
+            >
+              <option value="recientes">Más recientes</option>
+              <option value="antiguos">Más antiguos</option>
+              <option value="precio-menor">Menor precio</option>
+              <option value="precio-mayor">Mayor precio</option>
+              <option value="rating-mayor">Mejor calificación</option>
+              <option value="rating-menor">Peor calificación</option>
+            </select>
+            <button type="button" className="sort-toggle" onClick={handleToggleOrden} aria-label="Invertir orden">
+              <i className="bi bi-arrow-down-up"></i>
+            </button>
+          </div>
         </div>
 
         <div className="cards-grid" id="contenedor-explorar">

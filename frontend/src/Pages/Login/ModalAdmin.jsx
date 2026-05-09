@@ -53,7 +53,7 @@ export default function AdminModal({
             filter: "drop-shadow(0 0 16px rgba(239,68,68,0.5))",
           }}
         >
-          ⚠️
+          <i className="bi bi-exclamation-triangle-fill" style={{fontSize:"3.5rem",color:"#EF4444"}}></i>
         </div>
 
         <p
@@ -199,7 +199,7 @@ export default function AdminModal({
               color: "#F87171",
             }}
           >
-            🔒 Acceso bloqueado por intentos fallidos
+             <i className="bi bi-lock-fill"></i> Acceso bloqueado por intentos fallidos
           </div>
         )}
 

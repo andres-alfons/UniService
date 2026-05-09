@@ -57,13 +57,13 @@ export default function SeccionSolicitudes() {
     <section className="seccion section-dynamic" id="solicitudes">
       <div className="bg-canvas bg-canvas-code" />
       <div className="container">
-        <p className="label-seccion reveal">🔔 Bandeja</p>
+        <p className="label-seccion reveal"><i className="bi bi-bell-fill"></i> Bandeja</p>
         <h2 className="reveal delay-1">Mis solicitudes</h2>
 
         <div className="reveal delay-2" style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
           {[
-            ["enviadas", "📤 Enviadas"],
-            ["recibidas", "📥 Recibidas"],
+            ["enviadas", "Enviadas"],
+            ["recibidas", "Recibidas"],
           ].map(([val, label]) => (
             <button
               key={val}

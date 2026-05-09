@@ -21,7 +21,7 @@ export default function Navbar({ scrolled, onCerrarSesion }) {
           {[
             ["#inicio", "Inicio"],
             ["#buscar", "Buscar servicios"],
-            ["#mejor-calificados", "Top⭐"],
+            ["#mejor-calificados", "Top destacados"],
             ["#publicar", "Publicar servicio"],
             ["#solicitudes", "Mis solicitudes"],
             ["#soporte", "Soporte"],
@@ -36,7 +36,7 @@ export default function Navbar({ scrolled, onCerrarSesion }) {
             </a>
           ))}
           <a href="/perfil" className="nav-link-custom nav-iniciar">
-            👤 {nombreUsuario}
+            <i className="bi bi-person"></i> {nombreUsuario}
           </a>
           <button type="button" className="nav-Cerrar" onClick={onCerrarSesion}>
             Cerrar Sesión

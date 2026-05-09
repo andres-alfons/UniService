@@ -36,7 +36,7 @@ export default function SeccionDashboard() {
     },
     {
       accion: "Categoría creada",
-      detalle: "🔬 Ciencias exactas",
+      detalle: "Ciencias exactas",
       hora: "hace 1 hora",
       tipo: "categoria",
     },
@@ -57,28 +57,28 @@ export default function SeccionDashboard() {
 
       <div className="admin-stats-grid">
         <StatCard
-          icon="👥"
+          icon={<i className="bi bi-people-fill"></i>}
           label="Usuarios registrados"
           value={stats.totalUsuarios}
           sub="↑ 12 esta semana"
           type="primary"
         />
         <StatCard
-          icon="📋"
+          icon={<i className="bi bi-card-checklist"></i>}
           label="Servicios activos"
           value={stats.totalServicios}
           sub="↑ 7 nuevos hoy"
           type="success"
         />
         <StatCard
-          icon="🔁"
+          icon={<i className="bi bi-arrow-repeat"></i>}
           label="Solicitudes totales"
           value={stats.totalSolicitudes}
           sub="↑ 23 esta semana"
           type="info"
         />
         <StatCard
-          icon="🚩"
+          icon={<i className="bi bi-flag-fill"></i>}
           label="Reportes pendientes"
           value={stats.reportesPendientes}
           sub="Requieren revisión"
@@ -87,7 +87,7 @@ export default function SeccionDashboard() {
       </div>
 
       <div className="admin-activity-card">
-        <p className="admin-activity-card__title">📜 Actividad reciente</p>
+        <p className="admin-activity-card__title"><i className="bi bi-journal-text"></i> Actividad reciente</p>
         <div className="admin-activity-list">
           {actividad.map((a, i) => (
             <div key={i} className="admin-activity-item">

@@ -50,7 +50,7 @@ export default function Footer() {
         </div>
         <hr />
         <p className="footer-copy">
-          © 2026 UniServicios — Hecho por y para estudiantes 🎓
+          © 2026 UniServicios — Hecho por y para estudiantes <i className="bi bi-mortarboard-fill"></i>
         </p>
       </div>
     </footer>

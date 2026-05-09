@@ -1,5 +1,5 @@
 ﻿import { useState } from "react";
-import { CATEGORIAS, MODALIDADES, DISPONIBILIDAD, initialPublicar, API_HOME, mapaIconos, mapaCategoriaId } from "../shared/constantes";
+import { CATEGORIAS, MODALIDADES, DISPONIBILIDAD, initialPublicar, API_HOME, mapaIconos, mapaCategoriaId, MAPA_ICONOS_MODALIDAD, MAPA_ICONOS_DISPONIBILIDAD } from "../shared/constantes";
 
 export default function SeccionPublicar({ onPublicado }) {
   const [form, setForm] = useState(initialPublicar);
@@ -85,7 +85,7 @@ export default function SeccionPublicar({ onPublicado }) {
       id_categoria: mapaCategoriaId[categoria] || 7,
       precio_hora: Number(precio), contacto, universidad,
       modalidad: modalidadDB, disponibilidad: dispDB,
-      icono: mapaIconos[categoria] || "pin",
+      icono: mapaIconos[categoria] || "bi-pin",
     };
 
     setLoading(true);
@@ -116,7 +116,8 @@ export default function SeccionPublicar({ onPublicado }) {
   const cerrarModalExito = () => setModalExito(false);
 
   return (
-    <section className="seccion section-dynamic" id="publicar">
+    <>
+      <section className="seccion section-dynamic" id="publicar">
       <div className="bg-canvas bg-canvas-nodes" />
       <div className="floating-shapes-small">
         <div className="shape-sm shape-sm-1" /><div className="shape-sm shape-sm-2" />
@@ -242,7 +243,7 @@ export default function SeccionPublicar({ onPublicado }) {
                   {MODALIDADES.map((m) => (
                     <label key={m} className="check-item">
                       <input type="radio" name="modalidad" value={m} checked={form.modalidad === m} onChange={handleChange} />
-                      <span>{m}</span>
+                      <span><i className={`bi ${MAPA_ICONOS_MODALIDAD[m]}`}></i> {m}</span>
                     </label>
                   ))}
                 </div>
@@ -254,7 +255,7 @@ export default function SeccionPublicar({ onPublicado }) {
                   {DISPONIBILIDAD.map((d) => (
                     <label key={d} className="check-item">
                       <input type="radio" name="disponibilidad" value={d} checked={form.disponibilidad === d} onChange={handleChange} />
-                      <span>{d}</span>
+                      <span><i className={`bi ${MAPA_ICONOS_DISPONIBILIDAD[d]}`}></i> {d}</span>
                     </label>
                   ))}
                 </div>
@@ -276,13 +277,14 @@ export default function SeccionPublicar({ onPublicado }) {
           </div>
         </div>
       </div>
+    </section>
 
       {modalExito && (
         <div className="modal-overlay" onClick={cerrarModalExito}>
           <div className="modal-content modal-exito" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-icon success-icon">OK</div>
-            <h3>Servicio publicado con exito!</h3>
-            <p>Tu servicio ya esta visible para la comunidad universitaria.</p>
+            <div className="modal-icon success-icon"><i className="bi bi-check-circle-fill" style={{fontSize:"2.5rem",color:"#10b981"}}></i></div>
+            <h3>Servicio publicado con éxito!</h3>
+            <p>Tu servicio ya está visible para la comunidad universitaria.</p>
             <button className="btn btn-verde" onClick={cerrarModalExito}>Entendido</button>
           </div>
         </div>
@@ -291,13 +293,13 @@ export default function SeccionPublicar({ onPublicado }) {
       {modalError && (
         <div className="modal-overlay" onClick={() => setModalError(null)}>
           <div className="modal-content modal-error" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-icon error-icon">X</div>
+            <div className="modal-icon error-icon"><i className="bi bi-x-circle-fill" style={{fontSize:"2.5rem",color:"#ef4444"}}></i></div>
             <h3>Error al publicar</h3>
             <p>{modalError}</p>
             <button className="btn btn-borde" onClick={() => setModalError(null)}>Cerrar</button>
           </div>
         </div>
       )}
-    </section>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { formatearFecha, calcularEstrellas, iniciales } from "../utils/helpers";
+import { COLORES_CATEGORIA } from "./shared/constantes";
 import "../styles/styleHome.css";
 import "../styles/styleServicio.css";
 import Navbar from "./Servicio/BarraNavegacionServicio";
@@ -93,7 +94,9 @@ export default function Servicio() {
   function formatearFecha(fechaISO) {
     if (!fechaISO) return "—";
     try {
-      const fecha = new Date(fechaISO);
+      const partes = fechaISO.split("T")[0].split("-");
+      if (partes.length !== 3) return "—";
+      const fecha = new Date(+partes[0], +partes[1] - 1, +partes[2]);
       if (isNaN(fecha.getTime())) return "—";
       return fecha.toLocaleDateString("es-CO", {
         year: "numeric",
@@ -133,14 +136,14 @@ export default function Servicio() {
 
   const universidad =
     servicio.universidad === 1 || servicio.universidad === "1"
-      ? "🏛️ Universidad Popular del Cesar"
+      ? "Universidad Popular del Cesar"
       : servicio.universidad === "No pertenece a ninguna universidad"
-      ? "🌐 Independiente"
+      ? "Independiente"
       : servicio.universidad
-      ? `🏫 ${servicio.universidad}`
-      : "🎓 Comunidad académica";
+      ? `${servicio.universidad}`
+      : "Comunidad académica";
 
-  const emojisGaleria = [servicio.icono || "📌", "🖥️", "⌨️", "🔧"];
+  const iconosGaleria = [servicio.icono?.startsWith("bi-") ? servicio.icono : "bi-pin", "bi-display", "bi-keyboard", "bi-tools"];
 
   return (
     <>
@@ -162,16 +165,16 @@ export default function Servicio() {
         <div className="grid-detalle">
           <div>
             <div className="galeria-principal">
-              <div className="imagen-grande">{emojisGaleria[imagenActual]}</div>
+              <div className="imagen-grande"><i className={`bi ${iconosGaleria[imagenActual]}`}></i></div>
               <div className="galeria-miniaturas">
-                {emojisGaleria.map((em, i) => (
+                {iconosGaleria.map((icono, i) => (
                   <button
                     key={i}
                     type="button"
                     className={`miniatura${imagenActual === i ? " activa" : ""}`}
                     onClick={() => setImagenActual(i)}
                   >
-                    {em}
+                    <i className={`bi ${icono}`}></i>
                   </button>
                 ))}
               </div>
@@ -181,7 +184,7 @@ export default function Servicio() {
               <div className="header-servicio">
                 <div className="titulo-servicio">
                   <h1>{servicio.titulo || "Sin título"}</h1>
-                  <span className="etiqueta et-azul">
+                  <span className="etiqueta" style={{ background: (COLORES_CATEGORIA[servicio.nombre_categoria] || COLORES_CATEGORIA["Otros servicios"]).bg, color: (COLORES_CATEGORIA[servicio.nombre_categoria] || COLORES_CATEGORIA["Otros servicios"]).color, border: `1px solid ${(COLORES_CATEGORIA[servicio.nombre_categoria] || COLORES_CATEGORIA["Otros servicios"]).color}33` }}>
                     {servicio.nombre_categoria || "Categoría"}
                   </span>
                 </div>
@@ -205,7 +208,7 @@ export default function Servicio() {
             </div>
 
             <div className="seccion-info" style={{ marginTop: "24px" }}>
-              <h3>📋 Detalles del Servicio</h3>
+              <h3><i className="bi bi-card-checklist"></i> Detalles del Servicio</h3>
               <div className="info-row">
                 <span className="info-label">Modalidad</span>
                 <span className="info-valor">
@@ -243,7 +246,7 @@ export default function Servicio() {
             </div>
 
             <div className="seccion-info">
-              <h3>⭐ Reseñas de Clientes</h3>
+              <h3><i className="bi bi-star-fill"></i> Reseñas de Clientes</h3>
 
               {Array.isArray(servicio.resenas) &&
               servicio.resenas.length > 0 ? (
@@ -321,7 +324,7 @@ export default function Servicio() {
                   </div>
                   <div className="card-proveedor-footer">
                     <span className="badge-proveedor">
-                      ⭐ {servicio.estrellas || "0"} · {Array.isArray(servicio.resenas) ? servicio.resenas.length : (servicio.resenas ?? 0)} reseñas
+                      <i className="bi bi-star-fill"></i> {servicio.estrellas || "0"} · {Array.isArray(servicio.resenas) ? servicio.resenas.length : (servicio.resenas ?? 0)} reseñas
                     </span>
                     <span className="badge-ver">Ver perfil →</span>
                   </div>
@@ -337,7 +340,7 @@ export default function Servicio() {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      📧 Contactar por Gmail
+                      <i className="bi bi-envelope-fill"></i> Contactar por Gmail
                     </a>
                   ) : (
                     <a
@@ -346,7 +349,7 @@ export default function Servicio() {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      💬 Contactar por WhatsApp
+                      <i className="bi bi-whatsapp"></i> Contactar por WhatsApp
                     </a>
                   )}
                 </div>
@@ -354,7 +357,7 @@ export default function Servicio() {
             </div>
 
             <div className="seccion-info">
-              <h3>👤 Información del Proveedor</h3>
+              <h3><i className="bi bi-person-fill"></i> Información del Proveedor</h3>
               <div className="info-row">
                 <span className="info-label">Publicaciones</span>
                 <span className="info-valor">1 servicio</span>
@@ -391,7 +394,7 @@ export default function Servicio() {
         <div className="container">
           <hr />
           <p className="footer-copy">
-            © 2026 UniServicios — Hecho por y para estudiantes 🎓
+            © 2026 UniServicios — Hecho por y para estudiantes <i className="bi bi-mortarboard-fill"></i>
           </p>
         </div>
       </footer>

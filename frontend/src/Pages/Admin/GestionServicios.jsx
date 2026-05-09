@@ -17,7 +17,7 @@ export default function SeccionServiciosAdmin() {
   }, []);
 
   const eliminar = async (id) => {
-    if (!confirm("⚠️ ¿Eliminar este servicio?")) return;
+    if (!confirm("¿Eliminar este servicio?")) return;
     await fetch(`${API}/services/${id}`, { method: "DELETE" });
     setServicios((prev) => prev.filter((s) => s.id_servicio !== id));
   };
@@ -49,7 +49,7 @@ export default function SeccionServiciosAdmin() {
         <input
           className="admin-input-search"
           type="text"
-          placeholder="🔍 Buscar servicio..."
+          placeholder="Buscar servicio..."
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
         />
@@ -84,7 +84,7 @@ export default function SeccionServiciosAdmin() {
                   <td>
                     <div className="admin-table__service-info">
                       <span className="admin-table__service-icon">
-                        {s.icono || "📌"}
+                        <i className={`bi ${s.icono?.startsWith("bi-") ? s.icono : "bi-pin"}`}></i>
                       </span>
                       <div>
                         <p className="admin-table__service-name">{s.titulo}</p>

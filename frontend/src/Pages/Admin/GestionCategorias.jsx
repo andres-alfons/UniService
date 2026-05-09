@@ -2,13 +2,13 @@ import { useState } from "react";
 
 export default function SeccionCategorias() {
   const [categorias, setCategorias] = useState([
-    { id: 1, nombre: "Tutorías", icono: "📚", servicios: 34 },
-    { id: 2, nombre: "Ensayos", icono: "✍️", servicios: 12 },
-    { id: 3, nombre: "Proyectos", icono: "🗂️", servicios: 8 },
-    { id: 4, nombre: "Programación", icono: "💻", servicios: 21 },
-    { id: 5, nombre: "Diseño", icono: "🎨", servicios: 7 },
-    { id: 6, nombre: "Arriendo", icono: "🏠", servicios: 5 },
-    { id: 7, nombre: "Otros", icono: "🌐", servicios: 3 },
+    { id: 1, nombre: "Tutorías", icono: "bi-book", servicios: 34 },
+    { id: 2, nombre: "Ensayos", icono: "bi-pencil", servicios: 12 },
+    { id: 3, nombre: "Proyectos", icono: "bi-folder", servicios: 8 },
+    { id: 4, nombre: "Programación", icono: "bi-code-slash", servicios: 21 },
+    { id: 5, nombre: "Diseño", icono: "bi-palette", servicios: 7 },
+    { id: 6, nombre: "Arriendo", icono: "bi-house", servicios: 5 },
+    { id: 7, nombre: "Otros", icono: "bi-globe2", servicios: 3 },
   ]);
   const [nueva, setNueva] = useState({ nombre: "", icono: "" });
   const [agregando, setAgregando] = useState(false);
@@ -20,7 +20,7 @@ export default function SeccionCategorias() {
       {
         id: Date.now(),
         nombre: nueva.nombre,
-        icono: nueva.icono || "📌",
+        icono: nueva.icono || "bi-pin",
         servicios: 0,
       },
     ]);
@@ -52,7 +52,7 @@ export default function SeccionCategorias() {
           <input
             className="admin-category-form__icon"
             type="text"
-            placeholder="Emoji"
+            placeholder="Ícono"
             value={nueva.icono}
             onChange={(e) => setNueva((p) => ({ ...p, icono: e.target.value }))}
           />
@@ -84,7 +84,7 @@ export default function SeccionCategorias() {
         {categorias.map((c) => (
           <div key={c.id} className="admin-category-card">
             <div className="admin-category-card__header">
-              <span className="admin-category-card__icon">{c.icono}</span>
+              <span className="admin-category-card__icon"><i className={`bi ${c.icono}`}></i></span>
               <button
                 className="admin-category-card__delete"
                 onClick={() => eliminar(c.id)}

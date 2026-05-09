@@ -22,7 +22,7 @@ export default function ResetPasswordModal({
       <div className="modal-codigo" onClick={(e) => e.stopPropagation()}>
         {resetPaso === "correo" && (
           <>
-            <div className="modal-codigo-icon">🔑</div>
+            <div className="modal-codigo-icon"><i className="bi bi-key-fill"></i></div>
             <h3>¿Olvidaste tu contraseña?</h3>
             <p>
               Ingresa tu correo y te enviaremos un código de verificación
@@ -95,7 +95,7 @@ export default function ResetPasswordModal({
 
         {resetPaso === "nueva" && (
           <>
-            <div className="modal-codigo-icon">🔒</div>
+            <div className="modal-codigo-icon"><i className="bi bi-lock-fill"></i></div>
             <h3>Nueva contraseña</h3>
             <p>Elige una contraseña segura de mínimo 8 caracteres</p>
             <input

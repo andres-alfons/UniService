@@ -5,7 +5,7 @@ export default function SeccionRecientes({ servicios, cargando, linkBase }) {
     <section className="seccion" id="recientes">
       <div className="bg-canvas bg-canvas-circuit" />
       <div className="container">
-        <p className="label-seccion reveal">🕐 Recién publicados</p>
+        <p className="label-seccion reveal"><i className="bi bi-clock-history"></i> Recién publicados</p>
         <h2 className="reveal delay-1">Servicios más recientes</h2>
         <p className="seccion-desc reveal delay-2">
           Los últimos servicios añadidos por la comunidad
