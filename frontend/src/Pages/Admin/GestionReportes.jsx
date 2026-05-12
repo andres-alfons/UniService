@@ -1,7 +1,10 @@
+// Gestión de reportes — Moderación de reportes de usuarios y servicios
+// Muestra los reportes pendientes y permite marcarlos como resueltos
 import { useState } from "react";
 import { Badge, formatFecha } from "./UtilidadesAdmin";
 
 export default function SeccionReportes() {
+  // Datos mock de reportes (simula la respuesta de la API)
   const [reportes, setReportes] = useState([
     {
       id: 1,
@@ -33,6 +36,7 @@ export default function SeccionReportes() {
     },
   ]);
 
+  // Cambia el estado de un reporte a "cerrada" para marcarlo como resuelto
   const resolver = (id) =>
     setReportes((prev) =>
       prev.map((r) => (r.id === id ? { ...r, estado: "cerrada" } : r)),

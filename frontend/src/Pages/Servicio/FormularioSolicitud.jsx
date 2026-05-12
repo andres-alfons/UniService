@@ -1,3 +1,5 @@
+// Formulario para solicitar un servicio a un proveedor
+// Permite crear, validar y eliminar solicitudes con múltiples campos
 import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -11,6 +13,7 @@ function FormSolicitud({
   proveedorNombre,
   showModal,
 }) {
+  // Estado del formulario con todos los campos de la solicitud
   const [form, setForm] = useState({
     tipo_servicio: "",
     descripcion: "",
@@ -25,10 +28,12 @@ function FormSolicitud({
     archivo: null,
   });
 
+  // Indica si ya existe una solicitud del usuario para este servicio
   const [solicitudExiste, setSolicitudExiste] = useState(false);
 
   const [estado, setEstado] = useState("idle");
 
+  // Al cargar el componente, verifica si ya hay una solicitud previa
   useEffect(() => {
     const verificar = async () => {
       try {
@@ -46,6 +51,7 @@ function FormSolicitud({
     if (servicioId) verificar();
   }, [servicioId]);
 
+  // Maneja cambios en campos del formulario (input, checkbox, file)
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
     setForm((prev) => ({
@@ -55,16 +61,19 @@ function FormSolicitud({
     }));
   };
 
+  // Envía o elimina la solicitud según el estado actual
   const handleAccionSolicitud = async () => {
     const id_cliente = Number(localStorage.getItem("usuarioId"));
     const id_servicio_num = Number(servicioId);
     const id_proveedor_num = Number(proveedorId);
 
+    // Validar que los datos del usuario sean correctos
     if (!id_cliente || !id_servicio_num || !id_proveedor_num) {
       showModal("error", "Datos inválidos");
       return;
     }
 
+    // Si ya existe una solicitud, la elimina
     if (solicitudExiste) {
       try {
         const res = await fetch(
@@ -89,6 +98,7 @@ function FormSolicitud({
       return;
     }
 
+    // Validar campos obligatorios del formulario
     if (
       !form.tipo_servicio ||
       !form.descripcion ||
@@ -104,11 +114,13 @@ function FormSolicitud({
       return;
     }
 
+    // Validar límite de presupuesto
     if (Number(form.presupuesto) > 9999999) {
       showModal("error", "El presupuesto es demasiado grande");
       return;
     }
 
+    // Construir el payload para la API
     const payload = {
       id_cliente,
       id_proveedor: id_proveedor_num,
@@ -130,6 +142,7 @@ function FormSolicitud({
     };
 
     try {
+      // Enviar solicitud al backend
       const res = await fetch(API_SOLICITUD, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -141,6 +154,7 @@ function FormSolicitud({
       if (res.ok) {
         setSolicitudExiste(true);
 
+        // Reiniciar formulario tras envío exitoso
         setForm({
           tipo_servicio: "",
           descripcion: "",
@@ -155,6 +169,7 @@ function FormSolicitud({
           archivo: null,
         });
 
+        // Notificar a otros componentes que la solicitud cambió
         window.dispatchEvent(new CustomEvent("solicitud-actualizada"));
 
         showModal("success", "Solicitud enviada");
@@ -167,6 +182,7 @@ function FormSolicitud({
     }
   };
 
+  // Filtra el campo de presupuesto para aceptar solo dígitos numéricos (máx 10)
   const handleNumericChange = (e) => {
     const { name, value } = e.target;
 

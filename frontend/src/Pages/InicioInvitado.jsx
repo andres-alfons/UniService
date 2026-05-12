@@ -1,3 +1,9 @@
+// ════════════════════════════════════════════════════════════════
+// PÁGINA PRINCIPAL — Invitado (sin login)
+// Es idéntica al Home normal pero sin opciones de usuario:
+// no tiene navbar con perfil, no muestra solicitudes ni
+// notificaciones. Los enlaces a detalle redirigen al login.
+// ════════════════════════════════════════════════════════════════
 import { useState, useEffect } from "react";
 import "../styles/styleHome.css";
 import Navbar from "./Guest/BarraNavegacionInvitado";
@@ -11,18 +17,21 @@ import { promedioEstrellas } from "./shared/utilidades";
 const API = "http://localhost:5165/api/services";
 
 export default function HomeGuest() {
+  // Estado del scroll para cambiar estilo del navbar
   const [scrolled, setScrolled] = useState(false);
   const [serviciosTotales, setServiciosTotales] = useState([]);
   const [recientes, setRecientes] = useState([]);
   const [top3, setTop3] = useState([]);
   const [cargando, setCargando] = useState(true);
 
+  // ── Detecta scroll ──
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // ── Animaciones reveal al hacer scroll ──
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -41,6 +50,7 @@ export default function HomeGuest() {
     return () => observer.disconnect();
   }, []);
 
+  // ── Carga servicios desde la API ──
   useEffect(() => {
     fetch(API)
       .then((res) => res.json())
@@ -64,6 +74,7 @@ export default function HomeGuest() {
   return (
     <>
       <Navbar scrolled={scrolled} />
+      {/* El linkBase="/login?id=" obliga a iniciar sesión para ver detalles */}
       <Presentacion primaryBtn={{href:"#buscar", className:"btn btn-verde reveal delay-3", label:"Explorar servicios"}} secondaryBtn={{href:"/login", className:"btn btn-borde reveal delay-3", label:"Publicar mi servicio"}} />
       <SeccionBuscar serviciosTotales={serviciosTotales} />
       <SeccionRecientes servicios={recientes} cargando={cargando} linkBase="/login?id=" />

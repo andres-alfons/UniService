@@ -1,3 +1,4 @@
+// Elemento de menú del perfil con icono, título, descripción opcional, tag y flecha
 const MenuItem = ({ icon, title, desc, tag, onClick, danger }) => (
   <div
     className="menu-item"
@@ -14,6 +15,7 @@ const MenuItem = ({ icon, title, desc, tag, onClick, danger }) => (
       {icon}
     </div>
     <div className="menu-text">
+      {/* El título cambia de color si es una acción de peligro */}
       <div className="menu-title" style={danger ? { color: "#f87171" } : {}}>
         {title}
       </div>

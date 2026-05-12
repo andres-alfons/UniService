@@ -1,8 +1,15 @@
+// ─── PiePagina.jsx ──────────────────────────────────────────────────────────
+// Pie de página para usuarios autenticados con enlaces a plataforma,
+// cuenta, categorías y soporte. Incluye copyright.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Componente del footer
 export default function Footer() {
   return (
     <footer id="soporte">
       <div className="container">
         <div className="row g-4">
+          {/* Descripción de la plataforma */}
           <div className="col-md-4">
             <p className="logo">
               Uni<span>Servicios</span>
@@ -12,6 +19,7 @@ export default function Footer() {
               universitarios de Colombia.
             </p>
           </div>
+          {/* Enlaces de la plataforma */}
           <div className="col-6 col-md-2">
             <h5>Plataforma</h5>
             <div className="links-grid">
@@ -20,6 +28,7 @@ export default function Footer() {
               <a href="#publicar">Publicar servicio</a>
             </div>
           </div>
+          {/* Enlaces de la cuenta del usuario */}
           <div className="col-6 col-md-2">
             <h5>Mi cuenta</h5>
             <div className="links-grid">
@@ -28,6 +37,7 @@ export default function Footer() {
               <a href="/perfil">Perfil</a>
             </div>
           </div>
+          {/* Enlaces rápidos por categoría */}
           <div className="col-6 col-md-2">
             <h5>Categorías</h5>
             <div className="links-grid">
@@ -38,6 +48,7 @@ export default function Footer() {
               <a href="#buscar">Arriendo</a>
             </div>
           </div>
+          {/* Enlaces de soporte y legales */}
           <div className="col-6 col-md-2">
             <h5>Soporte</h5>
             <div className="links-grid">
@@ -49,6 +60,7 @@ export default function Footer() {
           </div>
         </div>
         <hr />
+        {/* Copyright */}
         <p className="footer-copy">
           © 2026 UniServicios — Hecho por y para estudiantes <i className="bi bi-mortarboard-fill"></i>
         </p>

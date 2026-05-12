@@ -1,3 +1,9 @@
+// ════════════════════════════════════════════════════════════════
+// PÁGINA DE DETALLE DE SERVICIO
+// Muestra la información completa de un servicio: galería de
+// iconos, descripción, valoración, reseñas, datos del proveedor,
+// formulario de solicitud y calificación.
+// ════════════════════════════════════════════════════════════════
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { formatearFecha, calcularEstrellas, iniciales } from "../utils/helpers";
@@ -16,19 +22,20 @@ const API_USUARIO = "https://localhost:7237/api/Users";
 export default function Servicio() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const idServicio = params.get("id");
+  const idServicio = params.get("id"); // ID del servicio desde la URL
 
   const [servicio, setServicio] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(false);
-  const [imagenActual, setImagenActual] = useState(0);
-  const [recargarResenas, setRecargarResenas] = useState(0);
+  const [imagenActual, setImagenActual] = useState(0); // Índice de la galería
+  const [recargarResenas, setRecargarResenas] = useState(0); // Trigger para recargar reseñas
   const [modal, setModal] = useState({
     show: false,
     type: "",
     message: "",
   });
 
+  // ── Modal de notificación que se auto-cierra a los 3 segundos ──
   const showModal = (type, message) => {
     setModal({
       show: true,
@@ -41,12 +48,14 @@ export default function Servicio() {
     }, 3000);
   };
 
+  // ── Redirige al login si no hay sesión activa ──
   useEffect(() => {
     if (localStorage.getItem("logueado") !== "true") {
       navigate("/login");
     }
   }, [navigate]);
 
+  // ── Carga los datos del servicio desde la API ──
   useEffect(() => {
     if (!idServicio) {
       setError(true);
@@ -66,8 +75,10 @@ export default function Servicio() {
       })
       .catch(() => setError(true))
       .finally(() => setCargando(false));
+    // recargarResenas cambia para refrescar después de una nueva reseña
     }, [idServicio, recargarResenas]);
 
+  // ── Cierra sesión: marca usuario como desconectado en BD y limpia localStorage ──
   const handleCerrarSesion = async () => {
     const id = localStorage.getItem("usuarioId");
     try {

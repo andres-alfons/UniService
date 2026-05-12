@@ -1,3 +1,5 @@
+// Modal para acceso de administradores
+// Solicita una contraseña maestra, muestra indicador de intentos y bloquea tras 3 fallos
 export default function AdminModal({
   visible,
   adminMasterInput,
@@ -9,6 +11,7 @@ export default function AdminModal({
   onConfirmar,
   onCancelar,
 }) {
+  // No renderiza nada si el modal no está visible
   if (!visible) return null;
 
   return (
@@ -16,6 +19,7 @@ export default function AdminModal({
       className="modal-overlay"
       style={{ zIndex: 9999, backdropFilter: "blur(8px)" }}
     >
+      {/* Contenedor del modal con animación de entrada (o de vibración en error) */}
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
@@ -34,6 +38,7 @@ export default function AdminModal({
           overflow: "hidden",
         }}
       >
+        {/* Barra superior decorativa roja */}
         <div
           style={{
             position: "absolute",
@@ -97,11 +102,13 @@ export default function AdminModal({
           </p>
         </div>
 
+        {/* Campo para la contraseña maestra de administrador */}
         <input
           type="password"
           placeholder="Contraseña de administradores"
           value={adminMasterInput}
           onChange={(e) => setAdminMasterInput(e.target.value)}
+          // Enviar al presionar Enter si no está bloqueado
           onKeyDown={(e) =>
             e.key === "Enter" && !adminBloqueado && onConfirmar()
           }
@@ -124,6 +131,7 @@ export default function AdminModal({
           }}
         />
 
+        {/* Indicador de intentos restantes (3 puntos) */}
         <div
           style={{
             display: "flex",
@@ -139,6 +147,7 @@ export default function AdminModal({
                 width: "10px",
                 height: "10px",
                 borderRadius: "50%",
+                // Se ilumina en rojo si el intento ya fue usado
                 background:
                   n <= adminIntentos ? "#EF4444" : "rgba(255,255,255,0.1)",
                 boxShadow:
@@ -151,6 +160,7 @@ export default function AdminModal({
           ))}
         </div>
 
+        {/* Mensaje de error si existe */}
         {adminError && (
           <p
             style={{
@@ -165,6 +175,7 @@ export default function AdminModal({
           </p>
         )}
 
+        {/* Botón de verificar o mensaje de bloqueo */}
         {!adminBloqueado ? (
           <button
             type="button"
@@ -187,6 +198,7 @@ export default function AdminModal({
             Verificar y acceder al panel
           </button>
         ) : (
+          // Mensaje mostrado cuando se alcanzó el máximo de intentos
           <div
             style={{
               background: "rgba(239,68,68,0.08)",
@@ -222,6 +234,7 @@ export default function AdminModal({
         </button>
       </div>
 
+      {/* Animaciones: entrada suave y vibración en error */}
       <style>{`
         @keyframes adminEntrada {
           from { opacity: 0; transform: scale(0.94) translateY(12px); }

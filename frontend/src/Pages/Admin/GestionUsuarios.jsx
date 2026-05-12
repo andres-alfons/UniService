@@ -1,3 +1,5 @@
+// Gestión de usuarios — CRUD de usuarios del sistema
+// Permite buscar, suspender y eliminar usuarios desde el panel de administración
 import { useState, useEffect } from "react";
 import { Badge, formatFecha } from "./UtilidadesAdmin";
 
@@ -8,6 +10,7 @@ export default function SeccionUsuarios() {
   const [busqueda, setBusqueda] = useState("");
   const [cargando, setCargando] = useState(true);
 
+  // Obtiene la lista de usuarios desde la API al montar el componente
   useEffect(() => {
     fetch(`${API}/users`)
       .then((r) => r.json())
@@ -16,6 +19,7 @@ export default function SeccionUsuarios() {
       .finally(() => setCargando(false));
   }, []);
 
+  // Suspende un usuario cambiando su estado a "Suspendido"
   const suspender = async (id) => {
     if (!confirm("¿Suspender este usuario?")) return;
     await fetch(`${API}/users/${id}/suspender`, { method: "PUT" });
@@ -26,6 +30,7 @@ export default function SeccionUsuarios() {
     );
   };
 
+  // Elimina un usuario de forma permanente previa confirmación
   const eliminar = async (id) => {
     if (
       !confirm("¿Eliminar este usuario? Esta acción no se puede deshacer.")
@@ -35,6 +40,7 @@ export default function SeccionUsuarios() {
     setUsuarios((prev) => prev.filter((u) => u.id_usuario !== id));
   };
 
+  // Filtra usuarios por nombre, correo o rol según el texto de búsqueda
   const filtrados = usuarios.filter((u) =>
     [u.nombre, u.correo, u.rol].some((v) =>
       (v || "").toLowerCase().includes(busqueda.toLowerCase()),

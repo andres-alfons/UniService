@@ -1,6 +1,9 @@
+// Gestión de categorías — CRUD de categorías para clasificar servicios
+// Permite crear nuevas categorías y eliminar las existentes
 import { useState } from "react";
 
 export default function SeccionCategorias() {
+  // Datos mock de categorías (simula la respuesta de la API)
   const [categorias, setCategorias] = useState([
     { id: 1, nombre: "Tutorías", icono: "bi-book", servicios: 34 },
     { id: 2, nombre: "Ensayos", icono: "bi-pencil", servicios: 12 },
@@ -10,9 +13,11 @@ export default function SeccionCategorias() {
     { id: 6, nombre: "Arriendo", icono: "bi-house", servicios: 5 },
     { id: 7, nombre: "Otros", icono: "bi-globe2", servicios: 3 },
   ]);
+  // Estado del formulario para agregar una nueva categoría
   const [nueva, setNueva] = useState({ nombre: "", icono: "" });
   const [agregando, setAgregando] = useState(false);
 
+  // Agrega una nueva categoría a la lista con los datos del formulario
   const agregar = () => {
     if (!nueva.nombre.trim()) return;
     setCategorias((prev) => [
@@ -28,6 +33,7 @@ export default function SeccionCategorias() {
     setAgregando(false);
   };
 
+  // Elimina una categoría previa confirmación del usuario
   const eliminar = (id) => {
     if (!confirm("¿Eliminar esta categoría?")) return;
     setCategorias((prev) => prev.filter((c) => c.id !== id));

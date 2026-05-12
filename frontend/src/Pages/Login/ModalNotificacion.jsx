@@ -1,4 +1,6 @@
+// Modal genérico de notificación (éxito/error) con un mensaje y botón de cierre
 export default function NotificationModal({ modal, setModal }) {
+  // No renderiza si el modal está oculto
   if (!modal.visible) return null;
 
   return (

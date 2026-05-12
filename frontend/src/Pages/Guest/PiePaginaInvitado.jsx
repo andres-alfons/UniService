@@ -1,3 +1,5 @@
+// Pie de página de la landing page para usuarios invitados
+// muestra enlaces rápidos a plataforma, cuenta, categorías y soporte
 export default function Footer() {
   return (
     <footer id="soporte">

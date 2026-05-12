@@ -1,3 +1,5 @@
+// Modal de recuperación de contraseña en 3 pasos:
+// 1. Ingresar correo | 2. Verificar código | 3. Establecer nueva contraseña
 export default function ResetPasswordModal({
   resetPaso,
   resetCorreo,
@@ -15,11 +17,13 @@ export default function ResetPasswordModal({
   onGuardar,
   onCerrar,
 }) {
+  // No renderiza si no hay un paso activo
   if (!resetPaso) return null;
 
   return (
     <div className="modal-overlay" onClick={onCerrar}>
       <div className="modal-codigo" onClick={(e) => e.stopPropagation()}>
+        {/* PASO 1: Solicitar correo electrónico para recuperación */}
         {resetPaso === "correo" && (
           <>
             <div className="modal-codigo-icon"><i className="bi bi-key-fill"></i></div>
@@ -55,6 +59,7 @@ export default function ResetPasswordModal({
           </>
         )}
 
+        {/* PASO 2: Ingresar código de verificación recibido por correo */}
         {resetPaso === "codigo" && (
           <>
             <div className="modal-codigo-icon">📧</div>
@@ -63,6 +68,7 @@ export default function ResetPasswordModal({
               Enviamos un código de 6 dígitos a{" "}
               <strong>{resetCorreo}</strong>
             </p>
+            {/* Campo que solo acepta dígitos numéricos */}
             <input
               type="text"
               maxLength={6}
@@ -93,6 +99,7 @@ export default function ResetPasswordModal({
           </>
         )}
 
+        {/* PASO 3: Establecer nueva contraseña (dos campos para confirmación) */}
         {resetPaso === "nueva" && (
           <>
             <div className="modal-codigo-icon"><i className="bi bi-lock-fill"></i></div>

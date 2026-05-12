@@ -1,3 +1,4 @@
+// Barra de navegación para usuarios autenticados dentro de la sección de servicio
 function Navbar({ onCerrarSesion }) {
   return (
     <nav className="navbar-custom">
@@ -18,6 +19,7 @@ function Navbar({ onCerrarSesion }) {
           <a href="/perfil" className="nav-link-custom">
             Perfil
           </a>
+          {/* Botón para cerrar sesión del usuario autenticado */}
           <button
             type="button"
             className="nav-link-custom nav-Cerrar"

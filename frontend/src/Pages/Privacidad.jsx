@@ -1,3 +1,8 @@
+// ════════════════════════════════════════════════════════════════
+// PÁGINA DE POLÍTICA DE PRIVACIDAD (estática)
+// Muestra los términos legales sobre el tratamiento de datos
+// personales de los usuarios de UniService.
+// ════════════════════════════════════════════════════════════════
 import React from "react";
 import "../styles/stylePrivacy.css";
 

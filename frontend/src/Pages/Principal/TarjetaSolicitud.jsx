@@ -1,7 +1,16 @@
+// ─── TarjetaSolicitud.jsx ────────────────────────────────────────────────────
+// Tarjeta individual que representa una solicitud (enviada o recibida).
+// Muestra ícono, título, nombre del contratante/proveedor, badge de estado,
+// descripción, motivo de rechazo, contraoferta y botones de acción.
+// ─────────────────────────────────────────────────────────────────────────────
+
 import { BADGE } from "../shared/constantes";
 
+// Componente de tarjeta para una solicitud
 export default function TarjetaSolicitud({ sol, tipo, responder, setRechazando }) {
+  // Badge visual según el estado de la solicitud
   const badge = BADGE[sol.estado] || BADGE.Pendiente;
+  // Nombre de la contraparte según el tipo de solicitud
   const nombre = tipo === "enviada" ? sol.nombre_proveedor : sol.nombre_cliente;
   const subtitulo = tipo === "enviada" ? "Proveedor" : "Cliente";
 
@@ -17,6 +26,7 @@ export default function TarjetaSolicitud({ sol, tipo, responder, setRechazando }
         gap: "10px",
       }}
     >
+      {/* Cabecera: ícono, título, contraparte y badge de estado */}
       <div
         style={{
           display: "flex",
@@ -50,6 +60,7 @@ export default function TarjetaSolicitud({ sol, tipo, responder, setRechazando }
         </span>
       </div>
 
+      {/* Descripción del servicio asociado (truncada a 120 caracteres) */}
       {sol.descripcion && (
         <p
           style={{
@@ -66,12 +77,14 @@ export default function TarjetaSolicitud({ sol, tipo, responder, setRechazando }
         </p>
       )}
 
+      {/* Motivo de rechazo, si existe */}
       {sol.motivo_rechazo && (
         <p style={{ margin: 0, fontSize: "0.8rem", color: "#f87171" }}>
           Motivo: {sol.motivo_rechazo}
         </p>
       )}
 
+      {/* Contraoferta del proveedor, si existe */}
       {sol.contraoferta && (
         <div
           style={{
@@ -110,6 +123,7 @@ export default function TarjetaSolicitud({ sol, tipo, responder, setRechazando }
         </div>
       )}
 
+      {/* Botones Aceptar / Rechazar solo para solicitudes recibidas pendientes */}
       {tipo === "recibida" && sol.estado === "Pendiente" && (
         <div style={{ display: "flex", gap: "8px", marginTop: "4px" }}>
           <button
