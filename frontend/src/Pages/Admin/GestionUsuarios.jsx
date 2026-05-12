@@ -14,7 +14,14 @@ export default function SeccionUsuarios() {
   useEffect(() => {
     fetch(`${API}/users`)
       .then((r) => r.json())
-      .then((data) => setUsuarios(Array.isArray(data) ? data : []))
+      .then((data) => {
+        const normalizados = (Array.isArray(data) ? data : []).map(u => ({
+        ...u,
+        // Convertimos el booleano de la API a string
+        estado: u.estado === true ? "activo" : "inactivo" 
+      }));
+      setUsuarios(normalizados);
+      })
       .catch(() => setUsuarios([]))
       .finally(() => setCargando(false));
   }, []);

@@ -1,6 +1,10 @@
 USE UniService;
 GO
 
+
+UPDATE usuarios
+SET estado = '0'
+WHERE id_usuario = 2;
 -- ============================================================
 -- Solo calificar si solicitud está aceptada (fue_aceptada = 1)
 -- ============================================================

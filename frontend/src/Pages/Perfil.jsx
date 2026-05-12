@@ -439,9 +439,11 @@ const Perfil = () => {
                       e.currentTarget.src = "/src/img/default-avatar.png";
                     }}
                   />
-                  <div
-                    className={`status-badge ${estaConectado ? "online" : "busy"}`}
-                  ></div>
+                  {esPerfilExterno && (
+                    <div
+                      className={`status-badge ${estaConectado ? "online" : "busy"}`}
+                    ></div>
+                  )}
                 </div>
                 <h1 className="profile-name">{userData.nombre}</h1>
                 <p className="profile-username">
@@ -509,11 +511,14 @@ const Perfil = () => {
 
             {/* ══ PANEL DERECHO ══ */}
             <div className="right-panel">
+              
               {/* El estado verde/rojo refleja el campo "estado" real de la BD */}
               <section className="menu-section">
                 <div className="section-title"><i className="bi bi-bar-chart-fill"></i> Estado y Actividad</div>
                 <div className="menu-list">
-                  <div className="menu-item" style={{ cursor: "default" }}>
+                  {esPerfilExterno && (
+                 <div className="menu-item" style={{ cursor: "default" }}>
+                    
                     <div className="menu-icon">
                       <i className={`bi bi-circle-fill ${estaConectado ? "text-success" : "text-danger"}`}></i>
                     </div>
@@ -528,7 +533,10 @@ const Perfil = () => {
                     >
                       {estaConectado ? "Conectado" : "Desconectado"}
                     </span>
-                  </div>
+                    </div>
+              )}
+                 
+                  
 
                   {/* La sección de actividad solo es visible para el dueño del perfil */}
                   {!esPerfilExterno && (
