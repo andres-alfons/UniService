@@ -1,4 +1,7 @@
+// Registro de actividades — Auditoría de acciones realizadas por administradores
+// Muestra una tabla con el historial de operaciones (eliminar, suspender, etc.)
 export default function SeccionLogs() {
+  // Datos mock del registro de actividad administrativa
   const logs = [
     {
       id: 1,

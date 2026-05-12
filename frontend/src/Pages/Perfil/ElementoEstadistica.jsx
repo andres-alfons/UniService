@@ -1,3 +1,4 @@
+// Elemento de estadística con un valor numérico grande y su etiqueta descriptiva
 const StatItem = ({ value, label }) => (
   <div className="stat-item">
     <div className="stat-value">{value}</div>

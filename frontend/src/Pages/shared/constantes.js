@@ -1,5 +1,7 @@
+// Constantes compartidas: paginación, categorías, modalidades, íconos, colores y APIs
 export const CANTIDAD_POR_PAGINA = 8;
 
+// Lista de categorías disponibles para filtrar servicios
 export const CATEGORIAS = [
   { valor: "", label: "Todas las categorías" },
   { valor: "tutorias", label: "Tutorías" },
@@ -12,6 +14,7 @@ export const CATEGORIAS = [
   { valor: "Diseño", label: "Diseños" },
 ];
 
+// Opciones de modalidad y disponibilidad para los formularios
 export const MODALIDADES = ["Presencial", "Virtual", "Mixta"];
 export const DISPONIBILIDAD = [
   "Entre semana",
@@ -19,6 +22,7 @@ export const DISPONIBILIDAD = [
   "Siempre disponible",
 ];
 
+// Chips de categorías para la sección de filtros rápidos con iconos Bootstrap
 export const CHIPS_CATEGORIA = [
   { label: "Todos", valor: "todos", icono: "bi-grid-3x3-gap-fill" },
   { label: "Tutorías", valor: "tutorias", icono: "bi-book" },
@@ -29,6 +33,7 @@ export const CHIPS_CATEGORIA = [
   { label: "Arriendo", valor: "arriendo", icono: "bi-house" },
 ];
 
+// Estado inicial del formulario de publicación de servicio
 export const initialPublicar = {
   titulo: "",
   descripcion: "",
@@ -40,6 +45,7 @@ export const initialPublicar = {
   disponibilidad: "",
 };
 
+// Mapa de nombres de categoría a iconos Bootstrap
 export const mapaIconos = {
   tutorias: "bi-book",
   ensayos: "bi-pencil",
@@ -50,6 +56,7 @@ export const mapaIconos = {
   otros: "bi-globe2",
 };
 
+// Mapa de nombres de categoría a IDs numéricos para la API
 export const mapaCategoriaId = {
   tutorias: 1,
   ensayos: 2,
@@ -64,24 +71,28 @@ export const API_HOME = "https://localhost:7237/api/Services";
 export const API_USUARIO = "https://localhost:7237/api/Users";
 export const API_SOLICITUD = "https://localhost:7237/api/Solicitudes";
 
+// Iconos Bootstrap para cada tipo de modalidad
 export const MAPA_ICONOS_MODALIDAD = {
   Presencial: "bi-building",
   Virtual: "bi-laptop",
   Mixta: "bi-arrow-repeat",
 };
 
+// Iconos Bootstrap para cada tipo de disponibilidad
 export const MAPA_ICONOS_DISPONIBILIDAD = {
   "Entre semana": "bi-calendar-week",
   "Fines de semana": "bi-calendar-event",
   "Siempre disponible": "bi-clock",
 };
 
+// Configuración visual de badges según estado de la solicitud
 export const BADGE = {
   Pendiente: { bg: "#FFF3CD", color: "#856404", texto: "Pendiente", icono: "bi-hourglass-split" },
   Aceptada: { bg: "#D1E7DD", color: "#0A5C36", texto: "Aceptada", icono: "bi-check-circle-fill" },
   Rechazada: { bg: "#F8D7DA", color: "#721C24", texto: "Rechazada", icono: "bi-x-circle-fill" },
 };
 
+// Colores distintivos para cada categoría de servicio (fondo, texto)
 export const COLORES_CATEGORIA = {
   "Programación":         { bg: "rgba(96, 165, 250, 0.1)",  color: "#60a5fa" },
   "Diseño":               { bg: "rgba(244, 114, 182, 0.1)", color: "#f472b6" },

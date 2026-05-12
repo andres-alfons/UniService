@@ -10,12 +10,28 @@ import QuickStatCard from "./Perfil/TarjetaRapida";
 import ProgressBar from "./Perfil/BarraProgreso";
 import ActivityItem from "./Perfil/ElementoActividad";
 
+// ════════════════════════════════════════════════════════════════
+// PÁGINA DE PERFIL DE USUARIO
+// Muestra la tarjeta de perfil (avatar, nombre, stats, acciones),
+// información detallada, servicios publicados y modales para
+// editar perfil, cambiar avatar, ver actividad y editar/eliminar
+// servicios.
+// Soporta dos modos: perfil propio y perfil externo (con botón seguir).
+// ════════════════════════════════════════════════════════════════
+
+// ════════════════════════════════════════════════════════════════
+// NOTA SOBRE LAS CREDENCIALES DE ADMIN
+// Este bloque fue eliminado/movido a InicioSesion.jsx.
+// Perfil.jsx ya no maneja lógica de admin.
+// ════════════════════════════════════════════════════════════════
+
 // URL base del API de usuarios
 const API_USUARIO = "http://localhost:5165/api/users";
 
 const Perfil = () => {
+  // Hook de navegación — redirige programáticamente a otras rutas
   const navigate = useNavigate();
-  // useRef para referenciar el input de archivo sin re-renderizar el componente
+  // Referencia al input de archivo sin re-renderizar el componente
   const FileInputRef = useRef(null);
 
   // useParams permite leer el :id de la URL, por ejemplo /perfil/12
@@ -51,12 +67,13 @@ const Perfil = () => {
     universidad: "Sin universidad",
   });
 
-  // Evita que el usuario haga clic en "Seguir" varias veces seguidas
+  // Flag antirrebote: impide múltiples clics en "Seguir/Dejar de seguir"
   const [enviandoSeguimiento, setEnviandoSeguimiento] = useState(false);
 
-  // Controla qué modal está visible: "info", "imagen", "actividad" o null (ninguno)
+  // Controla qué modal está visible: "info", "imagen", "actividad", "seguridad" o null
   const [activeModal, setActiveModal] = useState(null);
 
+  // Lista de servicios publicados por el usuario (solo se carga si es perfil propio)
   const [misServicios, setMisServicios] = useState([]);
   // Almacena el servicio que se está editando (con todos sus campos)
   const [editando, setEditando] = useState(null);
@@ -965,7 +982,9 @@ const Perfil = () => {
           </div>
         )}
 
-        {/* ══ MODAL: Cambiar avatar (solo perfil propio) */}
+        {/* ══ MODAL: Seguridad (solo perfil propio) — FALTA IMPLEMENTAR FUNCIONALIDAD REAL
+            Los botones actualmente usan prompt() y handleUpdate (placeholder).
+            Pendiente: formularios reales para cambiar contraseña y correo. */}
         {activeModal === "seguridad" && (
           <div
             className="image-menu-overlay active"
@@ -1030,6 +1049,7 @@ const Perfil = () => {
                 </button>
               </div>
               <div className="activity-body">
+                {/* Tarjetas de estadísticas rápidas — valores hardcodeados (demo/placeholder) */}
                 <div className="quick-stats">
                   <QuickStatCard icon={<i className="bi bi-pencil-square"></i>} value="12" label="Este Mes" />
                   <QuickStatCard icon={<i className="bi bi-check-circle-fill"></i>} value="45" label="Completados" />
@@ -1061,6 +1081,7 @@ const Perfil = () => {
                 <div className="recent-activity">
                   <div className="recent-title"><i className="bi bi-clock-history"></i> Actividad Reciente</div>
                   <div className="activity-list">
+                    {/* Datos de ejemplo — reemplazar con datos reales del backend cuando esté disponible */}
                     <ActivityItem
                       icon={<i className="bi bi-check-circle-fill"></i>}
                       text="Completaste el servicio 'Diseño de logo'"

@@ -1,3 +1,5 @@
+// Tarjeta de estadística — Componente reutilizable para mostrar indicadores en el dashboard
+// Recibe un ícono, etiqueta, valor, subtítulo y tipo de color (primary, success, info, danger)
 export default function StatCard({ icon, label, value, sub, type }) {
   return (
     <div className={`admin-stat-card admin-stat-card--${type}`}>

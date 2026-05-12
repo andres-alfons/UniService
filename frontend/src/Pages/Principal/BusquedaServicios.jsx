@@ -1,20 +1,30 @@
+// ─── BusquedaServicios.jsx ───────────────────────────────────────────────────
+// Sección de búsqueda y exploración de servicios para usuarios autenticados.
+// Permite filtrar por texto, categoría, ordenar por precio/rating/fecha,
+// invertir el orden y paginar resultados con "Mostrar más".
+// ─────────────────────────────────────────────────────────────────────────────
+
 import { useState, useEffect, useCallback } from "react";
 import { CANTIDAD_POR_PAGINA, CHIPS_CATEGORIA } from "../shared/constantes";
 import { normalizar, promedioEstrellas } from "../shared/utilidades";
 import TarjetaServicio from "../shared/TarjetaServicio";
 
+// Componente principal: recibe todos los servicios y los filtra localmente
 export default function SeccionBuscar({ serviciosTotales }) {
+  // Estado del buscador, categoría activa, orden y paginación
   const [busqueda, setBusqueda] = useState("");
   const [categoriaActual, setCategoriaActual] = useState("todos");
   const [orden, setOrden] = useState("recientes");
   const [mostrados, setMostrados] = useState(CANTIDAD_POR_PAGINA);
   const [resultados, setResultados] = useState([]);
 
+  // Al cambiar la lista de servicios, re-aplica los filtros desde cero
   useEffect(() => {
     aplicarFiltros(busqueda, categoriaActual, orden, CANTIDAD_POR_PAGINA);
     setMostrados(CANTIDAD_POR_PAGINA);
   }, [serviciosTotales]);
 
+  // Filtra por texto y categoría, luego ordena y recorta según el límite
   const aplicarFiltros = useCallback(
     (texto, cat, ord, limite) => {
       let filtrados = [...serviciosTotales].filter((s) => {
@@ -33,6 +43,7 @@ export default function SeccionBuscar({ serviciosTotales }) {
         return coincideTexto && coincideCat;
       });
 
+      // Aplica el criterio de ordenamiento según la opción seleccionada
       switch (ord) {
         case "precio-menor":
           filtrados.sort((a, b) => Number(a.precio_hora || 0) - Number(b.precio_hora || 0));
@@ -49,7 +60,7 @@ export default function SeccionBuscar({ serviciosTotales }) {
         case "antiguos":
           filtrados.sort((a, b) => new Date(a.fecha_publicacion || 0) - new Date(b.fecha_publicacion || 0));
           break;
-        default:
+        default: // "recientes"
           filtrados.sort((a, b) => new Date(b.fecha_publicacion || 0) - new Date(a.fecha_publicacion || 0));
       }
 
@@ -58,12 +69,14 @@ export default function SeccionBuscar({ serviciosTotales }) {
     [serviciosTotales],
   );
 
+  // Maneja cambios en el campo de búsqueda por texto
   const handleBusqueda = (e) => {
     const val = e.target.value;
     setBusqueda(val);
     aplicarFiltros(val, categoriaActual, orden, mostrados);
   };
 
+  // Maneja clics en los chips de categoría: resalta el activo y filtra
   const handleCategoria = (cat, e) => {
     document.querySelectorAll("#filtros-categorias .chip-enhanced").forEach((b) => b.classList.remove("activo"));
     e.target.classList.add("activo");
@@ -71,12 +84,14 @@ export default function SeccionBuscar({ serviciosTotales }) {
     aplicarFiltros(busqueda, cat, orden, mostrados);
   };
 
+  // Maneja cambios en el selector de ordenamiento
   const handleOrden = (e) => {
     const val = e.target.value;
     setOrden(val);
     aplicarFiltros(busqueda, categoriaActual, val, mostrados);
   };
 
+  // Invierte el orden actual (ej: recientes ↔ antiguos, menor precio ↔ mayor precio)
   const handleToggleOrden = () => {
     const pares = {
       recientes: "antiguos",
@@ -91,6 +106,7 @@ export default function SeccionBuscar({ serviciosTotales }) {
     aplicarFiltros(busqueda, categoriaActual, nuevo, mostrados);
   };
 
+  // Incrementa la cantidad de servicios visibles (paginación)
   const handleMostrarMas = () => {
     const nuevo = mostrados + CANTIDAD_POR_PAGINA;
     setMostrados(nuevo);
@@ -106,6 +122,7 @@ export default function SeccionBuscar({ serviciosTotales }) {
           <h1 className="reveal delay-1" style={{ fontSize: "2.5rem" }}>
             Todos los <span className="acento">servicios</span>
           </h1>
+          {/* Barra de búsqueda principal */}
           <div className="search-container reveal delay-2" style={{ maxWidth: "700px", margin: "30px auto" }}>
             <div className="search-input-wrapper">
               <input
@@ -120,6 +137,7 @@ export default function SeccionBuscar({ serviciosTotales }) {
         </div>
       </header>
 
+      {/* Chips de filtro por categoría */}
       <div className="container chips-container-enhanced" id="filtros-categorias" style={{ marginBottom: "24px" }}>
         {CHIPS_CATEGORIA.map((chip) => (
           <button
@@ -134,6 +152,7 @@ export default function SeccionBuscar({ serviciosTotales }) {
       </div>
 
       <div className="container">
+        {/* Barra de ordenamiento con selector y botón para invertir */}
         <div className="sort-bar reveal">
           <p className="texto-muted">
             Resultados: <strong className="texto-claro">{resultados.length}</strong>
@@ -157,6 +176,7 @@ export default function SeccionBuscar({ serviciosTotales }) {
           </div>
         </div>
 
+        {/* Cuadrícula de resultados; si no hay, muestra mensaje */}
         <div className="cards-grid" id="contenedor-explorar">
           {resultados.length === 0 ? (
             <p className="texto-muted" style={{ gridColumn: "1 / -1", textAlign: "center", padding: "32px 0" }}>
@@ -169,6 +189,7 @@ export default function SeccionBuscar({ serviciosTotales }) {
           )}
         </div>
 
+        {/* Botón "Mostrar más" visible solo si hay más resultados sin mostrar */}
         <div id="contenedor-boton" style={{ textAlign: "center", marginTop: "32px" }}>
           {resultados.length >= mostrados && (
             <button type="button" className="btn btn-verde" onClick={handleMostrarMas}>

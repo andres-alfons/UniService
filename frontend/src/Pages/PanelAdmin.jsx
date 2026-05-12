@@ -1,3 +1,9 @@
+// ════════════════════════════════════════════════════════════════
+// PANEL DE ADMINISTRACIÓN (Dashboard admin)
+// Layout principal del administrador con navegación lateral
+// y cambio dinámico de secciones (dashboard, usuarios, servicios,
+// reportes, categorías, logs).
+// ════════════════════════════════════════════════════════════════
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NavbarAdmin from "./Admin/BarraNavegacionAdmin";
@@ -11,8 +17,10 @@ import "../styles/styleAdmin.css";
 
 export default function HomeAdmin() {
   const navigate = useNavigate();
+  // Sección activa del panel (dashboard por defecto)
   const [seccion, setSeccion] = useState("dashboard");
 
+  // ── Verifica que el usuario sea admin (rol 1), si no redirige al login ──
   useEffect(() => {
     const logueado = localStorage.getItem("logueado");
     const rol = localStorage.getItem("usuarioRol");
@@ -22,11 +30,13 @@ export default function HomeAdmin() {
     }
   }, [navigate]);
 
+  // ── Cierra sesión del admin ──
   const handleCerrarSesion = () => {
     localStorage.clear();
     navigate("/login");
   };
 
+  // ── Mapa de secciones: cada clave renderiza un componente distinto ──
   const vistas = {
     dashboard: <SeccionDashboard />,
     usuarios: <SeccionUsuarios />,

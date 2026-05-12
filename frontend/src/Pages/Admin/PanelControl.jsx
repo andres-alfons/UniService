@@ -1,7 +1,10 @@
+// Panel de control — Dashboard principal del panel de administración
+// Muestra tarjetas con estadísticas generales y la actividad reciente de la plataforma
 import { useState } from "react";
 import StatCard from "./TarjetaEstadistica";
 
 export default function SeccionDashboard() {
+  // Estadísticas generales del sistema (simuladas)
   const [stats] = useState({
     totalUsuarios: 142,
     totalServicios: 87,
@@ -9,6 +12,7 @@ export default function SeccionDashboard() {
     reportesPendientes: 5,
   });
 
+  // Historial de actividad reciente para mostrar en el dashboard
   const actividad = [
     {
       accion: "Usuario registrado",
@@ -49,12 +53,14 @@ export default function SeccionDashboard() {
   ];
 
   return (
+    /* ════ Sección: Dashboard ════ */
     <section className="admin-dashboard">
       <div className="admin-header">
         <p className="admin-header__pre">Panel de control</p>
         <h1 className="admin-header__title">Dashboard</h1>
       </div>
 
+      {/* Tarjetas de resumen con indicadores clave */}
       <div className="admin-stats-grid">
         <StatCard
           icon={<i className="bi bi-people-fill"></i>}
@@ -86,6 +92,7 @@ export default function SeccionDashboard() {
         />
       </div>
 
+      {/* Lista de actividad reciente del sistema */}
       <div className="admin-activity-card">
         <p className="admin-activity-card__title"><i className="bi bi-journal-text"></i> Actividad reciente</p>
         <div className="admin-activity-list">

@@ -1,3 +1,4 @@
+// Elemento de actividad reciente con icono, texto, hora, badge y tipo visual
 const ActivityItem = ({ icon, text, time, badge, type }) => (
   <div className="activity-item">
     <div className="activity-icon">{icon}</div>

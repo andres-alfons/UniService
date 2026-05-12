@@ -1,3 +1,7 @@
+// ════════════════════════════════════════════════════════════════
+// PÁGINA DE TÉRMINOS Y CONDICIONES (estática)
+// Muestra los términos legales de uso de la plataforma UniService.
+// ════════════════════════════════════════════════════════════════
 import React from "react";
 import "../styles/styleTerms.css";
 

@@ -1,6 +1,13 @@
+// ─── Notificaciones.jsx ──────────────────────────────────────────────────────
+// Panel flotante de notificaciones. Se muestra al hacer clic en la campana.
+// Obtiene solicitudes enviadas/recibidas desde la API y genera notificaciones
+// automáticas según el estado (pendiente, aceptada, rechazada).
+// ─────────────────────────────────────────────────────────────────────────────
+
 import { useState, useEffect } from "react";
 import { API_SOLICITUD } from "../shared/constantes";
 
+// Componente que renderiza el botón de campana y el panel desplegable
 export default function NotificacionesFlotantes() {
   const [abierto, setAbierto] = useState(false);
   const [notificaciones, setNotificaciones] = useState([]);
@@ -8,9 +15,10 @@ export default function NotificacionesFlotantes() {
 
   const usuarioId = localStorage.getItem("usuarioId");
 
+  // Claves de localStorage para persistir el estado de leídas
   const getReadStorageKey = () => `notificaciones_leidas_${usuarioId}`;
-  const getDismissedStorageKey = () => `notificaciones_dismissed_${usuarioId}`;
 
+  // Lee el objeto de notificaciones leídas desde localStorage
   const obtenerLeidas = () => {
     try {
       const stored = localStorage.getItem(getReadStorageKey());
@@ -20,6 +28,7 @@ export default function NotificacionesFlotantes() {
     }
   };
 
+  // Marca una notificación como leída en localStorage
   const guardarLeida = (id) => {
     try {
       const leidas = obtenerLeidas();
@@ -30,6 +39,7 @@ export default function NotificacionesFlotantes() {
     }
   };
 
+  // Carga y construye las notificaciones desde las solicitudes enviadas y recibidas
   useEffect(() => {
     if (!usuarioId) return;
     setCargando(true);
@@ -47,6 +57,7 @@ export default function NotificacionesFlotantes() {
 
           const notifs = [];
 
+          // Notificaciones de solicitudes recibidas (nuevas, aceptadas, rechazadas)
           recibidasArr.forEach((sol) => {
             if (sol.estado === "Pendiente") {
               const id = `rec-${sol.id_solicitud}`;
@@ -75,6 +86,7 @@ export default function NotificacionesFlotantes() {
             }
           });
 
+          // Notificaciones de solicitudes enviadas (aceptadas o rechazadas)
           enviadasArr.forEach((sol) => {
             if (sol.estado === "Aceptada") {
               const id = `env-acept-${sol.id_solicitud}`;
@@ -95,6 +107,7 @@ export default function NotificacionesFlotantes() {
             }
           });
 
+          // Ordena: no leídas primero, luego por ID descendente
           notifs.sort((a, b) => {
             if (a.leida !== b.leida) return a.leida ? 1 : -1;
             return b.id.localeCompare(a.id);
@@ -107,12 +120,14 @@ export default function NotificacionesFlotantes() {
 
     cargarNotificaciones();
 
+    // Escucha el evento personalizado para refrescar notificaciones
     const handler = () => cargarNotificaciones();
     window.addEventListener("solicitud-actualizada", handler);
 
     return () => window.removeEventListener("solicitud-actualizada", handler);
   }, [usuarioId]);
 
+  // Marca una notificación como leída en estado y localStorage
   const marcarLeida = (id) => {
     guardarLeida(id);
     setNotificaciones((prev) =>
@@ -120,6 +135,7 @@ export default function NotificacionesFlotantes() {
     );
   };
 
+  // Elimina todas las notificaciones del localStorage (pide confirmación)
   const vaciarNotificaciones = () => {
     const confirmar = window.confirm(
       "¿Estás seguro de que deseas eliminar todas las notificaciones? Esta acción no se puede deshacer.",
@@ -136,6 +152,7 @@ export default function NotificacionesFlotantes() {
 
   return (
     <div className="contenedor-notificaciones">
+      {/* Botón de la campana con badge de no leídas */}
       <button
         className="boton-notificaciones"
         onClick={() => setAbierto(!abierto)}
@@ -144,6 +161,7 @@ export default function NotificacionesFlotantes() {
         {noLeidas > 0 && <span className="badge-notificaciones">{noLeidas}</span>}
       </button>
 
+      {/* Panel desplegable de notificaciones */}
       {abierto && (
         <div className="panel-notificaciones">
           <div className="cabecera-estatica">

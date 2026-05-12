@@ -1,6 +1,9 @@
+// Barra de navegación lateral del panel de administración
+// Renderiza los enlaces a cada sección y permite cerrar sesión
 export default function NavbarAdmin({ seccionActual, setSeccion, onCerrarSesion }) {
   const adminNombre = localStorage.getItem("usuario") || "Administrador";
 
+  // Define las secciones disponibles en el panel de administración
   const secciones = [
     { id: "dashboard", icon: "bi-grid-1x2-fill", label: "Dashboard" },
     { id: "usuarios", icon: "bi-people-fill", label: "Usuarios" },

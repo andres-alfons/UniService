@@ -1,3 +1,5 @@
+// Gestión de servicios — CRUD de servicios académicos desde el panel admin
+// Permite buscar, pausar y eliminar servicios publicados por los usuarios
 import { useState, useEffect } from "react";
 import { formatFecha } from "./UtilidadesAdmin";
 
@@ -8,6 +10,7 @@ export default function SeccionServiciosAdmin() {
   const [busqueda, setBusqueda] = useState("");
   const [cargando, setCargando] = useState(true);
 
+  // Obtiene la lista de servicios desde la API al montar el componente
   useEffect(() => {
     fetch(`${API}/services`)
       .then((r) => r.json())
@@ -16,12 +19,14 @@ export default function SeccionServiciosAdmin() {
       .finally(() => setCargando(false));
   }, []);
 
+  // Elimina un servicio de forma permanente previa confirmación
   const eliminar = async (id) => {
     if (!confirm("¿Eliminar este servicio?")) return;
     await fetch(`${API}/services/${id}`, { method: "DELETE" });
     setServicios((prev) => prev.filter((s) => s.id_servicio !== id));
   };
 
+  // Pausa un servicio marcándolo como inactivo
   const pausar = async (id) => {
     await fetch(`${API}/services/${id}/pausar`, { method: "PUT" });
     setServicios((prev) =>
@@ -31,6 +36,7 @@ export default function SeccionServiciosAdmin() {
     );
   };
 
+  // Filtra servicios por título, proveedor o categoría según el texto de búsqueda
   const filtrados = servicios.filter((s) =>
     [s.titulo, s.proveedor, s.nombre_categoria].some((v) =>
       (v || "").toLowerCase().includes(busqueda.toLowerCase()),

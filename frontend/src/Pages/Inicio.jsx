@@ -1,3 +1,10 @@
+// ════════════════════════════════════════════════════════════════
+// PÁGINA PRINCIPAL (HOME) — Usuario logueado
+// Importa y organiza todas las secciones de la página principal:
+// barra de navegación, presentación, buscador, servicios recientes,
+// destacados, formulario de publicación, bandeja de solicitudes,
+// notificaciones flotantes y pie de página.
+// ════════════════════════════════════════════════════════════════
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/styleHome.css";
@@ -13,14 +20,18 @@ import Presentacion from "./shared/Presentacion";
 import { API_HOME } from "./shared/constantes";
 import { promedioEstrellas } from "./shared/utilidades";
 
+// ── Componente principal del Home para usuarios logueados ──
 export default function HomePrincipal() {
   const navigate = useNavigate();
+  // Estado del scroll para cambiar estilo del navbar al hacer scroll
   const [scrolled, setScrolled] = useState(false);
+  // Lista completa de servicios, recientes y top 3 mejor calificados
   const [serviciosTotales, setServiciosTotales] = useState([]);
   const [recientes, setRecientes] = useState([]);
   const [top3, setTop3] = useState([]);
   const [cargando, setCargando] = useState(true);
 
+  // ── Efecto inicial: redirige si no hay token, detecta scroll ──
   useEffect(() => {
     if (!localStorage.getItem("token")) navigate("/login");
 
@@ -29,19 +40,20 @@ export default function HomePrincipal() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [navigate]);
 
+  // ── Carga todos los servicios desde la API ──
   const cargarServicios = useCallback(() => {
     setCargando(true);
     fetch(API_HOME)
       .then((res) => res.json())
       .then((data) => {
-        setServiciosTotales([...data].reverse());
-        setRecientes(data.slice(0, 4));
+        setServiciosTotales([...data].reverse()); // Invertidos: más recientes primero
+        setRecientes(data.slice(0, 4)); // Últimos 4 para la sección "Recientes"
         const top = [...data]
           .sort(
             (a, b) =>
               promedioEstrellas(b.estrellas) - promedioEstrellas(a.estrellas),
           )
-          .slice(0, 3);
+          .slice(0, 3); // Top 3 mejor calificados
         setTop3(top);
       })
       .finally(() => setCargando(false));
@@ -51,6 +63,7 @@ export default function HomePrincipal() {
     cargarServicios();
   }, [cargarServicios]);
 
+  // ── IntersectionObserver para animaciones de entrada (reveal) ──
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -69,6 +82,7 @@ export default function HomePrincipal() {
     return () => observer.disconnect();
   }, []);
 
+  // ── Cierra sesión: limpia localStorage (excepto notifs leídas) ──
   const handleCerrarSesion = () => {
     const keysToPreserve = [];
     for (let i = 0; i < localStorage.length; i++) {

@@ -1,3 +1,4 @@
+// Tarjeta de estadística rápida con icono, valor y etiqueta breve
 const QuickStatCard = ({ icon, value, label }) => (
   <div className="quick-stat-card">
     <div className="quick-stat-icon">{icon}</div>

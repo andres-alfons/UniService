@@ -1,10 +1,17 @@
+// ─── ModalRechazo.jsx ──────────────────────────────────────────────────────
+// Modal para rechazar una solicitud. Incluye campo obligatorio de motivo
+// y campo opcional de contraoferta (precio alternativo).
+// ─────────────────────────────────────────────────────────────────────────────
+
 import { useState } from "react";
 
+// Componente del modal de rechazo
 export default function ModalRechazo({ onConfirmar, onCancelar }) {
-  const [motivo, setMotivo] = useState("");
-  const [contraoferta, setContraoferta] = useState("");
+  const [motivo, setMotivo] = useState("");           // Motivo del rechazo
+  const [contraoferta, setContraoferta] = useState(""); // Precio alternativo opcional
 
   return (
+    // Overlay semitransparente
     <div
       style={{
         position: "fixed",
@@ -17,6 +24,7 @@ export default function ModalRechazo({ onConfirmar, onCancelar }) {
         padding: "20px",
       }}
     >
+      {/* Contenido del modal */}
       <div
         style={{
           background: "#051a2d",
@@ -34,6 +42,7 @@ export default function ModalRechazo({ onConfirmar, onCancelar }) {
           Explica el motivo y, si quieres, propón un precio alternativo.
         </p>
 
+        {/* Campo de texto para el motivo */}
         <label
           style={{
             display: "block",
@@ -62,6 +71,7 @@ export default function ModalRechazo({ onConfirmar, onCancelar }) {
           }}
         />
 
+        {/* Campo opcional de contraoferta */}
         <label
           style={{
             display: "block",
@@ -97,6 +107,7 @@ export default function ModalRechazo({ onConfirmar, onCancelar }) {
           Si propones un precio, el cliente lo verá en su solicitud.
         </p>
 
+        {/* Botones: Cancelar y Confirmar (deshabilitado si no hay motivo) */}
         <div style={{ display: "flex", gap: "10px", marginTop: "22px" }}>
           <button
             type="button"

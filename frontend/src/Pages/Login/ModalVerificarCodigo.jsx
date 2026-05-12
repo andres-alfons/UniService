@@ -1,3 +1,4 @@
+// Modal para verificar el código de 6 dígitos enviado al correo durante el registro
 export default function VerificationCodeModal({
   visible,
   correoReg,
@@ -7,6 +8,7 @@ export default function VerificationCodeModal({
   onReenviar,
   onCerrar,
 }) {
+  // No renderiza si el modal no está visible
   if (!visible) return null;
 
   return (
@@ -17,6 +19,7 @@ export default function VerificationCodeModal({
         <p>
           Enviamos un código de 6 dígitos a <strong>{correoReg}</strong>
         </p>
+        {/* Campo de código numérico de máximo 6 dígitos */}
         <input
           type="text"
           maxLength={6}
