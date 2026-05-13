@@ -936,7 +936,7 @@ const Perfil = () => {
                     if (u) handleUpdate("telefono", u);
                   }}
                 >
-                  <span className="image-option-icon">📱</span>
+                  <span className="image-option-icon"><i className="bi bi-telephone"></i></span>
                   <div className="image-option-text">
                     <b>Cambiar Teléfono</b>
                   </div>
