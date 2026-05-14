@@ -14,6 +14,7 @@ import SeccionReportes from "./Admin/GestionReportes";
 import SeccionCategorias from "./Admin/GestionCategorias";
 import SeccionLogs from "./Admin/RegistroActividades";
 import "../styles/styleAdmin.css";
+import BotonTema from "../Components/B_StyleHome";
 
 export default function HomeAdmin() {
   const navigate = useNavigate();
@@ -48,6 +49,7 @@ export default function HomeAdmin() {
 
   return (
     <div className="admin-layout">
+      <BotonTema />
       <NavbarAdmin
         seccionActual={seccion}
         setSeccion={setSeccion}

@@ -13,6 +13,7 @@ import SeccionBuscar from "./Principal/BusquedaServicios";
 import SeccionPublicar from "./Principal/PublicarServicio";
 import SeccionSolicitudes from "./Principal/SeccionSolicitudes";
 import NotificacionesFlotantes from "./Principal/Notificaciones";
+import BotonTema from "../Components/B_StyleHome";
 import Footer from "./Principal/PiePagina";
 import SeccionRecientes from "./shared/SeccionRecientes";
 import SeccionDestacados from "./shared/SeccionDestacados";
@@ -107,6 +108,7 @@ export default function HomePrincipal() {
       <SeccionDestacados top3={top3} />
       <SeccionPublicar onPublicado={cargarServicios} />
       <SeccionSolicitudes />
+      <BotonTema />
       <NotificacionesFlotantes />
       <Footer />
     </>

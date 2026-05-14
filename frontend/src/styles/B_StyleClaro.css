@@ -1,0 +1,22 @@
+/* ═══════════════════════════════════════════
+   UniServicios — B_StyleClaro.css
+   Tema claro — se activa con [data-theme="claro"]
+   ═══════════════════════════════════════════ */
+
+[data-theme="claro"] {
+  --bg: #f8fafc;
+  --bg2: #f1f5f9;
+  --bg3: #e2e8f0;
+  --card: #ffffff;
+  --card-hover: #f8fafc;
+  --borde: #cbd5e1;
+  --borde2: #94a3b8;
+  --teal: #0ea5a0;
+  --teal2: #0d9488;
+  --teal-dim: rgba(14, 165, 160, 0.08);
+  --amarillo: #eab308;
+  --texto: #0f172a;
+  --texto2: #475569;
+  --texto3: #64748b;
+  --trans: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}

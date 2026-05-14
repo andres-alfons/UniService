@@ -9,6 +9,7 @@ import InfoItem from "./Perfil/ElementoInfo";
 import QuickStatCard from "./Perfil/TarjetaRapida";
 import ProgressBar from "./Perfil/BarraProgreso";
 import ActivityItem from "./Perfil/ElementoActividad";
+import BotonTema from "../Components/B_StyleHome";
 
 // ════════════════════════════════════════════════════════════════
 // PÁGINA DE PERFIL DE USUARIO
@@ -408,6 +409,7 @@ const Perfil = () => {
   return (
     <>
       <Navbar onCerrarSesion={handleCerrarSesion} />
+      <BotonTema />
 
       <div className="profile-page-wrapper">
         <div className="dynamic-bg">

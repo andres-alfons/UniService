@@ -6,6 +6,7 @@ import AdminModal from "./Login/ModalAdmin";
 import ResetPasswordModal from "./Login/ModalRecuperarClave";
 import VerificationCodeModal from "./Login/ModalVerificarCodigo";
 import NotificationModal from "./Login/ModalNotificacion";
+import BotonTema from "../Components/B_StyleHome";
 
 // ══════════════════════════════════════════════════════════════════
 // CREDENCIALES DE ADMINISTRADOR HARDCODEADAS
@@ -545,6 +546,7 @@ export default function Login() {
   // ════════════════════════════════
   return (
     <>
+      <BotonTema />
       {/* Radios ocultos que controlan qué tab está activa mediante CSS puro */}
       <input
         type="radio"

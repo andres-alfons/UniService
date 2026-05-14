@@ -13,6 +13,7 @@ import SeccionRecientes from "./shared/SeccionRecientes";
 import SeccionDestacados from "./shared/SeccionDestacados";
 import Presentacion from "./shared/Presentacion";
 import { promedioEstrellas } from "./shared/utilidades";
+import BotonTema from "../Components/B_StyleHome";
 
 const API = "http://localhost:5165/api/services";
 
@@ -79,6 +80,7 @@ export default function HomeGuest() {
       <SeccionBuscar serviciosTotales={serviciosTotales} />
       <SeccionRecientes servicios={recientes} cargando={cargando} linkBase="/login?id=" />
       <SeccionDestacados top3={top3} linkBase="/login?id=" />
+      <BotonTema />
       <Footer />
     </>
   );

@@ -5,10 +5,12 @@
 // ════════════════════════════════════════════════════════════════
 import React from "react";
 import "../styles/stylePrivacy.css";
+import BotonTema from "../Components/B_StyleHome";
 
 const PrivacyPage = () => {
   return (
     <>
+      <BotonTema />
       {/* ── NAVBAR ── */}
       <nav className="navbar-custom">
         <div className="container">

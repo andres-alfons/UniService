@@ -15,6 +15,7 @@ import Skeleton from "./Servicio/Cargando";
 import FormSolicitud from "./Servicio/FormularioSolicitud";
 import FormCalificacion from "./Servicio/FormularioCalificacion";
 import { mostrarModalidad, mostrarDisponibilidad, colorAvatar } from "./Servicio/utilidades";
+import BotonTema from "../Components/B_StyleHome";
 
 const API = "https://localhost:7237/api/Services";
 const API_USUARIO = "https://localhost:7237/api/Users";
@@ -405,6 +406,8 @@ export default function Servicio() {
           </div>
         </div>
       )}
+
+      <BotonTema />
 
       <footer id="soporte">
         <div className="container">

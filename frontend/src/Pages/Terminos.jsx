@@ -4,10 +4,12 @@
 // ════════════════════════════════════════════════════════════════
 import React from "react";
 import "../styles/styleTerms.css";
+import BotonTema from "../Components/B_StyleHome";
 
 const TermsPage = () => {
   return (
     <>
+      <BotonTema />
       {/* ── NAVBAR ── */}
       <nav className="navbar-custom">
         <div className="container">
