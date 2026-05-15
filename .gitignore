@@ -33,3 +33,6 @@ appsettings.Development.json
 # --- Archivos específicos (fotos u otros) ---
 Proyecto-main/src/PHP/UserPerfilFotos/
 Proyecto-main/src/PHP/UserPerfilFotos/*
+
+# Cache de VS Code / C# Dev Kit
+.lscache/
