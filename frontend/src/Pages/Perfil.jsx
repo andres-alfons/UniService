@@ -87,11 +87,9 @@ const Perfil = () => {
 
   useEffect(() => {
     if (esPerfilExterno && id_usuario_logueado && id_a_consultar) {
-      fetch(
-        `${API_USUARIO}/es-seguidor?seguidor=${id_usuario_logueado}&seguido=${id_a_consultar}`,
-      )
+      fetch(`http://localhost:5165/api/seguidores/estado?seguidor=${id_usuario_logueado}&seguido=${id_a_consultar}`)
         .then((res) => res.json())
-        .then((data) => setSiguiendo(data.esSeguidor))
+        .then((data) => setSiguiendo(data.sigues))  // ← también cambia esSeguidor → sigues
         .catch((err) => console.error("Error al verificar seguimiento:", err));
     }
   }, [id_a_consultar, esPerfilExterno, id_usuario_logueado]);
@@ -355,52 +353,45 @@ const Perfil = () => {
   // Maneja la lógica de seguir/dejar de seguir
   // Usa el flag enviandoSeguimiento para bloquear el botón mientras espera respuesta
   const toggleSeguir = async () => {
-    if (enviandoSeguimiento) return;
-    setEnviandoSeguimiento(true);
+  if (enviandoSeguimiento) return;
+  setEnviandoSeguimiento(true);
 
-    try {
-      const accionActual = siguiendo;
-      // Si ya seguimos → DELETE "dejar-seguir"; si no → POST "seguir"
-      const endpoint = accionActual ? "dejar-seguir" : "seguir";
-      const metodo = accionActual ? "DELETE" : "POST";
+  // Guardamos el estado ANTES de llamar al API
+  const accionActual = siguiendo;
 
-      const response = await fetch(`${API_USUARIO}/${endpoint}`, {
-        method: metodo,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          id_seguidor: parseInt(id_usuario_logueado),
-          id_seguido: parseInt(id_a_consultar),
-        }),
-      });
+  try {
+    const response = await fetch(`http://localhost:5165/api/seguidores/toggle`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({
+        id_seguidor: parseInt(id_usuario_logueado),
+        id_seguido: parseInt(id_a_consultar),
+      }),
+    });
 
-      if (response.ok) {
-        setSiguiendo(!accionActual);
-        // Actualizamos el contador de seguidores localmente para respuesta inmediata
-        setUserData((prev) => ({
-          ...prev,
-          total_seguidores: accionActual
-            ? Math.max(0, prev.total_seguidores - 1)
-            : (prev.total_seguidores || 0) + 1,
-        }));
-      } else {
-        const errorData = await response.json();
-        console.error("Error del servidor:", errorData);
-        alert(
-          "Error: " +
-            (errorData.message || "No se pudo actualizar el seguimiento"),
-        );
-      }
-    } catch (error) {
-      console.error("Error de conexión:", error);
-      alert("Error de conexión al procesar el seguimiento");
-    } finally {
-      // Siempre liberamos el botón, haya salido bien o mal
-      setEnviandoSeguimiento(false);
+    if (response.ok) {
+      // No dependemos del string del SP, usamos el estado anterior invertido
+      const ahoraSigue = !accionActual;
+      setSiguiendo(ahoraSigue);
+      setUserData((prev) => ({
+        ...prev,
+        total_seguidores: ahoraSigue
+          ? (prev.total_seguidores || 0) + 1
+          : Math.max(0, (prev.total_seguidores || 0) - 1),
+      }));
+    } else {
+      alert("Error al procesar el seguimiento");
     }
-  };
+  } catch (error) {
+    console.error("Error de conexión:", error);
+    alert("Error de conexión al procesar el seguimiento");
+  } finally {
+    setEnviandoSeguimiento(false);
+  }
+};
 
   // ════════════════════════════════
   // JSX
