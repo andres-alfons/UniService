@@ -128,7 +128,7 @@ export default function SeccionBuscar({ serviciosTotales }) {
               <input
                 type="text"
                 className="search-input"
-                placeholder="¿Qué necesitas hoy? (Ej: Álgebra, Logo, Habitación...)"
+                placeholder=" ¿Qué necesitas hoy? (Ej: Álgebra, Logo, Habitación...)"
                 value={busqueda}
                 onChange={handleBusqueda}
               />

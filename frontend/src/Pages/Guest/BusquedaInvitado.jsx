@@ -134,11 +134,10 @@ export default function SeccionBuscar({ serviciosTotales }) {
             style={{ maxWidth: "700px", margin: "30px auto" }}
           >
             <div className="search-input-wrapper">
-              <span className="search-icon"><i className="bi bi-search"></i></span>
               <input
                 type="text"
                 className="search-input"
-                placeholder="¿Qué necesitas hoy? (Ej: Álgebra, Logo, Habitación...)"
+                placeholder=" ¿Qué necesitas hoy? (Ej: Álgebra, Logo, Habitación...)"
                 value={busqueda}
                 onChange={handleBusqueda}
               />
