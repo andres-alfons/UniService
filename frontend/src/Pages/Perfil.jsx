@@ -123,6 +123,14 @@ const abrirModalSiguiendo = async () => {
   }
 };
 
+const getAvatarUrl = (avatar) => {
+  if (!avatar) return "/img/default_avatar.png";
+  if (avatar === "img/default_avatar.png") return "/img/default_avatar.png"; // 👈 este caso
+  if (avatar.startsWith("http")) return avatar;
+  if (avatar.startsWith("/src") || avatar.startsWith("../")) return avatar;
+  return `http://localhost:5165/${avatar}`;
+};
+
   // ════════════════════════════════════════════════════════════
   // SABER SI YA SEGUIMOS A ESTE USUARIO (solo en perfil externo)
   // ════════════════════════════════════════════════════════════
@@ -471,7 +479,7 @@ const abrirModalSiguiendo = async () => {
                     className="avatar"
                     onError={(e) => {
                       e.currentTarget.onerror = null; // evita bucle infinito
-                      e.currentTarget.src = "/src/img/default-avatar.png";
+                      e.currentTarget.src = "/img/default_avatar.png";
                     }}
                   />
                   {esPerfilExterno && (
@@ -1213,13 +1221,11 @@ const abrirModalSiguiendo = async () => {
             >
               {/* Avatar */}
               <img
-                src={
-                  seguidor.avatar
-                    ? `http://localhost:5165/${seguidor.avatar}`
-                    : "/img/default_avatar.png"
-                }
+                src={getAvatarUrl(seguidor.avatar)}
                 alt={seguidor.nombre}
-                onError={(e) => { e.currentTarget.src = "/src/img/default-avatar.png"; }}
+                onError={(e) => { 
+                  e.currentTarget.onerror = null; // evita bucle infinito
+                  e.currentTarget.src = "/img/default_avatar.png"; }}
                 style={{
                   width: "44px",
                   height: "44px",
@@ -1303,13 +1309,11 @@ const abrirModalSiguiendo = async () => {
             >
               {/* Avatar */}
               <img
-                src={
-                  usuario.avatar
-                    ? `http://localhost:5165/${usuario.avatar}`
-                    : "/img/default_avatar.png"
-                }
+                src={getAvatarUrl(usuario.avatar)}
                 alt={usuario.nombre}
-                onError={(e) => { e.currentTarget.src = "/src/img/default-avatar.png"; }}
+                onError={(e) => { 
+                  e.currentTarget.onerror = null; // evita bucle infinito
+                  e.currentTarget.src = "/img/default_avatar.png"; }}
                 style={{
                   width: "44px",
                   height: "44px",
