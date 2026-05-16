@@ -85,6 +85,11 @@ const Perfil = () => {
   const [listaSeguidores, setListaSeguidores] = useState([]);
   const [cargandoSeguidores, setCargandoSeguidores] = useState(false);
 
+  // Modal de siguiendo
+const [modalSiguiendo, setModalSiguiendo] = useState(false);
+const [listaSiguiendo, setListaSiguiendo] = useState([]);
+const [cargandoSiguiendo, setCargandoSiguiendo] = useState(false);
+
 
   const abrirModalSeguidores = async () => {
   setModalSeguidores(true);
@@ -99,6 +104,22 @@ const Perfil = () => {
     console.error("Error al cargar seguidores:", err);
   } finally {
     setCargandoSeguidores(false);
+  }
+};
+
+const abrirModalSiguiendo = async () => {
+  setModalSiguiendo(true);
+  setCargandoSiguiendo(true);
+  try {
+    const res = await fetch(
+      `http://localhost:5165/api/seguidores/siguiendo?id_usuario=${id_a_consultar}`
+    );
+    const data = await res.json();
+    setListaSiguiendo(data);
+  } catch (err) {
+    console.error("Error al cargar siguiendo:", err);
+  } finally {
+    setCargandoSiguiendo(false);
   }
 };
 
@@ -485,10 +506,16 @@ const Perfil = () => {
                     label="Seguidores"
                 />
 </div>
+                  <div
+                      onClick={abrirModalSiguiendo}
+                      style={{ cursor: "pointer" }}
+                      title="Ver siguiendo"
+                  >
                   <StatItem
-                    value={userData.total_siguiendo}
-                    label="Siguiendo"
+                      value={userData.total_siguiendo}
+                      label="Siguiendo"
                   />
+</div>
                 </div>
 
                 <div className="action-buttons">
@@ -1208,6 +1235,96 @@ const Perfil = () => {
                 <div className="menu-desc">
                   <i className="bi bi-buildings" style={{ marginRight: "4px" }}></i>
                   {seguidor.universidad || "Sin universidad"}
+                </div>
+              </div>
+              {/* Flecha */}
+              <span className="menu-arrow">→</span>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  </div>
+)}
+
+{/* ══ MODAL: Lista de siguiendo ══ */}
+{modalSiguiendo && (
+  <div
+    className="image-menu-overlay active"
+    onClick={() => setModalSiguiendo(false)}
+  >
+    <div
+      className="image-menu"
+      onClick={(e) => e.stopPropagation()}
+      style={{ maxWidth: "420px", width: "90%" }}
+    >
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+        <h3 className="image-menu-title" style={{ margin: 0 }}>
+          <i className="bi bi-person-check-fill"></i> Siguiendo ({listaSiguiendo.length})
+        </h3>
+        <button
+          onClick={() => setModalSiguiendo(false)}
+          style={{
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            fontSize: "1.1rem",
+            color: "inherit",
+            opacity: 0.6,
+            padding: "4px 8px",
+            borderRadius: "6px",
+          }}
+        >
+          <i className="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      {/* Cuerpo */}
+      <div style={{ maxHeight: "380px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "4px" }}>
+        {cargandoSiguiendo ? (
+          <p style={{ textAlign: "center", padding: "1.5rem", opacity: 0.6 }}>
+            <i className="bi bi-hourglass-split"></i> Cargando...
+          </p>
+        ) : listaSiguiendo.length === 0 ? (
+          <p style={{ textAlign: "center", padding: "1.5rem", opacity: 0.5, fontSize: "0.9rem" }}>
+            Aún no sigues a nadie.
+          </p>
+        ) : (
+          listaSiguiendo.map((usuario) => (
+            <div
+              key={usuario.id_usuario}
+              className="menu-item"
+              onClick={() => {
+                setModalSiguiendo(false);
+                navigate(`/perfil/${usuario.id_usuario}`);
+              }}
+              style={{ cursor: "pointer", borderRadius: "10px", padding: "10px 12px" }}
+            >
+              {/* Avatar */}
+              <img
+                src={
+                  usuario.avatar
+                    ? `http://localhost:5165/${usuario.avatar}`
+                    : "/img/default_avatar.png"
+                }
+                alt={usuario.nombre}
+                onError={(e) => { e.currentTarget.src = "/src/img/default-avatar.png"; }}
+                style={{
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  border: "2px solid rgba(255,255,255,0.15)",
+                  flexShrink: 0,
+                }}
+              />
+              {/* Nombre y universidad */}
+              <div className="menu-text">
+                <div className="menu-title">{usuario.nombre}</div>
+                <div className="menu-desc">
+                  <i className="bi bi-buildings" style={{ marginRight: "4px" }}></i>
+                  {usuario.universidad || "Sin universidad"}
                 </div>
               </div>
               {/* Flecha */}
