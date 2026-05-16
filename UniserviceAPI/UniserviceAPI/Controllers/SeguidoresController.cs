@@ -68,4 +68,42 @@ public class SeguidoresController : ControllerBase
             return StatusCode(500, new { error = ex.Message });
         }
     }
+    // GET /api/seguidores/lista?id_usuario=X
+    [HttpGet("lista")]
+    public async Task<IActionResult> ListaSeguidores(int id_usuario)
+    {
+        try
+        {
+            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            using var cmd = new SqlCommand(@"
+            SELECT u.id_usuario, u.nombre, u.universidad, u.avatar
+            FROM seguidores s
+            INNER JOIN usuarios u ON s.id_seguidor = u.id_usuario
+            WHERE s.id_seguido = @id_usuario
+        ", conn);
+
+            cmd.Parameters.AddWithValue("@id_usuario", id_usuario);
+
+            var lista = new List<object>();
+            using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                lista.Add(new
+                {
+                    id_usuario = (int)reader["id_usuario"],
+                    nombre = reader["nombre"]?.ToString(),
+                    universidad = reader["universidad"]?.ToString(),
+                    avatar = reader["avatar"]?.ToString()
+                });
+            }
+
+            return Ok(lista);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
 }
