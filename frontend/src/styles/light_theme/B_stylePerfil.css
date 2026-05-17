@@ -76,11 +76,13 @@ html[data-theme="claro"] {
   color: var(--teal);
 }
 
-[data-theme="claro"] .navbar-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  justify-content: flex-end;
+@media (min-width: 769px) {
+  [data-theme="claro"] .navbar-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: flex-end;
+  }
 }
 
 [data-theme="claro"] .nav-link-custom {

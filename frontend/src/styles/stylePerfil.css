@@ -74,11 +74,13 @@ body {
   color: var(--teal);
 }
 
-.navbar-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  justify-content: flex-end;
+@media (min-width: 769px) {
+  .navbar-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: flex-end;
+  }
 }
 
 .nav-link-custom {
