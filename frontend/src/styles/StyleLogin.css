@@ -177,18 +177,23 @@ body.login-page::after {
   margin: 0 auto 24px;
 }
 
+.lateral-icono-img {
+  width: 100%;
+  height: auto;
+}
+
 .lateral-titulo {
-  font-family: "DM Serif Display", serif;
+  font-family: "Poppins", sans-serif;
   font-size: 1.7rem;
-  font-weight: 400;
-  color: #e8eef8;
+  font-weight: 700;
+  color: #0ea5a0;
   line-height: 1.25;
   margin-bottom: 12px;
 }
 
-.lateral-titulo span {
-  color: var(--teal);
-  font-style: italic;
+.lateral-titulo-service {
+  color: #f5c842;
+  font-weight: 700;
 }
 
 .lateral-desc {
@@ -544,6 +549,7 @@ input::placeholder {
   color: var(--texto);
   line-height: 1.3;
   margin-bottom: 10px;
+  text-shadow: none;
 }
 
 .auth-title::after {

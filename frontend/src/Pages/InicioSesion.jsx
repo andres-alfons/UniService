@@ -566,14 +566,11 @@ export default function Login() {
                 <img
                   src={logoIcon}
                   alt="UniServices Logo"
-                  style={{ width: "100%", height: "auto" }}
+                  className="lateral-icono-img"
                 />
               </div>
-              <h2>
-                Uni
-                <span style={{ color: "#0ea5a0", fontWeight: "bold" }}>
-                  Service
-                </span>
+              <h2 className="lateral-titulo">
+                Uni<span className="lateral-titulo-service">Service</span>
               </h2>
               <p className="lateral-desc">
                 Intercambia tutorías, proyectos, diseño y más con otros

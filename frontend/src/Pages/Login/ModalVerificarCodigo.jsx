@@ -14,7 +14,7 @@ export default function VerificationCodeModal({
   return (
     <div className="modal-overlay" onClick={onCerrar}>
       <div className="modal-codigo" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-codigo-icon">📧</div>
+        <div className="modal-codigo-icon"><i className="bi bi-envelope-fill"></i></div>
         <h3>Revisa tu correo</h3>
         <p>
           Enviamos un código de 6 dígitos a <strong>{correoReg}</strong>
