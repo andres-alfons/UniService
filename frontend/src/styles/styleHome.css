@@ -3021,3 +3021,231 @@ html {
   background: var(--teal);
   box-shadow: 0 0 8px rgba(14, 165, 160, 0.5);
 }
+
+/* ═══════════════════════════════════════════
+   TARJETA SOLICITUD
+═══════════════════════════════════════════ */
+
+.solicitud-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.solicitud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.solicitud-info {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.solicitud-icon {
+  font-size: 1.6rem;
+}
+
+.solicitud-title {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.solicitud-subtitle {
+  margin: 0;
+  font-size: 0.78rem;
+  opacity: 0.6;
+}
+
+.solicitud-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.solicitud-desc {
+  margin: 0;
+  font-size: 0.82rem;
+  opacity: 0.7;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 8px;
+}
+
+.solicitud-rechazo {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #f87171;
+}
+
+.solicitud-contraoferta {
+  background: rgba(74, 199, 182, 0.1);
+  border: 1px solid rgba(74, 199, 182, 0.3);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.solicitud-contraoferta-icon {
+  font-size: 1.2rem;
+}
+
+.solicitud-contraoferta-label {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #4ac7b6;
+  font-weight: 600;
+}
+
+.solicitud-contraoferta-price {
+  margin: 0;
+  font-size: 1rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.solicitud-acciones {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.solicitud-acciones .btn {
+  flex: 1;
+  font-size: 0.82rem;
+  padding: 8px;
+}
+
+/* ═══════════════════════════════════════════
+   SECCIÓN SOLICITUDES
+═══════════════════════════════════════════ */
+
+.solicitud-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.solicitud-tabs .btn {
+  font-size: 0.85rem;
+}
+
+.solicitud-mensaje {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.solicitud-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+/* ═══════════════════════════════════════════
+   MODAL RECHAZO
+═══════════════════════════════════════════ */
+
+.modal-rechazo-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.modal-rechazo-content {
+  background: #051a2d;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 28px;
+  max-width: 440px;
+  width: 100%;
+}
+
+.modal-rechazo-title {
+  margin: 0 0 6px;
+  color: #fff;
+}
+
+.modal-rechazo-subtitle {
+  margin: 0 0 20px;
+  opacity: 0.6;
+  font-size: 0.85rem;
+}
+
+.modal-rechazo-label {
+  display: block;
+  font-size: 0.82rem;
+  opacity: 0.7;
+  margin-bottom: 6px;
+}
+
+.modal-rechazo-textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  color: #fff;
+  padding: 10px;
+  font-size: 0.88rem;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.modal-rechazo-label-contraoferta {
+  display: block;
+  font-size: 0.82rem;
+  opacity: 0.7;
+  margin: 14px 0 6px;
+}
+
+.modal-rechazo-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-rechazo-dolar {
+  color: #4ac7b6;
+  font-weight: 600;
+}
+
+.modal-rechazo-input {
+  flex: 1;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  color: #fff;
+  padding: 10px;
+  font-size: 0.88rem;
+  box-sizing: border-box;
+}
+
+.modal-rechazo-helper {
+  margin: 4px 0 0;
+  font-size: 0.76rem;
+  opacity: 0.5;
+}
+
+.modal-rechazo-acciones {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.modal-rechazo-acciones .btn {
+  flex: 1;
+}

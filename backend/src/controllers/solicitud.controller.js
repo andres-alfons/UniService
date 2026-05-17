@@ -219,11 +219,13 @@ export const getMisSolicitudes = async (req, res) => {
           sol.*,
           s.titulo        AS titulo_servicio,
           s.icono,
+          c.nombre_categoria,
           u.nombre        AS nombre_proveedor,
           u.avatar        AS avatar_proveedor
         FROM solicitudes sol
         INNER JOIN servicios s  ON s.id_servicio  = sol.id_servicio
         INNER JOIN usuarios  u  ON u.id_usuario   = sol.id_proveedor
+        LEFT JOIN categorias c ON c.id_categoria = s.id_categoria
         WHERE sol.id_cliente = @id_cliente
         ORDER BY sol.id_solicitud DESC
       `);
@@ -247,12 +249,14 @@ export const getSolicitudesRecibidas = async (req, res) => {
           sol.*,
           s.titulo        AS titulo_servicio,
           s.icono,
+          c.nombre_categoria,
           u.nombre        AS nombre_cliente,
           u.avatar        AS avatar_cliente,
           u.correo        AS correo_cliente
         FROM solicitudes sol
         INNER JOIN servicios s  ON s.id_servicio = sol.id_servicio
         INNER JOIN usuarios  u  ON u.id_usuario  = sol.id_cliente
+        LEFT JOIN categorias c ON c.id_categoria = s.id_categoria
         WHERE sol.id_proveedor = @id_proveedor
         ORDER BY sol.id_solicitud DESC
       `);
