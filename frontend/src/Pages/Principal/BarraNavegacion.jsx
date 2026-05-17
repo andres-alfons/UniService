@@ -16,7 +16,7 @@ export default function Navbar({ scrolled, onCerrarSesion }) {
     <nav className={`navbar-custom${scrolled ? " scrolled" : ""}`}>
       <div className="container">
         {/* Marca / logo */}
-        <a href="#inicio" className="navbar-brand-custom">UniService</a>
+        <a href="#inicio" className="navbar-brand-custom"><span className="uni-brand">Uni</span><span className="service-brand">Service</span></a>
 
         {/* Botón hamburguesa para menú responsive */}
         <button

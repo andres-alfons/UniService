@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="row g-4">
           <div className="col-md-4">
             <p className="logo">
-              Uni<span>Servicios</span>
+              Uni<span>Service</span>
             </p>
             <p>
               La plataforma de intercambio de servicios entre estudiantes
@@ -52,7 +52,7 @@ export default function Footer() {
         </div>
         <hr />
         <p className="footer-copy">
-          © 2026 UniServicios — Hecho por y para estudiantes <i className="bi bi-mortarboard-fill"></i>
+          © 2026 UniService — Hecho por y para estudiantes <i className="bi bi-mortarboard-fill"></i>
         </p>
       </div>
     </footer>

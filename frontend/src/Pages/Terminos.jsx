@@ -14,7 +14,7 @@ const TermsPage = () => {
       <nav className="navbar-custom">
         <div className="container">
           <a href="#inicio" className="navbar-brand-custom">
-            UniService
+            <span className="uni-brand">Uni</span><span className="service-brand">Service</span>
           </a>
           <div className="navbar-links">
             <a href="/login" className="nav-link-custom nav-iniciar">

@@ -11,7 +11,7 @@ function Navbar({ onCerrarSesion }) {
       <div className="container">
         {/* Usamos Link para evitar recargas de página */}
         <Link to="/home" className="navbar-brand-custom">
-          UniService
+          <span className="uni-brand">Uni</span><span className="service-brand">Service</span>
         </Link>
 
         {/* Botón hamburguesa para móvil */}

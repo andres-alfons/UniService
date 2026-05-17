@@ -151,12 +151,21 @@ fieldset {
 }
 
 .navbar-brand-custom {
-  font-family: "DM Serif Display", serif;
+  font-family: "Poppins", sans-serif;
   font-size: 1.5rem;
+  font-weight: 700;
   color: var(--texto);
   letter-spacing: 0.5px;
   transition: var(--trans);
   flex-shrink: 0;
+}
+
+.uni-brand {
+  color: #0ea5a0;
+}
+
+.service-brand {
+  color: #f5c842;
 }
 
 .navbar-brand-custom:hover {
@@ -248,6 +257,42 @@ fieldset {
 .boton-tema:hover {
   transform: scale(1.1);
   background: rgb(14, 165, 160);
+}
+
+@media (max-width: 1024px) {
+  .boton-tema {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+  .contenedor-tema {
+    bottom: 24px;
+    left: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .boton-tema {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+  }
+  .contenedor-tema {
+    bottom: 20px;
+    left: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .boton-tema {
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
+  }
+  .contenedor-tema {
+    bottom: 16px;
+    left: 16px;
+  }
 }
 
 /* ══════════════════════════════
@@ -2106,40 +2151,49 @@ html {
 .top-cards-3d {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  gap: 18px;
   perspective: 1000px;
   margin-top: 32px;
+}
+
+.top-cards-track {
+  display: contents;
 }
 
 .top-card {
   background: var(--card);
   border: 1px solid var(--borde);
-  border-radius: 24px;
-  padding: 32px 24px;
+  border-radius: 18px;
+  padding: 24px 18px;
   position: relative;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   transform-style: preserve-3d;
+  border-color: #0b8a86c9;
 }
 
 .top-card:hover {
-  transform: rotateY(5deg) rotateX(5deg) translateZ(15px);
+  transform: rotateY(4deg) rotateX(4deg) translateZ(12px);
   box-shadow:
-    0 30px 60px rgba(0, 0, 0, 0.4),
+    0 24px 48px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(14, 165, 160, 0.2);
   border-color: var(--borde2);
 }
 
 .top-card-rank {
   position: absolute;
-  top: -15px;
-  left: 20px;
+  top: -12px;
+  left: 15px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  background: var(--card);
+  padding: 2px 12px 2px 8px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .rank-number {
-  font-size: 3.5rem;
+  font-size: 2.6rem;
   font-weight: 900;
   color: var(--bg3);
   line-height: 1;
@@ -2147,68 +2201,80 @@ html {
 }
 
 .rank-medal {
-  font-size: 1.8rem;
+  font-size: 1.35rem;
+  color: rgba(0, 255, 247, 0.575);
 }
 
 .top-card-content {
   text-align: center;
-  padding-top: 20px;
+  padding-top: 15px;
 }
 
 .top-card-icon {
-  font-size: 3rem;
-  margin-bottom: 16px;
+  font-size: 2.25rem;
+  margin-bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(14, 165, 160, 0.15), rgba(14, 165, 160, 0.02));
+}
+
+.top-card-icon i {
+  color: #0ea5a0;
 }
 
 .top-card-content h5 {
-  font-size: 1.1rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--texto);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .top-card-meta {
   color: var(--texto2);
-  font-size: 0.85rem;
-  margin-bottom: 16px;
+  font-size: 0.65rem;
+  margin-bottom: 12px;
 }
 
 .top-card-rating {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  margin-bottom: 20px;
+  gap: 3px;
+  margin-bottom: 15px;
 }
 
 .top-card-rating .stars {
   color: var(--amarillo);
-  font-size: 1.2rem;
+  font-size: 0.9rem;
 }
 
 .rating-text {
   color: var(--texto2);
-  font-size: 0.8rem;
+  font-size: 0.6rem;
 }
 
 .top-card-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 16px;
+  padding-top: 12px;
   border-top: 1px solid var(--borde);
 }
 
 .top-card-footer .author {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: var(--texto2);
-  font-size: 0.9rem;
+  font-size: 0.7rem;
 }
 
 .top-card-footer .price {
-  font-size: 1.2rem;
+  font-size: 0.9rem;
   font-weight: 800;
   color: var(--teal);
 }
@@ -2895,4 +2961,63 @@ html {
   .publicar-wrapper {
     max-width: 100% !important;
   }
+}
+
+/* ══════════════════════════════
+   CARRUSEL MÓVIL - TOP CARDS
+══════════════════════════════ */
+
+@media (max-width: 768px) {
+  .top-cards-3d {
+    display: block;
+    overflow: hidden;
+    perspective: none;
+  }
+
+  .top-cards-track {
+    display: flex;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .top-card {
+    min-width: 100%;
+    padding-left: 15%;
+    padding-right: 15%;
+    flex-shrink: 0;
+  }
+
+  .top-card:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--borde);
+  }
+}
+
+.carousel-dots {
+  display: none;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+@media (max-width: 768px) {
+  .carousel-dots {
+    display: flex;
+  }
+}
+
+.carousel-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--teal);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s ease;
+}
+
+.carousel-dot.active {
+  background: var(--teal);
+  box-shadow: 0 0 8px rgba(14, 165, 160, 0.5);
 }

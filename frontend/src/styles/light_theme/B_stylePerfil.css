@@ -60,16 +60,21 @@ html[data-theme="claro"] {
 }
 
 [data-theme="claro"] .navbar-brand-custom {
-  font-family: "DM Serif Display", serif;
+  font-family: "Poppins", sans-serif;
   font-size: 1.5rem;
+  font-weight: 700;
   color: rgb(147, 178, 237);
   letter-spacing: 0.5px;
   transition: var(--trans);
   text-decoration: none;
 }
 
-[data-theme="claro"] .navbar-brand-custom span {
-  color: var(--amarillo);
+[data-theme="claro"] .uni-brand {
+  color: #0ea5a0;
+}
+
+[data-theme="claro"] .service-brand {
+  color: #f5c842;
 }
 
 [data-theme="claro"] .navbar-brand-custom:hover {

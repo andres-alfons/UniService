@@ -413,7 +413,7 @@ export default function Servicio() {
         <div className="container">
           <hr />
           <p className="footer-copy">
-            © 2026 UniServicios — Hecho por y para estudiantes <i className="bi bi-mortarboard-fill"></i>
+            © 2026 UniService — Hecho por y para estudiantes <i className="bi bi-mortarboard-fill"></i>
           </p>
         </div>
       </footer>

@@ -13,7 +13,7 @@ export default function Navbar({ scrolled }) {
     >
       <div className="container">
         <a href="#inicio" className="navbar-brand-custom">
-          UniService
+          <span className="uni-brand">Uni</span><span className="service-brand">Service</span>
         </a>
 
         {/* Botón de menú hamburguesa para dispositivos móviles */}
