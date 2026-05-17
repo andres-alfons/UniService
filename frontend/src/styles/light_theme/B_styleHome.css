@@ -592,7 +592,7 @@ html[data-theme="claro"] {
   border-radius: 16px;
   padding: 20px;
   backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
 [data-theme="claro"] .search-input-wrapper {
@@ -1481,7 +1481,7 @@ html[data-theme="claro"] {
   gap: 12px;
   margin: 20px 0 16px;
   padding: 12px 18px;
-  background: var(--bg2);
+  background: rgba(245, 245, 245, 0.96);
   border: 1px solid var(--borde);
   border-radius: 14px;
 }
@@ -1500,21 +1500,29 @@ html[data-theme="claro"] {
 }
 
 [data-theme="claro"] .sort-select {
+  /* Forzar la desaparición del diseño nativo */
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  
+  /* Forzar esquinas: Izquierda redonda, Derecha recta */
+  border-radius: 10px 0 0 10px !important; 
+  
+  /* Borde e unión */
+  border: 1px solid var(--borde) !important;
+  border-right: none !important;
+  
+  /* Estilos base */
   padding: 9px 14px;
-  border-radius: 10px 0 0 10px;
   font-size: 0.82rem;
   font-weight: 500;
   font-family: "DM Sans", "Poppins", sans-serif;
   color: var(--texto);
   background: var(--bg);
-  border: 1px solid var(--borde);
-  border-right: none;
   cursor: pointer;
   outline: none;
   transition: all 0.25s ease;
-  appearance: auto;
-  -webkit-appearance: auto;
-  min-width: 170px;
+  min-width: 150px;
 }
 
 [data-theme="claro"] .sort-select:hover {
@@ -1530,9 +1538,12 @@ html[data-theme="claro"] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
+  width: 42px;
+  
+  /* Recto izquierda, redondo derecha */
   border: 1px solid var(--borde);
   border-radius: 0 10px 10px 0;
+  
   background: rgba(14, 165, 160, 0.06);
   color: var(--teal);
   cursor: pointer;
