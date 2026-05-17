@@ -810,6 +810,24 @@ input[type="file"].form-input-custom {
 }
 
 /* =========================
+   INPUT
+========================= */
+[data-theme="claro"] .form-input-custom {
+  background: #0b1420;
+  border: 1px solid rgba(14, 165, 160, 0.35);
+  color: #e8eef8;
+  padding: 12px 14px;
+  border-radius: 12px;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+[data-theme="claro"] .form-input-custom:focus {
+  border-color: #14c7c1;
+  box-shadow: 0 0 0 3px rgba(20, 199, 193, 0.15);
+}
+
+/* =========================
    CALENDARIO BASE
 ========================= */
 .mi-calendario {
@@ -826,23 +844,28 @@ input[type="file"].form-input-custom {
    HEADER
 ========================= */
 .mi-calendario .react-datepicker__header {
-  background: linear-gradient(135deg, #f2f5f5, #a7ecee);
+  background: linear-gradient(135deg, #0c3937, #005e56);
   border-bottom: none;
   padding: 12px;
 }
 
 /* 🔥 MES (ARREGLADO 100%) */
 .mi-calendario .react-datepicker__current-month {
-  color: #071018;
+  color: #ffffff;
   font-weight: 800;
   text-align: center;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: #ffffff;
+  background-clip: unset;
+  animation: none;
 }
 
 /* =========================
    DÍAS DE SEMANA
 ========================= */
 .mi-calendario .react-datepicker__day-name {
-  color: #e8eef8;
+  color: #71aaa8;
   font-weight: 600;
 }
 
@@ -854,7 +877,7 @@ input[type="file"].form-input-custom {
 }
 
 .mi-calendario .react-datepicker__day {
-  color: #e8eef8;
+  color: #000000;
   border-radius: 10px;
   padding: 6px;
   transition: 0.2s ease;
@@ -862,28 +885,28 @@ input[type="file"].form-input-custom {
 
 .mi-calendario .react-datepicker__day:hover {
   background: rgba(14, 165, 160, 0.2);
-  color: #ffffff;
+  color: #14c7c1;
 }
 
 .mi-calendario .react-datepicker__day--selected {
   background: #0ea5a0;
-  color: #071018;
+  color: #ffffff;
   font-weight: 700;
 }
 
 .mi-calendario .react-datepicker__day--today {
-  border: 1px solid #14c7c1;
-  color: #14c7c1;
+  border: 1px solid #0ea5a0;
+  color: #0ea5a0;
 }
 
 /* =========================
    NAVEGACIÓN (FLECHAS)
 ========================= */
 .mi-calendario .react-datepicker__navigation-icon::before {
-  border-color: #071018;
+  border-color: #ffffff;
   border-width: 2px 2px 0 0;
 }
-.modal-overlay {
+[data-theme="claro"] .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -896,7 +919,7 @@ input[type="file"].form-input-custom {
   z-index: 9999;
 }
 
-.modal-box {
+[data-theme="claro"] .modal-box {
   background: rgba(21, 63, 65, 0.918);
   padding: 20px;
   border-radius: 12px;

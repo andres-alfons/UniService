@@ -61,7 +61,7 @@
 [data-theme="claro"] .imagen-grande {
   width: 100%;
   height: 360px;
-  background: linear-gradient(135deg, #0b1420 0%, #0f1c2e 100%);
+  background: linear-gradient(135deg, #a7c3e9 0%, #cef8ff 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -118,8 +118,9 @@
 [data-theme="claro"] .titulo-servicio h1 {
   font-size: 1.9rem;
   margin-bottom: 10px;
-  color: var(--texto);
+  color: rgba(0, 0, 0, 0.75);
   line-height: 1.2;
+  text-shadow: none;
 }
 
 [data-theme="claro"] .rating-grande {
@@ -267,9 +268,9 @@
   overflow: hidden;
   background: linear-gradient(
     135deg,
-    #0e1929 0%,
-    rgba(14, 165, 160, 0.05) 50%,
-    rgba(139, 92, 246, 0.03) 100%
+    #8fbcff9c 0%,
+    rgba(20, 204, 198, 0.169) 50%,
+    rgba(138, 92, 246, 0.088) 100%
   );
   border: 1px solid var(--borde);
   border-radius: 20px;
@@ -480,6 +481,7 @@
   flex-direction: column;
   gap: 7px;
   margin-bottom: 18px;
+  color: #000000;
 }
 
 [data-theme="claro"] .form-label-custom {
@@ -795,7 +797,7 @@
    INPUT
 ========================= */
 [data-theme="claro"] .form-input-custom {
-  background: #0b1420;
+  background: #c4d8f1;
   border: 1px solid rgba(14, 165, 160, 0.35);
   color: #e8eef8;
   padding: 12px 14px;
@@ -813,36 +815,41 @@
    CALENDARIO BASE
 ========================= */
 [data-theme="claro"] .mi-calendario {
-  background: #0b1420;
-  border: 1px solid rgba(14, 165, 160, 0.4);
+  background: #ffffff;
+  border: 1px solid var(--borde);
   border-radius: 16px;
   overflow: hidden;
   font-family: "Poppins", sans-serif;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
-  color: #e8eef8;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.1);
+  color: var(--texto);
 }
 
 /* =========================
    HEADER
 ========================= */
 [data-theme="claro"] .mi-calendario .react-datepicker__header {
-  background: linear-gradient(135deg, #f2f5f5, #a7ecee);
+  background: linear-gradient(135deg, #0ea5a0, #0d9488);
   border-bottom: none;
   padding: 12px;
 }
 
 /* 🔥 MES (ARREGLADO 100%) */
 [data-theme="claro"] .mi-calendario .react-datepicker__current-month {
-  color: #071018;
+  color: #ffffff;
   font-weight: 800;
   text-align: center;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: #ffffff;
+  background-clip: unset;
+  animation: none;
 }
 
 /* =========================
    DÍAS DE SEMANA
 ========================= */
 [data-theme="claro"] .mi-calendario .react-datepicker__day-name {
-  color: #e8eef8;
+  color: #71aaa8;
   font-weight: 600;
 }
 
@@ -854,33 +861,33 @@
 }
 
 [data-theme="claro"] .mi-calendario .react-datepicker__day {
-  color: #e8eef8;
+  color: var(--texto);
   border-radius: 10px;
   padding: 6px;
   transition: 0.2s ease;
 }
 
 [data-theme="claro"] .mi-calendario .react-datepicker__day:hover {
-  background: rgba(14, 165, 160, 0.2);
-  color: #ffffff;
+  background: rgba(14, 165, 160, 0.1);
+  color: #0d9488;
 }
 
 [data-theme="claro"] .mi-calendario .react-datepicker__day--selected {
   background: #0ea5a0;
-  color: #071018;
+  color: #ffffff;
   font-weight: 700;
 }
 
 [data-theme="claro"] .mi-calendario .react-datepicker__day--today {
-  border: 1px solid #14c7c1;
-  color: #14c7c1;
+  border: 1px solid #0ea5a0;
+  color: #0ea5a0;
 }
 
 /* =========================
    NAVEGACIÓN (FLECHAS)
 ========================= */
 [data-theme="claro"] .mi-calendario .react-datepicker__navigation-icon::before {
-  border-color: #071018;
+  border-color: #ffffff;
   border-width: 2px 2px 0 0;
 }
 [data-theme="claro"] .modal-overlay {
