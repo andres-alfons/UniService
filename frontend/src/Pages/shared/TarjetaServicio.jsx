@@ -1,7 +1,7 @@
 // Tarjeta de presentación de un servicio con icono, categoría, título, descripción, autor y precio
 import { formatearFecha } from "../../utils/helpers";
 import { calcularEstrellas, truncar } from "./utilidades";
-import { COLORES_CATEGORIA } from "./constantes";
+import { COLORES_CATEGORIA, ICONOS_POR_NOMBRE_CATEGORIA } from "./constantes";
 
 export default function TarjetaServicio({ servicio, linkBase = "/servicio?id=" }) {
   // Generar representación de estrellas y contar reseñas
@@ -25,8 +25,8 @@ export default function TarjetaServicio({ servicio, linkBase = "/servicio?id=" }
 
   return (
     <a href={`${linkBase}${servicio.id_servicio}`} className="card-servicio card-3d">
-      {/* Icono del servicio con fallback a bi-pin */}
-      <div className="card-icono card-icono-azul"><i className={`bi ${servicio.icono?.startsWith("bi-") ? servicio.icono : "bi-pin"}`}></i></div>
+      {/* Icono del servicio según categoría, con fallback a bi-pin */}
+      <div className="card-icono card-icono-azul"><i className={`bi ${ICONOS_POR_NOMBRE_CATEGORIA[servicio.nombre_categoria] || (servicio.icono?.startsWith("bi-") ? servicio.icono : "bi-pin")}`}></i></div>
       <div className="card-body-custom">
         {/* Etiqueta de categoría con color dinámico */}
         {colorCat && (

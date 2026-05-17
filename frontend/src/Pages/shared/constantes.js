@@ -92,6 +92,17 @@ export const BADGE = {
   Rechazada: { bg: "#F8D7DA", color: "#721C24", texto: "Rechazada", icono: "bi-x-circle-fill" },
 };
 
+// Mapa de nombre_categoria (display name) a iconos Bootstrap
+export const ICONOS_POR_NOMBRE_CATEGORIA = {
+  "Programación": "bi-code-slash",
+  "Diseño": "bi-palette",
+  "Tutorías": "bi-book",
+  "Ensayos y redacción": "bi-pencil",
+  "Proyectos": "bi-folder",
+  "Arriendo de habitaciones": "bi-house",
+  "Otros servicios": "bi-globe2",
+};
+
 // Colores distintivos para cada categoría de servicio (fondo, texto)
 export const COLORES_CATEGORIA = {
   "Programación":         { bg: "rgba(96, 165, 250, 0.1)",  color: "#60a5fa" },
