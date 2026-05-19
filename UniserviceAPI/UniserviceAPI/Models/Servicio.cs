@@ -10,5 +10,10 @@ namespace UniServiceAPI.Models
         public string contacto { get; set; }
         public int modalidad { get; set; }
         public int disponibilidad { get; set; }
+        
+        // Google Maps
+        public decimal? ubicacion_lat { get; set; }
+        public decimal? ubicacion_lng { get; set; }
+        public string? direccion { get; set; }
     }
 }

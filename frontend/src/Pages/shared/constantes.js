@@ -1,7 +1,6 @@
 // Constantes compartidas: paginación, categorías, modalidades, íconos, colores y APIs
 export const CANTIDAD_POR_PAGINA = 8;
 
-// Lista de categorías disponibles para filtrar servicios
 export const CATEGORIAS = [
   { valor: "", label: "Todas las categorías" },
   { valor: "tutorias", label: "Tutorías" },
@@ -11,10 +10,8 @@ export const CATEGORIAS = [
   { valor: "diseno", label: "Diseño" },
   { valor: "arriendo", label: "Arriendo de habitaciones" },
   { valor: "otros", label: "Otros servicios" },
-  { valor: "Diseño", label: "Diseños" },
 ];
 
-// Opciones de modalidad y disponibilidad para los formularios
 export const MODALIDADES = ["Presencial", "Virtual", "Mixta"];
 export const DISPONIBILIDAD = [
   "Entre semana",
@@ -22,7 +19,6 @@ export const DISPONIBILIDAD = [
   "Siempre disponible",
 ];
 
-// Chips de categorías para la sección de filtros rápidos con iconos Bootstrap
 export const CHIPS_CATEGORIA = [
   { label: "Todos", valor: "todos", icono: "bi-grid-3x3-gap-fill" },
   { label: "Tutorías", valor: "tutorias", icono: "bi-book" },
@@ -33,7 +29,6 @@ export const CHIPS_CATEGORIA = [
   { label: "Arriendo", valor: "arriendo", icono: "bi-house" },
 ];
 
-// Estado inicial del formulario de publicación de servicio
 export const initialPublicar = {
   titulo: "",
   descripcion: "",
@@ -45,7 +40,6 @@ export const initialPublicar = {
   disponibilidad: "",
 };
 
-// Mapa de nombres de categoría a iconos Bootstrap
 export const mapaIconos = {
   tutorias: "bi-book",
   ensayos: "bi-pencil",
@@ -56,7 +50,6 @@ export const mapaIconos = {
   otros: "bi-globe2",
 };
 
-// Mapa de nombres de categoría a IDs numéricos para la API
 export const mapaCategoriaId = {
   tutorias: 1,
   ensayos: 2,
@@ -71,21 +64,18 @@ export const API_HOME = "/api/services";
 export const API_USUARIO = "/api/users";
 export const API_SOLICITUD = "/api/solicitudes";
 
-// Iconos Bootstrap para cada tipo de modalidad
 export const MAPA_ICONOS_MODALIDAD = {
   Presencial: "bi-building",
   Virtual: "bi-laptop",
   Mixta: "bi-arrow-repeat",
 };
 
-// Iconos Bootstrap para cada tipo de disponibilidad
 export const MAPA_ICONOS_DISPONIBILIDAD = {
   "Entre semana": "bi-calendar-week",
   "Fines de semana": "bi-calendar-event",
   "Siempre disponible": "bi-clock",
 };
 
-// Configuración visual de badges según estado de la solicitud
 export const BADGE = {
   Pendiente: { bg: "#FFF3CD", color: "#856404", texto: "Pendiente", icono: "bi-hourglass-split" },
   Aceptada: { bg: "#D1E7DD", color: "#0A5C36", texto: "Aceptada", icono: "bi-check-circle-fill" },
@@ -93,7 +83,6 @@ export const BADGE = {
   Completada: { bg: "#CCE5FF", color: "#004085", texto: "Completada", icono: "bi-check2-all" },
 };
 
-// Mapa de nombre_categoria (display name) a iconos Bootstrap
 export const ICONOS_POR_NOMBRE_CATEGORIA = {
   "Programación": "bi-code-slash",
   "Diseño": "bi-palette",
@@ -104,13 +93,93 @@ export const ICONOS_POR_NOMBRE_CATEGORIA = {
   "Otros servicios": "bi-globe2",
 };
 
-// Colores distintivos para cada categoría de servicio (fondo, texto)
 export const COLORES_CATEGORIA = {
   "Programación":         { bg: "rgba(96, 165, 250, 0.1)",  color: "#60a5fa" },
   "Diseño":               { bg: "rgba(244, 114, 182, 0.1)", color: "#f472b6" },
   "Tutorías":             { bg: "rgba(167, 139, 250, 0.1)", color: "#a78bfa" },
   "Ensayos y redacción":  { bg: "rgba(251, 191, 36, 0.1)",  color: "#fbbf24" },
-  "Proyectos":            { bg: "rgba(52, 211, 153, 0.1)",  color: "#34d399" },
+  "Proyectos":            { bg: "rgba(52, 211, 153, 0.1)", color: "#34d399" },
   "Arriendo de habitaciones": { bg: "rgba(251, 146, 60, 0.1)", color: "#fb923c" },
   "Otros servicios":      { bg: "rgba(148, 163, 184, 0.1)", color: "#94a3b8" },
 };
+
+// =====================================================
+// CONFIGURACIÓN DE FORMULARIOS DINÁMICOS POR CATEGORÍA
+// =====================================================
+export const CONFIGURACION_FORMULARIOS_SOLICITUD = {
+  tutorias: {
+    titulo: "Solicitar Tutoría",
+    campos: [
+      { nombre: "descripcion", tipo: "textarea", obligatorio: true, label: "¿Qué tema necesitas?", placeholder: "Ej: Necesito ayuda con derivadas parciales..." },
+      { nombre: "fecha_deseada", tipo: "date", obligatorio: true, label: "Fecha preferida" },
+      { nombre: "hora_deseada", tipo: "time", obligatorio: true, label: "Hora preferida" },
+      { nombre: "presupuesto", tipo: "number", obligatorio: true, label: "Presupuesto (COP)", placeholder: "Ej: 50000" },
+      { nombre: "archivo", tipo: "file", obligatorio: false, label: "Adjuntar documento (opcional)", accept: ".pdf,.doc,.docx,.jpg,.png" },
+    ],
+  },
+  ensayos: {
+    titulo: "Solicitar Ensayo",
+    campos: [
+      { nombre: "descripcion", tipo: "textarea", obligatorio: true, label: "Tema del ensayo", placeholder: "Describe el tema y requisitos..." },
+      { nombre: "fecha_deseada", tipo: "date", obligatorio: true, label: "Fecha de entrega" },
+      { nombre: "presupuesto", tipo: "number", obligatorio: true, label: "Presupuesto (COP)", placeholder: "Ej: 80000" },
+      { nombre: "cantidad_paginas", tipo: "select", obligatorio: false, label: "Cantidad de páginas", opciones: ["1-3 páginas", "4-6 páginas", "7-10 páginas", "Más de 10"], placeholder: "Selecciona" },
+      { nombre: "archivo", tipo: "file", obligatorio: false, label: "Instrucciones o guía (opcional)", accept: ".pdf,.doc,.docx" },
+    ],
+  },
+  proyectos: {
+    titulo: "Solicitar Proyecto",
+    campos: [
+      { nombre: "descripcion", tipo: "textarea", obligatorio: true, label: "Describe el proyecto", placeholder: "¿Qué necesitas?" },
+      { nombre: "fecha_deseada", tipo: "date", obligatorio: true, label: "Fecha de entrega" },
+      { nombre: "presupuesto", tipo: "number", obligatorio: true, label: "Presupuesto (COP)", placeholder: "Ej: 150000" },
+      { nombre: "archivo", tipo: "file", obligatorio: false, label: "Requisitos del proyecto (opcional)", accept: ".pdf,.doc,.docx,.xlsx" },
+    ],
+  },
+  programacion: {
+    titulo: "Solicitar Programación",
+    campos: [
+      { nombre: "descripcion", tipo: "textarea", obligatorio: true, label: "¿Qué necesitas programar?", placeholder: "Describe el proyecto o funcionalidad..." },
+      { nombre: "fecha_deseada", tipo: "date", obligatorio: true, label: "Fecha de entrega" },
+      { nombre: "presupuesto", tipo: "number", obligatorio: true, label: "Presupuesto (COP)", placeholder: "Ej: 200000" },
+      { nombre: "lenguaje", tipo: "select", obligatorio: false, label: "Lenguaje preferido", opciones: ["Python", "JavaScript", "Java", "C#", "C++", "Otro"], placeholder: "Selecciona" },
+      { nombre: "archivo", tipo: "file", obligatorio: false, label: "Documentación o enunciado (opcional)", accept: ".pdf,.doc,.docx,.txt,.zip" },
+    ],
+  },
+  diseno: {
+    titulo: "Solicitar Diseño",
+    campos: [
+      { nombre: "descripcion", tipo: "textarea", obligatorio: true, label: "Describe el diseño que necesitas", placeholder: "Logo, banner, presentación..." },
+      { nombre: "fecha_deseada", tipo: "date", obligatorio: true, label: "Fecha de entrega" },
+      { nombre: "presupuesto", tipo: "number", obligatorio: true, label: "Presupuesto (COP)", placeholder: "Ej: 100000" },
+      { nombre: "archivo", tipo: "file", obligatorio: false, label: "Referencias o brief (opcional)", accept: ".pdf,.jpg,.png,.ai,.psd" },
+    ],
+  },
+  arriendo: {
+    titulo: "Solicitar Arriendo",
+    campos: [
+      { nombre: "descripcion", tipo: "textarea", obligatorio: true, label: "¿Qué necesitas?", placeholder: "Ej: Habitación cerca a la universidad con baño privado..." },
+      { nombre: "fecha_inicio", tipo: "date", obligatorio: true, label: "Fecha de inicio" },
+      { nombre: "dias_estadia", tipo: "select", obligatorio: true, label: "Duración de estadía", opciones: ["1-7 días", "1-2 semanas", "1 mes", "2-3 meses", "Semestre completo"], placeholder: "Selecciona" },
+      { nombre: "presupuesto", tipo: "number", obligatorio: true, label: "Presupuesto mensual (COP)", placeholder: "Ej: 500000" },
+    ],
+  },
+  otros: {
+    titulo: "Solicitar Servicio",
+    campos: [
+      { nombre: "descripcion", tipo: "textarea", obligatorio: true, label: "Describe lo que necesitas", placeholder: "Cuéntanos..." },
+      { nombre: "fecha_deseada", tipo: "date", obligatorio: false, label: "Fecha preferida (opcional)" },
+      { nombre: "presupuesto", tipo: "number", obligatorio: true, label: "Presupuesto (COP)", placeholder: "Ej: 50000" },
+    ],
+  },
+};
+
+export function getConfiguracionSolicitud(categoria) {
+  const key = categoria?.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/ de habitaciones/g, "")
+    .replace(/ y redaccion/g, "")
+    .trim();
+
+  return CONFIGURACION_FORMULARIOS_SOLICITUD[key] || CONFIGURACION_FORMULARIOS_SOLICITUD.otros;
+}

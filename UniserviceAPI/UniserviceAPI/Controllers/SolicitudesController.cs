@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Text.Json;
 using UniserviceAPI.Services;
 
 [ApiController]
@@ -41,19 +42,53 @@ public class SolicitudesController : ControllerBase
             if (pendientes > 0)
                 return BadRequest(new { error = "Ya tienes una solicitud pendiente para este servicio." });
 
+            // Obtener categoría del servicio para validación
+            string categoria = "";
+            using var catCmd = new NpgsqlCommand(@"
+                SELECT c.nombre_categoria FROM servicios s
+                LEFT JOIN categorias c ON s.id_categoria = c.id_categoria
+                WHERE s.id_servicio = @id_servicio
+            ", conn);
+            catCmd.Parameters.AddWithValue("@id_servicio", dto.id_servicio);
+            var catResult = await catCmd.ExecuteScalarAsync();
+            categoria = catResult?.ToString()?.ToLower() ?? "";
+
+            // Validar campos obligatorios según categoría
+            var camposRequeridos = GetCamposRequeridosPorCategoria(categoria);
+            foreach (var campo in camposRequeridos)
+            {
+                if (string.IsNullOrEmpty(campo) || campo == "descripcion")
+                {
+                    if (string.IsNullOrEmpty(dto.descripcion))
+                        return BadRequest(new { error = $"El campo 'descripcion' es obligatorio para servicios de {categoria}" });
+                }
+                else if (campo == "presupuesto")
+                {
+                    if (dto.presupuesto <= 0)
+                        return BadRequest(new { error = $"El campo 'presupuesto' es obligatorio para servicios de {categoria}" });
+                }
+            }
+
+            // Serializar campos personalizados a JSONB
+            string camposJson = "{}";
+            if (dto.campos_personalizados != null && dto.campos_personalizados.Count > 0)
+            {
+                camposJson = JsonSerializer.Serialize(dto.campos_personalizados);
+            }
+
             using var insertCmd = new NpgsqlCommand(@"
                 INSERT INTO solicitudes (
                     id_cliente, id_proveedor, id_servicio, fue_aceptada,
                     tipo_servicio, tema, descripcion,
                     fecha_deseada, hora_deseada, duracion, modalidad,
                     metodo_pago, presupuesto, pago_anticipado,
-                    urgencia, archivo, estado
+                    urgencia, archivo, estado, campos_personalizados
                 ) VALUES (
                     @id_cliente, @id_proveedor, @id_servicio, FALSE,
                     @tipo_servicio, @tema, @descripcion,
                     @fecha_deseada, @hora_deseada, @duracion, @modalidad,
                     @metodo_pago, @presupuesto, @pago_anticipado,
-                    @urgencia, @archivo, 'Pendiente'
+                    @urgencia, @archivo, 'Pendiente', @campos_personalizados::jsonb
                 )
                 RETURNING id_solicitud
             ", conn);
@@ -64,24 +99,29 @@ public class SolicitudesController : ControllerBase
             insertCmd.Parameters.Add(new NpgsqlParameter("@tipo_servicio", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = dto.tipo_servicio ?? "" });
             insertCmd.Parameters.Add(new NpgsqlParameter("@tema", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = dto.tema ?? "" });
             insertCmd.Parameters.Add(new NpgsqlParameter("@descripcion", NpgsqlTypes.NpgsqlDbType.Text) { Value = dto.descripcion ?? "" });
-            insertCmd.Parameters.Add(new NpgsqlParameter("@fecha_deseada", NpgsqlTypes.NpgsqlDbType.Date) { Value = dto.fecha_deseada.Date });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@fecha_deseada", NpgsqlTypes.NpgsqlDbType.Date) 
+            { 
+                Value = dto.fecha_deseada.HasValue ? (object)dto.fecha_deseada.Value.Date : DBNull.Value 
+            });
             insertCmd.Parameters.Add(new NpgsqlParameter("@hora_deseada", NpgsqlTypes.NpgsqlDbType.Time)
             {
                 Value = dto.hora_deseada.HasValue ? (object)dto.hora_deseada.Value : DBNull.Value
             });
-            insertCmd.Parameters.Add(new NpgsqlParameter("@duracion", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = dto.duracion ?? "" });
-            insertCmd.Parameters.Add(new NpgsqlParameter("@modalidad", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = dto.modalidad ?? "" });
-            insertCmd.Parameters.Add(new NpgsqlParameter("@metodo_pago", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = dto.metodo_pago ?? "" });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@duracion", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = (object)dto.duracion ?? DBNull.Value });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@modalidad", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = (object)dto.modalidad ?? DBNull.Value });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@metodo_pago", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = (object)dto.metodo_pago ?? DBNull.Value });
             insertCmd.Parameters.Add(new NpgsqlParameter("@presupuesto", NpgsqlTypes.NpgsqlDbType.Numeric) { Value = dto.presupuesto });
             insertCmd.Parameters.Add(new NpgsqlParameter("@pago_anticipado", NpgsqlTypes.NpgsqlDbType.Boolean) { Value = dto.pago_anticipado });
-            insertCmd.Parameters.Add(new NpgsqlParameter("@urgencia", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = dto.urgencia ?? "" });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@urgencia", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = (object)dto.urgencia ?? DBNull.Value });
             insertCmd.Parameters.Add(new NpgsqlParameter("@archivo", NpgsqlTypes.NpgsqlDbType.Varchar)
             {
                 Value = string.IsNullOrEmpty(dto.archivo) ? DBNull.Value : (object)dto.archivo
             });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@campos_personalizados", NpgsqlTypes.NpgsqlDbType.Jsonb) { Value = camposJson });
 
             var idSolicitud = await insertCmd.ExecuteScalarAsync();
 
+            // Email notification
             try
             {
                 using var connEmail = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
@@ -111,7 +151,7 @@ public class SolicitudesController : ControllerBase
                     {
                         try
                         {
-                            Console.WriteLine("📧 Intentando enviar correo a:", emailProveedor);
+                            Console.WriteLine($"📧 Intentando enviar correo a: {emailProveedor}");
                             await _emailService.EnviarNotificacionSolicitud(
                                 emailProveedor,
                                 nombreProveedor ?? "Proveedor",
@@ -147,6 +187,20 @@ public class SolicitudesController : ControllerBase
         }
     }
 
+    private List<string> GetCamposRequeridosPorCategoria(string categoria)
+    {
+        return categoria switch
+        {
+            "tutorías" or "tutorias" => new List<string> { "descripcion", "presupuesto" },
+            "ensayos y redacción" or "ensayos" => new List<string> { "descripcion", "presupuesto" },
+            "proyectos" => new List<string> { "descripcion", "presupuesto" },
+            "programación" or "programacion" => new List<string> { "descripcion", "presupuesto" },
+            "diseño" or "diseno" => new List<string> { "descripcion", "presupuesto" },
+            "arriendo de habitaciones" or "arriendo" => new List<string> { "descripcion", "presupuesto" },
+            _ => new List<string> { "descripcion", "presupuesto" }
+        };
+    }
+
     // 🔹 SOLICITUDES ENVIADAS
     [HttpGet("enviadas/{id}")]
     public async Task<IActionResult> GetEnviadas(int id)
@@ -159,7 +213,8 @@ public class SolicitudesController : ControllerBase
         var cmd = new NpgsqlCommand(@"
             SELECT s.id_solicitud, s.id_servicio, s.estado, s.descripcion,
                    u.nombre AS nombre_proveedor,
-                   se.titulo AS titulo_servicio, se.icono
+                   se.titulo AS titulo_servicio, se.icono,
+                   s.campos_personalizados
             FROM solicitudes s
             INNER JOIN usuarios u ON s.id_proveedor = u.id_usuario
             INNER JOIN servicios se ON s.id_servicio = se.id_servicio
@@ -181,7 +236,9 @@ public class SolicitudesController : ControllerBase
                 descripcion = reader["descripcion"] == DBNull.Value ? "" : reader["descripcion"].ToString(),
                 nombre_proveedor = reader["nombre_proveedor"],
                 titulo_servicio = reader["titulo_servicio"],
-                icono = reader["icono"]
+                icono = reader["icono"],
+                campos_personalizados = reader["campos_personalizados"] != DBNull.Value 
+                    ? reader["campos_personalizados"].ToString() : "{}"
             });
         }
 
@@ -201,7 +258,8 @@ public class SolicitudesController : ControllerBase
             SELECT s.id_solicitud, s.estado, s.descripcion,
                    u.nombre AS nombre_cliente,
                    se.titulo AS titulo_servicio, se.icono,
-                   s.motivo_rechazo, s.contraoferta
+                   s.motivo_rechazo, s.contraoferta,
+                   s.campos_personalizados
             FROM solicitudes s
             INNER JOIN usuarios u ON s.id_cliente = u.id_usuario
             INNER JOIN servicios se ON s.id_servicio = se.id_servicio
@@ -225,6 +283,8 @@ public class SolicitudesController : ControllerBase
                 icono = reader["icono"],
                 motivo_rechazo = reader["motivo_rechazo"] == DBNull.Value ? "" : reader["motivo_rechazo"].ToString(),
                 contraoferta = reader["contraoferta"] == DBNull.Value ? "" : reader["contraoferta"].ToString(),
+                campos_personalizados = reader["campos_personalizados"] != DBNull.Value 
+                    ? reader["campos_personalizados"].ToString() : "{}"
             });
         }
 
@@ -251,8 +311,8 @@ public class SolicitudesController : ControllerBase
         ", conn);
 
         cmd.Parameters.AddWithValue("@estado", estado);
-        cmd.Parameters.AddWithValue("@motivo", dto.motivo_rechazo ?? (object)DBNull.Value);
-        cmd.Parameters.AddWithValue("@contraoferta", dto.contraoferta ?? (object)DBNull.Value);
+        cmd.Parameters.AddWithValue("@motivo", (object)dto.motivo_rechazo ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@contraoferta", dto.contraoferta.HasValue ? (object)dto.contraoferta.Value : DBNull.Value);
         cmd.Parameters.AddWithValue("@fue_aceptada", fueAceptada);
         cmd.Parameters.AddWithValue("@id", dto.id_solicitud);
 
@@ -268,7 +328,6 @@ public class SolicitudesController : ControllerBase
         using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
         await conn.OpenAsync();
 
-        // Solo se puede completar si está "Aceptada"
         var checkCmd = new NpgsqlCommand("SELECT estado FROM solicitudes WHERE id_solicitud = @id", conn);
         checkCmd.Parameters.AddWithValue("@id", dto.id_solicitud);
         var estadoActual = await checkCmd.ExecuteScalarAsync();
@@ -288,7 +347,6 @@ public class SolicitudesController : ControllerBase
         return Ok(new { message = "Servicio marcado como completado. El cliente ya puede calificar." });
     }
 
-
     // 🔹 VERIFICAR SI YA EXISTE SOLICITUD
     [HttpGet("verificar")]
     public async Task<IActionResult> Verificar([FromQuery] int id_cliente, [FromQuery] int id_servicio)
@@ -296,12 +354,11 @@ public class SolicitudesController : ControllerBase
         using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
         await conn.OpenAsync();
 
-        // Excluir completadas y rechazadas para permitir nuevas solicitudes
         var cmd = new NpgsqlCommand(@"
-        SELECT COUNT(*) FROM solicitudes
-        WHERE id_cliente = @id_cliente AND id_servicio = @id_servicio
-        AND estado NOT IN ('Rechazada', 'Cancelada', 'Completada')
-    ", conn);
+            SELECT COUNT(*) FROM solicitudes
+            WHERE id_cliente = @id_cliente AND id_servicio = @id_servicio
+            AND estado NOT IN ('Rechazada', 'Cancelada', 'Completada')
+        ", conn);
 
         cmd.Parameters.AddWithValue("@id_cliente", id_cliente);
         cmd.Parameters.AddWithValue("@id_servicio", id_servicio);
@@ -317,12 +374,11 @@ public class SolicitudesController : ControllerBase
         using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
         await conn.OpenAsync();
 
-        // Solo se pueden eliminar solicitudes pendientes o rechazadas
         var cmd = new NpgsqlCommand(@"
-        DELETE FROM solicitudes
-        WHERE id_cliente = @id_cliente AND id_servicio = @id_servicio
-        AND estado IN ('Pendiente', 'Rechazada')
-    ", conn);
+            DELETE FROM solicitudes
+            WHERE id_cliente = @id_cliente AND id_servicio = @id_servicio
+            AND estado IN ('Pendiente', 'Rechazada')
+        ", conn);
 
         cmd.Parameters.AddWithValue("@id_cliente", id_cliente);
         cmd.Parameters.AddWithValue("@id_servicio", id_servicio);
@@ -333,5 +389,4 @@ public class SolicitudesController : ControllerBase
 
         return Ok(new { message = "Solicitud eliminada" });
     }
-
 }

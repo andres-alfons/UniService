@@ -34,6 +34,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 );
 
 builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<SupabaseStorageService>();
+builder.Services.AddHttpClient();
 
 // 3. Configuración de CORS
 // IMPORTANTE: Se agregan los puertos 5173 y 5174 por si Vite cambia de puerto automáticamente

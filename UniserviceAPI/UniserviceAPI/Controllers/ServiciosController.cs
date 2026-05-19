@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UniserviceAPI.DTOs;
+using UniserviceAPI.Services;
 using System.Linq;
 
 [ApiController]
@@ -12,10 +13,12 @@ using System.Linq;
 public class ServicesController : ControllerBase
 {
     private readonly IConfiguration _config;
+    private readonly SupabaseStorageService _storageService;
 
-    public ServicesController(IConfiguration config)
+    public ServicesController(IConfiguration config, SupabaseStorageService storageService)
     {
         _config = config;
+        _storageService = storageService;
     }
 
     // =========================
@@ -65,8 +68,6 @@ public class ServicesController : ControllerBase
                 double prom = (double)reader["promedio_estrellas"];
                 int numResenas = Convert.ToInt32(reader["num_resenas"]);
 
-                // Construimos el array de estrellas que espera el frontend
-                // (repite el promedio tantas veces como reseñas, que es lo que usa calcularEstrellas())
                 var estrellasArr = Enumerable.Repeat(prom, numResenas).ToArray();
 
                 servicios.Add(new
@@ -94,6 +95,7 @@ public class ServicesController : ControllerBase
             return StatusCode(500, new { error = ex.Message });
         }
     }
+
     // =========================
     // GET POR ID
     // =========================
@@ -105,7 +107,7 @@ public class ServicesController : ControllerBase
             using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            // 1. Datos del servicio
+            // 1. Datos del servicio (incluyendo ubicación)
             using var cmd = new NpgsqlCommand(@"
             SELECT 
                 s.id_servicio,
@@ -120,7 +122,10 @@ public class ServicesController : ControllerBase
                 s.disponibilidad,
                 c.nombre_categoria,
                 u.nombre AS proveedor,
-                u.universidad
+                u.universidad,
+                s.ubicacion_lat,
+                s.ubicacion_lng,
+                s.direccion
             FROM servicios s
             LEFT JOIN usuarios u ON s.id_proveedor = u.id_usuario
             LEFT JOIN categorias c ON s.id_categoria = c.id_categoria
@@ -135,7 +140,6 @@ public class ServicesController : ControllerBase
                 return NotFound(new { error = "Servicio no encontrado" });
             }
 
-            // Conversiones seguras para evitar excepciones por tipos nulos
             int idServicio = reader["id_servicio"] != DBNull.Value ? Convert.ToInt32(reader["id_servicio"]) : 0;
             int idProveedor = reader["id_proveedor"] != DBNull.Value ? Convert.ToInt32(reader["id_proveedor"]) : 0;
             DateTime fechaPub = reader["fecha_publicacion"] != DBNull.Value ? Convert.ToDateTime(reader["fecha_publicacion"]) : DateTime.Now;
@@ -154,11 +158,36 @@ public class ServicesController : ControllerBase
                 disponibilidad = MapDisponibilidad(reader["disponibilidad"]),
                 nombre_categoria = reader["nombre_categoria"]?.ToString() ?? "",
                 proveedor = reader["proveedor"]?.ToString() ?? "Proveedor anónimo",
-                universidad = reader["universidad"]?.ToString() ?? ""
+                universidad = reader["universidad"]?.ToString() ?? "",
+                ubicacion_lat = reader["ubicacion_lat"] != DBNull.Value ? Convert.ToDecimal(reader["ubicacion_lat"]) : (decimal?)null,
+                ubicacion_lng = reader["ubicacion_lng"] != DBNull.Value ? Convert.ToDecimal(reader["ubicacion_lng"]) : (decimal?)null,
+                direccion = reader["direccion"]?.ToString() ?? ""
             };
             reader.Close();
 
-            // 2. Reseñas
+            // 2. Imágenes del servicio (galería real)
+            var imagenes = new List<object>();
+            using var cmdImagenes = new NpgsqlCommand(@"
+                SELECT id_imagen, url_imagen, es_principal, fecha_subida
+                FROM servicios_imagenes
+                WHERE id_servicio = @id
+                ORDER BY es_principal DESC, id_imagen ASC
+            ", conn);
+            cmdImagenes.Parameters.AddWithValue("@id", id);
+            using var rImagenes = await cmdImagenes.ExecuteReaderAsync();
+            while (await rImagenes.ReadAsync())
+            {
+                imagenes.Add(new
+                {
+                    id_imagen = rImagenes["id_imagen"],
+                    url_imagen = rImagenes["url_imagen"],
+                    es_principal = Convert.ToBoolean(rImagenes["es_principal"]),
+                    fecha_subida = rImagenes["fecha_subida"]
+                });
+            }
+            rImagenes.Close();
+
+            // 3. Reseñas
             using var cmdResenas = new NpgsqlCommand(@"
             SELECT 
                 c.puntuacion,
@@ -189,7 +218,6 @@ public class ServicesController : ControllerBase
             }
             rReader.Close();
 
-            // 3. Promedio
             double prom = resenas.Count > 0
                 ? resenas.Average(r => (double)((dynamic)r).estrellas)
                 : 0;
@@ -209,6 +237,10 @@ public class ServicesController : ControllerBase
                 servicio.nombre_categoria,
                 servicio.proveedor,
                 servicio.universidad,
+                servicio.ubicacion_lat,
+                servicio.ubicacion_lng,
+                servicio.direccion,
+                imagenes,
                 resenas,
                 estrellas = prom.ToString("0.0")
             });
@@ -232,9 +264,10 @@ public class ServicesController : ControllerBase
 
             using var cmd = new NpgsqlCommand(@"
                 INSERT INTO servicios
-                (id_proveedor, titulo, descripcion, id_categoria, precio_hora, contacto, modalidad, icono, disponibilidad, fecha_publicacion)
+                (id_proveedor, titulo, descripcion, id_categoria, precio_hora, contacto, modalidad, icono, disponibilidad, fecha_publicacion, ubicacion_lat, ubicacion_lng, direccion)
                 VALUES
-                (@id_proveedor, @titulo, @descripcion, @id_categoria, @precio_hora, @contacto, @modalidad, @icono, @disponibilidad, NOW())
+                (@id_proveedor, @titulo, @descripcion, @id_categoria, @precio_hora, @contacto, @modalidad, @icono, @disponibilidad, NOW(), @ubicacion_lat, @ubicacion_lng, @direccion)
+                RETURNING id_servicio
             ", conn);
 
             cmd.Parameters.AddWithValue("@id_proveedor", dto.id_proveedor);
@@ -246,10 +279,109 @@ public class ServicesController : ControllerBase
             cmd.Parameters.AddWithValue("@modalidad", dto.modalidad);
             cmd.Parameters.AddWithValue("@icono", dto.icono ?? "📌");
             cmd.Parameters.AddWithValue("@disponibilidad", dto.disponibilidad);
+            cmd.Parameters.AddWithValue("@ubicacion_lat", dto.ubicacion_lat.HasValue ? (object)dto.ubicacion_lat.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@ubicacion_lng", dto.ubicacion_lng.HasValue ? (object)dto.ubicacion_lng.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@direccion", (object)dto.direccion ?? DBNull.Value);
 
-            await cmd.ExecuteNonQueryAsync();
+            var idServicio = await cmd.ExecuteScalarAsync();
 
-            return Ok(new { ok = true, message = "Servicio creado correctamente" });
+            return Ok(new { ok = true, message = "Servicio creado correctamente", id_servicio = idServicio });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    // =========================
+    // SUBIR IMÁGENES DE SERVICIO (máx 5)
+    // =========================
+    [HttpPost("{id}/imagenes")]
+    public async Task<IActionResult> SubirImagenes(int id, List<IFormFile> imagenes)
+    {
+        try
+        {
+            if (imagenes == null || imagenes.Count == 0)
+                return BadRequest(new { error = "No se recibieron imágenes" });
+
+            if (imagenes.Count > 5)
+                return BadRequest(new { error = "Máximo 5 imágenes por servicio" });
+
+            // Validar tipo y tamaño
+            var tiposPermitidos = new[] { "image/jpeg", "image/png", "image/webp" };
+            long tamanoMaximo = 5 * 1024 * 1024; // 5MB
+
+            foreach (var imagen in imagenes)
+            {
+                if (!tiposPermitidos.Contains(imagen.ContentType))
+                    return BadRequest(new { error = "Solo se permiten imágenes JPG, PNG o WebP" });
+                
+                if (imagen.Length > tamanoMaximo)
+                    return BadRequest(new { error = "Cada imagen debe ser menor a 5MB" });
+            }
+
+            // Subir a Supabase Storage
+            var urls = await _storageService.SubirMultiplesImagenesAsync(id, imagenes);
+
+            // Guardar URLs en la base de datos
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            foreach (var url in urls)
+            {
+                using var cmd = new NpgsqlCommand(@"
+                    INSERT INTO servicios_imagenes (id_servicio, url_imagen, es_principal)
+                    VALUES (@id_servicio, @url, @es_principal)
+                ", conn);
+                cmd.Parameters.AddWithValue("@id_servicio", id);
+                cmd.Parameters.AddWithValue("@url", url);
+                // La primera imagen es principal, las demás no
+                cmd.Parameters.AddWithValue("@es_principal", urls.IndexOf(url) == 0);
+                await cmd.ExecuteNonQueryAsync();
+            }
+
+            return Ok(new { ok = true, message = "Imágenes subidas correctamente", urls });
+        }
+        catch (NpgsqlException ex) when (ex.Message.Contains("más de 5 imágenes"))
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    // =========================
+    // ELIMINAR IMAGEN DE SERVICIO
+    // =========================
+    [HttpDelete("{idServicio}/imagenes/{idImagen}")]
+    public async Task<IActionResult> EliminarImagen(int idServicio, int idImagen)
+    {
+        try
+        {
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            // Obtener URL de la imagen
+            using var cmdGet = new NpgsqlCommand("SELECT url_imagen FROM servicios_imagenes WHERE id_imagen = @id AND id_servicio = @id_servicio", conn);
+            cmdGet.Parameters.AddWithValue("@id", idImagen);
+            cmdGet.Parameters.AddWithValue("@id_servicio", idServicio);
+            var urlImagen = await cmdGet.ExecuteScalarAsync() as string;
+
+            if (string.IsNullOrEmpty(urlImagen))
+                return NotFound(new { error = "Imagen no encontrada" });
+
+            // Eliminar de Supabase Storage
+            await _storageService.EliminarImagenAsync(urlImagen);
+
+            // Eliminar de la base de datos
+            using var cmdDelete = new NpgsqlCommand("DELETE FROM servicios_imagenes WHERE id_imagen = @id AND id_servicio = @id_servicio", conn);
+            cmdDelete.Parameters.AddWithValue("@id", idImagen);
+            cmdDelete.Parameters.AddWithValue("@id_servicio", idServicio);
+            await cmdDelete.ExecuteNonQueryAsync();
+
+            return Ok(new { ok = true, message = "Imagen eliminada" });
         }
         catch (Exception ex)
         {
@@ -291,8 +423,6 @@ public class ServicesController : ControllerBase
         };
     }
 
-
-
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] EditarServicioDTO dto)
     {
@@ -307,7 +437,10 @@ public class ServicesController : ControllerBase
                 descripcion = @descripcion,
                 precio_hora = @precio_hora,
                 contacto = @contacto,
-                icono = @icono
+                icono = @icono,
+                ubicacion_lat = @ubicacion_lat,
+                ubicacion_lng = @ubicacion_lng,
+                direccion = @direccion
             WHERE id_servicio = @id AND id_proveedor = @id_proveedor
         ", conn);
 
@@ -318,6 +451,9 @@ public class ServicesController : ControllerBase
             cmd.Parameters.AddWithValue("@precio_hora", dto.precio_hora);
             cmd.Parameters.AddWithValue("@contacto", dto.contacto ?? "");
             cmd.Parameters.AddWithValue("@icono", dto.icono ?? "");
+            cmd.Parameters.AddWithValue("@ubicacion_lat", dto.ubicacion_lat.HasValue ? (object)dto.ubicacion_lat.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@ubicacion_lng", dto.ubicacion_lng.HasValue ? (object)dto.ubicacion_lng.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@direccion", (object)dto.direccion ?? DBNull.Value);
 
             int filas = await cmd.ExecuteNonQueryAsync();
             if (filas == 0)

@@ -1,31 +1,31 @@
-﻿// ════════════════════════════════════════════════════════════════
-// FORMULARIO DE PUBLICACIÓN DE SERVICIOS
-// Permite a usuarios autenticados publicar un nuevo servicio
-// con título, descripción, categoría, precio, universidad,
-// contacto, modalidad y disponibilidad.
-// ════════════════════════════════════════════════════════════════
-import { useState } from "react";
+﻿import { useState, useRef } from "react";
 import { CATEGORIAS, MODALIDADES, DISPONIBILIDAD, initialPublicar, API_HOME, mapaIconos, mapaCategoriaId, MAPA_ICONOS_MODALIDAD, MAPA_ICONOS_DISPONIBILIDAD } from "../shared/constantes";
+import GoogleMapsAutocomplete from "../../Components/GoogleMapsAutocomplete";
 
 export default function SeccionPublicar({ onPublicado }) {
-  // ── Estados del formulario ──
   const [form, setForm] = useState(initialPublicar);
   const [loading, setLoading] = useState(false);
-  const [tipoContacto, setTipoContacto] = useState("");       // "telefono" | "correo"
+  const [tipoContacto, setTipoContacto] = useState("");
   const [errorCampo, setErrorCampo] = useState("");
   const [modalExito, setModalExito] = useState(false);
   const [modalError, setModalError] = useState(null);
-  const [tipoUniversidad, setTipoUniversidad] = useState(""); // "upc" | "otra" | "ninguna"
+  const [tipoUniversidad, setTipoUniversidad] = useState("");
   const [otraUniversidad, setOtraUniversidad] = useState("");
 
-  // ── Maneja cambios genéricos en inputs/selects ──
+  // Imágenes del servicio
+  const [imagenes, setImagenes] = useState([]);
+  const [imagenesPreview, setImagenesPreview] = useState([]);
+  const fileInputRef = useRef(null);
+
+  // Ubicación para arriendo
+  const [ubicacion, setUbicacion] = useState(null);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
     if (errorCampo) setErrorCampo("");
   };
 
-  // ── Selecciona tipo de universidad (UPC, otra o ninguna) ──
   const handleTipoUniversidad = (tipo) => {
     setTipoUniversidad(tipo);
     if (tipo === "upc") {
@@ -45,22 +45,47 @@ export default function SeccionPublicar({ onPublicado }) {
     setForm((prev) => ({ ...prev, universidad: val }));
   };
 
-  // ── Valida el campo de contacto según el tipo seleccionado ──
+  // Manejo de imágenes
+  const handleImagenesChange = (e) => {
+    const files = Array.from(e.target.files);
+    const nuevasImagenes = files.slice(0, 5 - imagenes.length);
+    
+    if (imagenes.length + nuevasImagenes.length > 5) {
+      setModalError("Máximo 5 imágenes permitidas");
+      return;
+    }
+
+    const previews = nuevasImagenes.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+
+    setImagenes((prev) => [...prev, ...nuevasImagenes]);
+    setImagenesPreview((prev) => [...prev, ...previews]);
+  };
+
+  const eliminarImagen = (index) => {
+    URL.revokeObjectURL(imagenesPreview[index].preview);
+    setImagenes((prev) => prev.filter((_, i) => i !== index));
+    setImagenesPreview((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const validarContacto = () => {
     const { contacto } = form;
     if (!contacto) return "El campo de contacto es obligatorio";
     if (tipoContacto === "telefono") {
-      const soloNumeros = contacto.replace(/\D/g, "");
-      if (soloNumeros.length !== 10) return "Ingresa un numero de telefono valido de 10 digitos";
-      if (!/^[0-9]{10}$/.test(soloNumeros)) return "El telefono debe contener exactamente 10 digitos";
+      if (!/^[0-9]{10}$/.test(contacto)) return "El telefono debe contener exactamente 10 digitos";
     } else if (tipoContacto === "correo") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(contacto.trim())) return "Ingresa un correo electronico valido (ejemplo@correo.com)";
+      if (!emailRegex.test(contacto.trim())) return "Ingresa un correo electronico valido";
     }
     return "";
   };
 
-  // ── Envía el formulario al backend ──
+  const handleLocationSelect = (loc) => {
+    setUbicacion(loc);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { titulo, descripcion, categoria, precio, universidad, contacto, modalidad, disponibilidad } = form;
@@ -73,16 +98,15 @@ export default function SeccionPublicar({ onPublicado }) {
       setModalError("Selecciona si tu contacto es por telefono o correo electronico.");
       return;
     }
-    if (tipoContacto === "telefono") {
-      const soloNumeros = contacto.replace(/\D/g, "");
-      if (soloNumeros.length !== 10) {
-        setModalError("El numero de telefono debe tener exactamente 10 digitos (formato Colombia).");
-        return;
-      }
-    }
     const errorContacto = validarContacto();
     if (errorContacto) { setModalError(errorContacto); return; }
     if (Number(precio) < 1000) { setModalError("El precio minimo debe ser $1,000 COP."); return; }
+
+    // Validar ubicación para arriendo
+    if (categoria === "arriendo" && !ubicacion) {
+      setModalError("Para servicios de arriendo debes seleccionar una ubicación en el mapa.");
+      return;
+    }
 
     const proveedor = localStorage.getItem("usuarioId");
     if (!proveedor) { setModalError("Debes iniciar sesion para publicar un servicio."); return; }
@@ -97,6 +121,9 @@ export default function SeccionPublicar({ onPublicado }) {
       precio_hora: Number(precio), contacto, universidad,
       modalidad: modalidadDB, disponibilidad: dispDB,
       icono: mapaIconos[categoria] || "bi-pin",
+      ubicacion_lat: ubicacion?.lat || null,
+      ubicacion_lng: ubicacion?.lng || null,
+      direccion: ubicacion?.direccion || null,
     };
 
     setLoading(true);
@@ -107,12 +134,33 @@ export default function SeccionPublicar({ onPublicado }) {
         body: JSON.stringify(nuevoServicio),
       });
       const data = await res.json();
+      
       if (data.ok) {
+        const idServicio = data.id_servicio;
+
+        // Subir imágenes si existen
+        if (imagenes.length > 0 && idServicio) {
+          const formData = new FormData();
+          imagenes.forEach((img) => formData.append("imagenes", img));
+          
+          try {
+            await fetch(`${API_HOME}/${idServicio}/imagenes`, {
+              method: "POST",
+              body: formData,
+            });
+          } catch (imgErr) {
+            console.error("Error subiendo imágenes:", imgErr);
+          }
+        }
+
         setModalExito(true);
         setForm(initialPublicar);
         setTipoContacto("");
         setTipoUniversidad("");
         setOtraUniversidad("");
+        setImagenes([]);
+        setImagenesPreview([]);
+        setUbicacion(null);
         onPublicado();
       } else {
         setModalError("Error: " + (data.error || "No se pudo publicar el servicio."));
@@ -126,9 +174,8 @@ export default function SeccionPublicar({ onPublicado }) {
 
   const cerrarModalExito = () => setModalExito(false);
 
-  // ══════════════════════════════════════════════════════
-  // RENDERIZADO
-  // ══════════════════════════════════════════════════════
+  const esArriendo = form.categoria === "arriendo";
+
   return (
     <>
       <section className="seccion section-dynamic" id="publicar">
@@ -169,6 +216,60 @@ export default function SeccionPublicar({ onPublicado }) {
                 <div className="form-grupo">
                   <label className="form-label">Precio (COP/hora) *</label>
                   <input type="number" name="precio" className="form-input" placeholder="Ej: 30000" min="1000" value={form.precio} onChange={handleChange} />
+                </div>
+              </div>
+            </fieldset>
+
+            {/* GOOGLE MAPS - SOLO PARA ARRIENDO */}
+            {esArriendo && (
+              <fieldset className="contacto-fieldset">
+                <legend className="legend-custom">
+                  <i className="bi bi-geo-alt-fill"></i> Ubicacion del inmueble
+                </legend>
+                <GoogleMapsAutocomplete onLocationSelect={handleLocationSelect} />
+              </fieldset>
+            )}
+
+            {/* GALERÍA DE IMÁGENES */}
+            <fieldset className="contacto-fieldset">
+              <legend className="legend-custom">
+                <i className="bi bi-images"></i> Imagenes del servicio (max 5)
+              </legend>
+              <div className="imagenes-upload-area">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImagenesChange}
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  style={{ display: "none" }}
+                />
+                
+                {imagenesPreview.length < 5 && (
+                  <button
+                    type="button"
+                    className="btn-upload-imagen"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <i className="bi bi-plus-lg"></i>
+                    <span>Agregar imagen</span>
+                  </button>
+                )}
+
+                <div className="imagenes-preview-grid">
+                  {imagenesPreview.map((img, index) => (
+                    <div key={index} className="imagen-preview-item">
+                      <img src={img.preview} alt={`Preview ${index + 1}`} />
+                      <button
+                        type="button"
+                        className="btn-eliminar-imagen"
+                        onClick={() => eliminarImagen(index)}
+                      >
+                        <i className="bi bi-x-lg"></i>
+                      </button>
+                      {index === 0 && <span className="badge-principal">Principal</span>}
+                    </div>
+                  ))}
                 </div>
               </div>
             </fieldset>
@@ -283,7 +384,7 @@ export default function SeccionPublicar({ onPublicado }) {
                     "Publicar servicio"
                   )}
                 </button>
-                <button type="button" className="btn btn-borde" onClick={() => { setForm(initialPublicar); setTipoContacto(""); setTipoUniversidad(""); setOtraUniversidad(""); }}>
+                <button type="button" className="btn btn-borde" onClick={() => { setForm(initialPublicar); setTipoContacto(""); setTipoUniversidad(""); setOtraUniversidad(""); setImagenes([]); setImagenesPreview([]); setUbicacion(null); }}>
                   Limpiar
                 </button>
               </div>
@@ -293,7 +394,6 @@ export default function SeccionPublicar({ onPublicado }) {
       </div>
     </section>
 
-      {/* Modal de éxito: se muestra tras publicar correctamente */}
       {modalExito && (
         <div className="modal-overlay" onClick={cerrarModalExito}>
           <div className="modal-content modal-exito" onClick={(e) => e.stopPropagation()}>
@@ -305,7 +405,6 @@ export default function SeccionPublicar({ onPublicado }) {
         </div>
       )}
 
-      {/* Modal de error: muestra el mensaje de error correspondiente */}
       {modalError && (
         <div className="modal-overlay" onClick={() => setModalError(null)}>
           <div className="modal-content modal-error" onClick={(e) => e.stopPropagation()}>

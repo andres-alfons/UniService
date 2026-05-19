@@ -1,9 +1,3 @@
-// ════════════════════════════════════════════════════════════════
-// PÁGINA DE DETALLE DE SERVICIO
-// Muestra la información completa de un servicio: galería de
-// iconos, descripción, valoración, reseñas, datos del proveedor,
-// formulario de solicitud y calificación.
-// ════════════════════════════════════════════════════════════════
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { formatearFecha, calcularEstrellas, iniciales } from "../utils/helpers";
@@ -14,6 +8,7 @@ import Navbar from "./Servicio/BarraNavegacionServicio";
 import Skeleton from "./Servicio/Cargando";
 import FormSolicitud from "./Servicio/FormularioSolicitud";
 import FormCalificacion from "./Servicio/FormularioCalificacion";
+import MapaModal from "../Components/MapaModal";
 import { mostrarModalidad, mostrarDisponibilidad, colorAvatar } from "./Servicio/utilidades";
 import BotonTema from "../Components/B_StyleHome";
 
@@ -23,75 +18,42 @@ const API_USUARIO = "/api/users";
 export default function Servicio() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const idServicio = params.get("id"); // ID del servicio desde la URL
+  const idServicio = params.get("id");
 
   const [servicio, setServicio] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(false);
-  const [imagenActual, setImagenActual] = useState(0); // Índice de la galería
-  const [recargarResenas, setRecargarResenas] = useState(0); // Trigger para recargar reseñas
-  const [modal, setModal] = useState({
-    show: false,
-    type: "",
-    message: "",
-  });
+  const [imagenActual, setImagenActual] = useState(0);
+  const [recargarResenas, setRecargarResenas] = useState(0);
+  const [modalMapa, setModalMapa] = useState(false);
+  const [modal, setModal] = useState({ show: false, type: "", message: "" });
 
-  // ── Modal de notificación que se auto-cierra a los 3 segundos ──
   const showModal = (type, message) => {
-    setModal({
-      show: true,
-      type,
-      message,
-    });
-
-    setTimeout(() => {
-      setModal({ show: false, type: "", message: "" });
-    }, 3000);
+    setModal({ show: true, type, message });
+    setTimeout(() => setModal({ show: false, type: "", message: "" }), 3000);
   };
 
-  // ── Redirige al login si no hay sesión activa ──
   useEffect(() => {
-    if (localStorage.getItem("logueado") !== "true") {
-      navigate("/login");
-    }
+    if (localStorage.getItem("logueado") !== "true") navigate("/login");
   }, [navigate]);
 
-  // ── Carga los datos del servicio desde la API ──
   useEffect(() => {
-    if (!idServicio) {
-      setError(true);
-      setCargando(false);
-      return;
-    }
+    if (!idServicio) { setError(true); setCargando(false); return; }
 
     fetch(`${API}/${idServicio}`)
       .then((res) => {
-        if (!res.ok) {
-          return res.json().then(err => {
-            console.error("Error API:", err);
-            throw new Error(err.error || "Servicio no encontrado");
-          });
-        }
+        if (!res.ok) return res.json().then(err => { throw new Error(err.error || "Servicio no encontrado"); });
         return res.json();
       })
       .then((data) => {
-        console.log("Datos del servicio:", data);
         const s = Array.isArray(data) ? data[0] : data;
-        if (!s || !s.id_servicio) {
-          setError(true);
-          return;
-        }
+        if (!s || !s.id_servicio) { setError(true); return; }
         setServicio(s);
       })
-      .catch((err) => {
-        console.error("Error cargando servicio:", err);
-        setError(true);
-      })
+      .catch((err) => { console.error("Error cargando servicio:", err); setError(true); })
       .finally(() => setCargando(false));
-    // recargarResenas cambia para refrescar después de una nueva reseña
-    }, [idServicio, recargarResenas]);
+  }, [idServicio, recargarResenas]);
 
-  // ── Cierra sesión: marca usuario como desconectado en BD y limpia localStorage ──
   const handleCerrarSesion = async () => {
     const id = localStorage.getItem("usuarioId");
     try {
@@ -109,54 +71,24 @@ export default function Servicio() {
     return (
       <>
         <Navbar onCerrarSesion={handleCerrarSesion} />
-        <div className="container" style={{ padding: "80px 24px" }}>
-          <Skeleton />
-        </div>
+        <div className="container" style={{ padding: "80px 24px" }}><Skeleton /></div>
       </>
     );
-
-  function formatearFecha(fechaISO) {
-    if (!fechaISO) return "—";
-    try {
-      const partes = fechaISO.split("T")[0].split("-");
-      if (partes.length !== 3) return "—";
-      const fecha = new Date(+partes[0], +partes[1] - 1, +partes[2]);
-      if (isNaN(fecha.getTime())) return "—";
-      return fecha.toLocaleDateString("es-CO", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    } catch {
-      return "—";
-    }
-  }
 
   if (error || !servicio)
     return (
       <>
         <Navbar onCerrarSesion={handleCerrarSesion} />
-        <div
-          className="container"
-          style={{ textAlign: "center", padding: "80px 24px" }}
-        >
+        <div className="container" style={{ textAlign: "center", padding: "80px 24px" }}>
           <p style={{ fontSize: "3rem" }}>😕</p>
           <h2>Servicio no encontrado</h2>
-          <p className="texto-muted" style={{ margin: "12px 0 24px" }}>
-            El servicio que buscas no existe o fue eliminado.
-          </p>
-          <a href="/home" className="btn btn-verde">
-            ← Volver al inicio
-          </a>
+          <p className="texto-muted" style={{ margin: "12px 0 24px" }}>El servicio que buscas no existe o fue eliminado.</p>
+          <a href="/home" className="btn btn-verde">← Volver al inicio</a>
         </div>
       </>
     );
 
-  const {
-      texto: estrellasTexto,
-      prom,
-     num,
-  } = calcularEstrellas(servicio.resenas);
+  const { texto: estrellasTexto, prom, num } = calcularEstrellas(servicio.resenas);
 
   const universidad =
     servicio.universidad === 1 || servicio.universidad === "1"
@@ -167,7 +99,20 @@ export default function Servicio() {
       ? `${servicio.universidad}`
       : "Comunidad académica";
 
-  const iconosGaleria = [servicio.icono?.startsWith("bi-") ? servicio.icono : "bi-pin", "bi-display", "bi-keyboard", "bi-tools"];
+  const tieneUbicacion = servicio.ubicacion_lat && servicio.ubicacion_lng;
+  const esArriendo = servicio.nombre_categoria?.toLowerCase().includes("arriendo");
+
+  // Galería: usar imágenes reales si existen, sino usar iconos fallback
+  const imagenes = servicio.imagenes && servicio.imagenes.length > 0
+    ? servicio.imagenes
+    : null;
+
+  const iconosGaleria = [
+    servicio.icono?.startsWith("bi-") ? servicio.icono : "bi-pin",
+    "bi-display",
+    "bi-keyboard",
+    "bi-tools",
+  ];
 
   return (
     <>
@@ -186,49 +131,87 @@ export default function Servicio() {
       </section>
 
       <main className="container" style={{ marginBottom: "80px" }}>
-        <div className="grid-detalle">
+        <div className="grid_detalle">
           <div>
+            {/* GALERÍA DE IMÁGENES */}
             <div className="galeria-principal">
-              <div className="imagen-grande"><i className={`bi ${iconosGaleria[imagenActual]}`}></i></div>
-              <div className="galeria-miniaturas">
-                {iconosGaleria.map((icono, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    className={`miniatura${imagenActual === i ? " activa" : ""}`}
-                    onClick={() => setImagenActual(i)}
-                  >
-                    <i className={`bi ${icono}`}></i>
-                  </button>
-                ))}
-              </div>
+              {imagenes ? (
+                <>
+                  <div className="imagen-grande imagen-grande-real">
+                    <img
+                      src={imagenes[imagenActual]?.url_imagen || ""}
+                      alt={servicio.titulo}
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                        e.target.parentElement.innerHTML = `<i class="bi ${iconosGaleria[0]}"></i>`;
+                      }}
+                    />
+                  </div>
+                  <div className="galeria-miniaturas">
+                    {imagenes.map((img, i) => (
+                      <button
+                        key={img.id_imagen || i}
+                        type="button"
+                        className={`miniatura${imagenActual === i ? " activa" : ""}`}
+                        onClick={() => setImagenActual(i)}
+                      >
+                        <img src={img.url_imagen} alt={`Imagen ${i + 1}`} />
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="imagen-grande">
+                    <i className={`bi ${iconosGaleria[imagenActual]}`}></i>
+                  </div>
+                  <div className="galeria-miniaturas">
+                    {iconosGaleria.map((icono, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        className={`miniatura${imagenActual === i ? " activa" : ""}`}
+                        onClick={() => setImagenActual(i)}
+                      >
+                        <i className={`bi ${icono}`}></i>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
 
+            {/* BOTÓN VER EN MAPA (solo arriendo con ubicación) */}
+            {esArriendo && tieneUbicacion && (
+              <button
+                className="btn-ver-mapa"
+                onClick={() => setModalMapa(true)}
+              >
+                <i className="bi bi-geo-alt-fill"></i> Ver ubicación en el mapa
+              </button>
+            )}
+
             <div className="info-principal">
-                <div className="header-servicio">
-                  <div className="titulo-servicio">
-                    <h1>{servicio.titulo || "Sin título"}</h1>
-                    {servicio.nombre_categoria && (() => {
-                      const c = COLORES_CATEGORIA[servicio.nombre_categoria] || { bg: "rgba(148, 163, 184, 0.1)", color: "#94a3b8" };
-                      return (
-                        <span className="etiqueta" style={{ background: c.bg, color: c.color, border: `1px solid ${c.color}33` }}>
-                          {servicio.nombre_categoria}
-                        </span>
-                      );
-                    })()}
-                  </div>
+              <div className="header-servicio">
+                <div className="titulo-servicio">
+                  <h1>{servicio.titulo || "Sin título"}</h1>
+                  {servicio.nombre_categoria && (() => {
+                    const c = COLORES_CATEGORIA[servicio.nombre_categoria] || { bg: "rgba(148, 163, 184, 0.1)", color: "#94a3b8" };
+                    return (
+                      <span className="etiqueta" style={{ background: c.bg, color: c.color, border: `1px solid ${c.color}33` }}>
+                        {servicio.nombre_categoria}
+                      </span>
+                    );
+                  })()}
                 </div>
+              </div>
 
               <div className="rating-grande">
                 <div>
                   <div className="estrellas-grande">{estrellasTexto}</div>
-                  <div className="texto-rating">
-                    <strong>{prom}</strong> de 5.0
-                  </div>
+                  <div className="texto-rating"><strong>{prom}</strong> de 5.0</div>
                 </div>
-                <div className="texto-rating">
-                  <div>{num} reseñas</div>
-                </div>
+                <div className="texto-rating"><div>{num} reseñas</div></div>
               </div>
 
               <div className="desc-completa">
@@ -240,21 +223,15 @@ export default function Servicio() {
               <h3><i className="bi bi-card-checklist"></i> Detalles del Servicio</h3>
               <div className="info-row">
                 <span className="info-label">Modalidad</span>
-                <span className="info-valor">
-                  {mostrarModalidad(servicio.modalidad)}
-                </span>
+                <span className="info-valor">{mostrarModalidad(servicio.modalidad)}</span>
               </div>
               <div className="info-row">
                 <span className="info-label">Disponibilidad</span>
-                <span className="info-valor">
-                  {mostrarDisponibilidad(servicio.disponibilidad)}
-                </span>
+                <span className="info-valor">{mostrarDisponibilidad(servicio.disponibilidad)}</span>
               </div>
               <div className="info-row">
                 <span className="info-label">Precio por hora</span>
-                <span className="info-valor">
-                  ${servicio.precio_hora || 0} COP
-                </span>
+                <span className="info-valor">${servicio.precio_hora || 0} COP</span>
               </div>
               <div className="info-row">
                 <span className="info-label">Universidad</span>
@@ -262,9 +239,7 @@ export default function Servicio() {
               </div>
               <div className="info-row">
                 <span className="info-label">Publicado</span>
-                <span className="info-valor">
-                  {formatearFecha(servicio.fecha_publicacion) || "—"}
-                </span>
+                <span className="info-valor">{formatearFecha(servicio.fecha_publicacion) || "—"}</span>
               </div>
               {servicio.contacto && (
                 <div className="info-row">
@@ -272,39 +247,38 @@ export default function Servicio() {
                   <span className="info-valor">{servicio.contacto}</span>
                 </div>
               )}
+              {esArriendo && servicio.direccion && (
+                <div className="info-row">
+                  <span className="info-label">Dirección</span>
+                  <span className="info-valor">
+                    <i className="bi bi-geo-alt"></i> {servicio.direccion}
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="seccion-info">
               <h3><i className="bi bi-star-fill"></i> Reseñas de Clientes</h3>
-
-              {Array.isArray(servicio.resenas) &&
-              servicio.resenas.length > 0 ? (
+              {Array.isArray(servicio.resenas) && servicio.resenas.length > 0 ? (
                 <div className="resenas-container">
                   {servicio.resenas.map((r, i) => (
                     <div key={i} className="resena">
                       <div className="resena-header">
                         <div className="resena-autor">
-                          <div className="avatar-resena">
-                            {iniciales(r.autor)}
-                          </div>
+                          <div className="avatar-resena">{iniciales(r.autor)}</div>
                           <div className="resena-info">
                             <h4>{r.autor || "Anónimo"}</h4>
                             <div className="resena-fecha">{r.fecha || ""}</div>
                           </div>
                         </div>
-                        <div className="resena-rating">
-                          {"★".repeat(r.estrellas || 5)}
-                        </div>
+                        <div className="resena-rating">{"★".repeat(r.estrellas || 5)}</div>
                       </div>
                       <div className="resena-texto">{r.comentario || ""}</div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p
-                  className="texto-muted"
-                  style={{ textAlign: "center", padding: "20px 0" }}
-                >
+                <p className="texto-muted" style={{ textAlign: "center", padding: "20px 0" }}>
                   Aún no hay reseñas para este servicio.
                 </p>
               )}
@@ -315,7 +289,6 @@ export default function Servicio() {
               showModal={showModal}
               onNuevaResena={() => setRecargarResenas(n => n + 1)}
             />
-
           </div>
 
           <div>
@@ -337,17 +310,11 @@ export default function Servicio() {
                 <div className="card-proveedor" style={{ cursor: "pointer" }}>
                   <div className="card-proveedor-glow" />
                   <div className="card-proveedor-header">
-                    <div
-                      className={`avatar-grande ${colorAvatar(servicio.proveedor)}`}
-                    >
+                    <div className={`avatar-grande ${colorAvatar(servicio.proveedor)}`}>
                       {iniciales(servicio.proveedor)}
                     </div>
                     <div className="card-proveedor-info">
-                      <div
-                        className="nombre-proveedor"
-                      >
-                        {servicio.proveedor || "Proveedor anónimo"}
-                      </div>
+                      <div className="nombre-proveedor">{servicio.proveedor || "Proveedor anónimo"}</div>
                       <div className="ubicacion-proveedor">{universidad}</div>
                     </div>
                   </div>
@@ -405,12 +372,24 @@ export default function Servicio() {
               servicioId={idServicio}
               proveedorId={servicio.id_proveedor}
               proveedorNombre={servicio.proveedor}
+              categoria={servicio.nombre_categoria}
               showModal={showModal}
             />
           </div>
         </div>
       </main>
 
+      {/* MODAL DE MAPA */}
+      {modalMapa && tieneUbicacion && (
+        <MapaModal
+          lat={servicio.ubicacion_lat}
+          lng={servicio.ubicacion_lng}
+          direccion={servicio.direccion}
+          onClose={() => setModalMapa(false)}
+        />
+      )}
+
+      {/* MODAL DE NOTIFICACIÓN */}
       {modal.show && (
         <div className="modal-overlay">
           <div className={`modal-box ${modal.type}`}>
