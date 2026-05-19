@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using Npgsql;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -22,11 +22,11 @@ public class UsersController : ControllerBase
     {
         try
         {
-            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
             // Buscamos al usuario incluyendo la columna id_rol que vimos en tu DB
-            using var cmd = new SqlCommand("SELECT * FROM usuarios WHERE correo = @correo", conn);
+            using var cmd = new NpgsqlCommand("SELECT * FROM usuarios WHERE correo = @correo", conn);
             cmd.Parameters.AddWithValue("@correo", dto.correo);
 
             using var reader = await cmd.ExecuteReaderAsync();
@@ -42,7 +42,7 @@ public class UsersController : ControllerBase
 
             int id = (int)reader["id_usuario"];
             // Capturamos el id_rol (1 o 2)
-            int idRol = reader["id_rol"] != DBNull.Value ? (int)reader["id_rol"] : 2;
+            int idRol = reader["id_rol"] != DBNull.Value ? Convert.ToInt32(reader["id_rol"]) : 2;
 
             // 🔐 GENERAR TOKEN
             var jwtKey = _config["Jwt:Key"] ?? "ClaveSuperSecretaDeRespaldo_UniServices_2026";
@@ -88,17 +88,17 @@ public class UsersController : ControllerBase
     {
         try
         {
-            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
             string sql = @"
             SELECT 
                 u.id_usuario, u.nombre, u.correo, u.estado, u.id_rol,
-                ISNULL(u.avatar, '../src/img/default-avatar.png') as avatar, 
-                ISNULL(u.descripcion, 'Sin descripción') as descripcion, 
-                ISNULL(u.telefono, 'No disponible') as telefono, 
-                ISNULL(u.fecha_registro, GETDATE()) as fecha_registro, 
-                ISNULL(u.universidad, 'Sin universidad') as universidad,
+                COALESCE(u.avatar, '../src/img/default-avatar.png') as avatar, 
+                COALESCE(u.descripcion, 'Sin descripción') as descripcion, 
+                COALESCE(u.telefono, 'No disponible') as telefono, 
+                COALESCE(u.fecha_registro, NOW()) as fecha_registro, 
+                COALESCE(u.universidad, 'Sin universidad') as universidad,
                 (SELECT COUNT(*) FROM seguidores WHERE id_seguido  = u.id_usuario) as total_seguidores,
                 (SELECT COUNT(*) FROM seguidores WHERE id_seguidor = u.id_usuario) as total_siguiendo,
                 (SELECT COUNT(*) FROM servicios  WHERE id_proveedor = u.id_usuario) as total_publicaciones,
@@ -106,7 +106,7 @@ public class UsersController : ControllerBase
             FROM usuarios u
             WHERE u.id_usuario = @id";
 
-            using var cmd = new SqlCommand(sql, conn);
+            using var cmd = new NpgsqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("@id", id);
 
             using var reader = await cmd.ExecuteReaderAsync();
@@ -119,15 +119,15 @@ public class UsersController : ControllerBase
                     nombre = reader["nombre"]?.ToString(),
                     correo = reader["correo"]?.ToString(),
                     estado = reader["estado"],
-                    id_rol = (int)reader["id_rol"],
+                    id_rol = Convert.ToInt32(reader["id_rol"]),
                     avatar = reader["avatar"]?.ToString(),
                     descripcion = reader["descripcion"]?.ToString(),
                     telefono = reader["telefono"]?.ToString(),
                     fecha_registro = (DateTime)reader["fecha_registro"],
                     universidad = reader["universidad"]?.ToString(),
-                    total_seguidores = reader["total_seguidores"] == DBNull.Value ? 0 : (int)reader["total_seguidores"],
-                    total_siguiendo = reader["total_siguiendo"] == DBNull.Value ? 0 : (int)reader["total_siguiendo"],
-                    total_publicaciones = reader["total_publicaciones"] == DBNull.Value ? 0 : (int)reader["total_publicaciones"],
+                    total_seguidores = reader["total_seguidores"] == DBNull.Value ? 0 : Convert.ToInt32(reader["total_seguidores"]),
+                    total_siguiendo = reader["total_siguiendo"] == DBNull.Value ? 0 : Convert.ToInt32(reader["total_siguiendo"]),
+                    total_publicaciones = reader["total_publicaciones"] == DBNull.Value ? 0 : Convert.ToInt32(reader["total_publicaciones"]),
                     reputacion = reader["reputacion"] == DBNull.Value ? (double?)null : (double)reader["reputacion"],
                 });
             }
@@ -145,10 +145,10 @@ public class UsersController : ControllerBase
     {
         try
         {
-            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
             string sql = "SELECT id_usuario, nombre, correo, estado, id_rol FROM usuarios";
-            using var cmd = new SqlCommand(sql, conn);
+            using var cmd = new NpgsqlCommand(sql, conn);
             using var reader = await cmd.ExecuteReaderAsync();
             var users = new List<object>();
             while (await reader.ReadAsync())
@@ -159,7 +159,7 @@ public class UsersController : ControllerBase
                     nombre = reader["nombre"]?.ToString(),
                     correo = reader["correo"]?.ToString(),
                     estado = reader["estado"],
-                    id_rol = (int)reader["id_rol"]
+                    id_rol = Convert.ToInt32(reader["id_rol"])
                 });
             }
             return Ok(users);

@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using Npgsql;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -26,12 +26,12 @@ public class ServicesController : ControllerBase
     {
         try
         {
-            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
             var servicios = new List<object>();
 
-            using var cmd = new SqlCommand(@"
+            using var cmd = new NpgsqlCommand(@"
             SELECT 
                 s.id_servicio,
                 s.id_proveedor, 
@@ -46,7 +46,7 @@ public class ServicesController : ControllerBase
                 u.nombre AS proveedor,
                 u.universidad,
                 COUNT(cal.id_calificacion)      AS num_resenas,
-                ISNULL(AVG(CAST(cal.puntuacion AS FLOAT)), 0) AS promedio_estrellas
+                COALESCE(AVG(CAST(cal.puntuacion AS FLOAT)), 0) AS promedio_estrellas
             FROM servicios s
             LEFT JOIN usuarios u ON s.id_proveedor = u.id_usuario
             LEFT JOIN categorias c ON s.id_categoria = c.id_categoria
@@ -63,7 +63,7 @@ public class ServicesController : ControllerBase
             while (await reader.ReadAsync())
             {
                 double prom = (double)reader["promedio_estrellas"];
-                int numResenas = (int)reader["num_resenas"];
+                int numResenas = Convert.ToInt32(reader["num_resenas"]);
 
                 // Construimos el array de estrellas que espera el frontend
                 // (repite el promedio tantas veces como reseñas, que es lo que usa calcularEstrellas())
@@ -102,11 +102,11 @@ public class ServicesController : ControllerBase
     {
         try
         {
-            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
             // 1. Datos del servicio
-            using var cmd = new SqlCommand(@"
+            using var cmd = new NpgsqlCommand(@"
             SELECT 
                 s.id_servicio,
                 s.id_proveedor,
@@ -151,7 +151,7 @@ public class ServicesController : ControllerBase
             reader.Close();
 
             // 2. Reseñas
-            using var cmdResenas = new SqlCommand(@"
+            using var cmdResenas = new NpgsqlCommand(@"
             SELECT 
                 c.puntuacion,
                 c.comentario,
@@ -216,14 +216,14 @@ public class ServicesController : ControllerBase
     {
         try
         {
-            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            using var cmd = new SqlCommand(@"
+            using var cmd = new NpgsqlCommand(@"
                 INSERT INTO servicios
                 (id_proveedor, titulo, descripcion, id_categoria, precio_hora, contacto, modalidad, icono, disponibilidad, fecha_publicacion)
                 VALUES
-                (@id_proveedor, @titulo, @descripcion, @id_categoria, @precio_hora, @contacto, @modalidad, @icono, @disponibilidad, GETDATE())
+                (@id_proveedor, @titulo, @descripcion, @id_categoria, @precio_hora, @contacto, @modalidad, @icono, @disponibilidad, NOW())
             ", conn);
 
             cmd.Parameters.AddWithValue("@id_proveedor", dto.id_proveedor);
@@ -287,10 +287,10 @@ public class ServicesController : ControllerBase
     {
         try
         {
-            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            using var cmd = new SqlCommand(@"
+            using var cmd = new NpgsqlCommand(@"
             UPDATE servicios
             SET titulo = @titulo,
                 descripcion = @descripcion,
@@ -326,33 +326,33 @@ public class ServicesController : ControllerBase
     {
         try
         {
-            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
             // 1. Verificar que el servicio pertenece al proveedor
-            using var cmdCheck = new SqlCommand(
+            using var cmdCheck = new NpgsqlCommand(
                 "SELECT COUNT(1) FROM servicios WHERE id_servicio = @id AND id_proveedor = @id_proveedor",
                 conn);
             cmdCheck.Parameters.AddWithValue("@id", id);
             cmdCheck.Parameters.AddWithValue("@id_proveedor", id_proveedor);
-            int existe = (int)await cmdCheck.ExecuteScalarAsync();
+            int existe = Convert.ToInt32(await cmdCheck.ExecuteScalarAsync());
             if (existe == 0)
                 return NotFound(new { error = "Servicio no encontrado o no tienes permiso" });
 
             // 2. Eliminar calificaciones del servicio
-            using var cmdCalif = new SqlCommand(
+            using var cmdCalif = new NpgsqlCommand(
                 "DELETE FROM calificaciones WHERE id_servicio = @id", conn);
             cmdCalif.Parameters.AddWithValue("@id", id);
             await cmdCalif.ExecuteNonQueryAsync();
 
             // 3. Eliminar solicitudes del servicio
-            using var cmdSol = new SqlCommand(
+            using var cmdSol = new NpgsqlCommand(
                 "DELETE FROM solicitudes WHERE id_servicio = @id", conn);
             cmdSol.Parameters.AddWithValue("@id", id);
             await cmdSol.ExecuteNonQueryAsync();
 
             // 4. Ahora sí eliminar el servicio
-            using var cmd = new SqlCommand(
+            using var cmd = new NpgsqlCommand(
                 "DELETE FROM servicios WHERE id_servicio = @id AND id_proveedor = @id_proveedor",
                 conn);
             cmd.Parameters.AddWithValue("@id", id);

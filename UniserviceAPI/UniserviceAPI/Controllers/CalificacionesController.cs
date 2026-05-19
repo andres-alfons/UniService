@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using Npgsql;
 using UniserviceAPI.DTOs;
 
 [ApiController]
@@ -20,10 +20,10 @@ public class CalificacionesController : ControllerBase
     {
         try
         {
-            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            using var cmd = new SqlCommand(@"
+            using var cmd = new NpgsqlCommand(@"
                 SELECT 
                     c.id_calificacion,
                     c.puntuacion,
@@ -68,11 +68,11 @@ public class CalificacionesController : ControllerBase
     {
         try
         {
-            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
             // Verificar que la solicitud existe y fue aceptada
-            using var checkCmd = new SqlCommand(@"
+            using var checkCmd = new NpgsqlCommand(@"
                 SELECT COUNT(*) FROM solicitudes
                 WHERE id_solicitud = @id_solicitud
                   AND id_cliente   = @id_cliente
@@ -84,12 +84,12 @@ public class CalificacionesController : ControllerBase
             checkCmd.Parameters.AddWithValue("@id_cliente", dto.id_cliente);
             checkCmd.Parameters.AddWithValue("@id_servicio", dto.id_servicio);
 
-            int valida = (int)await checkCmd.ExecuteScalarAsync();
+            int valida = Convert.ToInt32(await checkCmd.ExecuteScalarAsync());
             if (valida == 0)
                 return BadRequest(new { error = "Solo puedes calificar servicios con solicitud aceptada" });
 
             // Insertar calificación
-            using var cmd = new SqlCommand(@"
+            using var cmd = new NpgsqlCommand(@"
                 INSERT INTO calificaciones
                     (id_solicitud, id_cliente, id_servicio, puntuacion, comentario)
                 VALUES
@@ -105,7 +105,7 @@ public class CalificacionesController : ControllerBase
             await cmd.ExecuteNonQueryAsync();
             return Ok(new { ok = true });
         }
-        catch (SqlException ex) when (ex.Number == 2627) // violación UNIQUE
+        catch (NpgsqlException ex) when (ex.SqlState == "23505") // violación UNIQUE
         {
             return BadRequest(new { error = "Ya calificaste este servicio" });
         }
@@ -122,11 +122,11 @@ public class CalificacionesController : ControllerBase
     {
         try
         {
-            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
             // ¿Tiene solicitud aceptada?
-            using var cmdSol = new SqlCommand(@"
+            using var cmdSol = new NpgsqlCommand(@"
                 SELECT COUNT(*) FROM solicitudes
                 WHERE id_cliente  = @id_cliente
                   AND id_servicio = @id_servicio
@@ -134,27 +134,28 @@ public class CalificacionesController : ControllerBase
             ", conn);
             cmdSol.Parameters.AddWithValue("@id_cliente", id_cliente);
             cmdSol.Parameters.AddWithValue("@id_servicio", id_servicio);
-            int tieneSolicitud = (int)await cmdSol.ExecuteScalarAsync();
+            int tieneSolicitud = Convert.ToInt32(await cmdSol.ExecuteScalarAsync());
 
             // ¿Ya calificó?
-            using var cmdCalif = new SqlCommand(@"
+            using var cmdCalif = new NpgsqlCommand(@"
                 SELECT COUNT(*) FROM calificaciones
                 WHERE id_cliente  = @id_cliente
                   AND id_servicio = @id_servicio
             ", conn);
             cmdCalif.Parameters.AddWithValue("@id_cliente", id_cliente);
             cmdCalif.Parameters.AddWithValue("@id_servicio", id_servicio);
-            int yaCalifico = (int)await cmdCalif.ExecuteScalarAsync();
+            int yaCalifico = Convert.ToInt32(await cmdCalif.ExecuteScalarAsync());
 
             // También devolvemos el id_solicitud para usarlo al crear la calificación
             int idSolicitud = 0;
             if (tieneSolicitud > 0)
             {
-                using var cmdId = new SqlCommand(@"
-                    SELECT TOP 1 id_solicitud FROM solicitudes
+                using var cmdId = new NpgsqlCommand(@"
+                    SELECT id_solicitud FROM solicitudes
                     WHERE id_cliente  = @id_cliente
                       AND id_servicio = @id_servicio
                       AND estado      = 'Aceptada'
+                    LIMIT 1
                 ", conn);
                 cmdId.Parameters.AddWithValue("@id_cliente", id_cliente);
                 cmdId.Parameters.AddWithValue("@id_servicio", id_servicio);

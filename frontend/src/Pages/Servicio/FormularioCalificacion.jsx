@@ -1,7 +1,7 @@
 // Formulario para calificar un servicio con estrellas y comentario opcional
 import { useState, useEffect } from "react";
 
-const API_CALIFICACIONES = "https://localhost:7237/api/calificaciones";
+const API_CALIFICACIONES = "http://localhost:5165/api/calificaciones";
 
 function FormCalificacion({ servicioId, showModal, onNuevaResena }) {
   // Permiso de calificación (null = cargando, {puede, yaCalifico} = resultado)

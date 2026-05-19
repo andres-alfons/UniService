@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using Npgsql;
 
 [ApiController]
 [Route("api/usuarios")]
@@ -43,10 +43,10 @@ public class UsuariosController : ControllerBase
             var avatarUrl = $"http://localhost:5165/avatars/{nombreArchivo}";
 
             // 6. Actualizar la URL en la base de datos
-            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            using var cmd = new SqlCommand(
+            using var cmd = new NpgsqlCommand(
                 "UPDATE usuarios SET avatar = @avatar WHERE id_usuario = @id", conn);
             cmd.Parameters.AddWithValue("@avatar", avatarUrl);
             cmd.Parameters.AddWithValue("@id", id_usuario);

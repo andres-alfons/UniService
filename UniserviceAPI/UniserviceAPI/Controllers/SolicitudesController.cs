@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using Npgsql;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Threading.Tasks;
 using UniserviceAPI.Services;
 
@@ -26,11 +25,11 @@ public class SolicitudesController : ControllerBase
     {
         try
         {
-            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            using var cmd = new SqlCommand("sp_GestionarSolicitud", conn);
-            cmd.CommandType = CommandType.StoredProcedure;
+            using var cmd = new NpgsqlCommand("sp_GestionarSolicitud", conn);
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
             cmd.Parameters.AddWithValue("@id_cliente", dto.id_cliente);
             cmd.Parameters.AddWithValue("@id_proveedor", dto.id_proveedor);
@@ -67,10 +66,10 @@ public class SolicitudesController : ControllerBase
                 {
                     try
                     {
-                        using var connEmail = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+                        using var connEmail = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
                         await connEmail.OpenAsync();
 
-                        var cmdEmail = new SqlCommand(@"
+                        var cmdEmail = new NpgsqlCommand(@"
                             SELECT u.correo AS email_proveedor, u.nombre AS nombre_proveedor,
                                    c.nombre AS nombre_cliente, se.titulo AS titulo_servicio
                             FROM usuarios u
@@ -140,10 +139,10 @@ public class SolicitudesController : ControllerBase
     {
         var lista = new List<object>();
 
-        using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+        using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
         await conn.OpenAsync();
 
-        var cmd = new SqlCommand(@"
+        var cmd = new NpgsqlCommand(@"
             SELECT s.id_solicitud, s.estado, s.descripcion,
                    u.nombre AS nombre_proveedor,
                    se.titulo AS titulo_servicio, se.icono
@@ -180,10 +179,10 @@ public class SolicitudesController : ControllerBase
     {
         var lista = new List<object>();
 
-        using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+        using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
         await conn.OpenAsync();
 
-        var cmd = new SqlCommand(@"
+        var cmd = new NpgsqlCommand(@"
             SELECT s.id_solicitud, s.estado, s.descripcion,
                    u.nombre AS nombre_cliente,
                    se.titulo AS titulo_servicio, se.icono,
@@ -221,13 +220,13 @@ public class SolicitudesController : ControllerBase
     [HttpPost("responder")]
     public async Task<IActionResult> Responder([FromBody] ResponderSolicitudDTO dto)
     {
-        using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+        using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
         await conn.OpenAsync();
 
         string estado = dto.accion == "aceptar" ? "Aceptada" : "Rechazada";
         int fueAceptada = dto.accion == "aceptar" ? 1 : 0;
 
-        var cmd = new SqlCommand(@"
+        var cmd = new NpgsqlCommand(@"
             UPDATE solicitudes
             SET estado = @estado,
                 motivo_rechazo = @motivo,
@@ -252,10 +251,10 @@ public class SolicitudesController : ControllerBase
     [HttpGet("verificar")]
     public async Task<IActionResult> Verificar([FromQuery] int id_cliente, [FromQuery] int id_servicio)
     {
-        using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+        using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
         await conn.OpenAsync();
 
-        var cmd = new SqlCommand(@"
+        var cmd = new NpgsqlCommand(@"
         SELECT COUNT(*) FROM solicitudes
         WHERE id_cliente = @id_cliente AND id_servicio = @id_servicio
         AND estado NOT IN ('Rechazada', 'Cancelada')
@@ -264,7 +263,7 @@ public class SolicitudesController : ControllerBase
         cmd.Parameters.AddWithValue("@id_cliente", id_cliente);
         cmd.Parameters.AddWithValue("@id_servicio", id_servicio);
 
-        var count = (int)await cmd.ExecuteScalarAsync();
+        var count = Convert.ToInt32(await cmd.ExecuteScalarAsync());
         return Ok(new { existe = count > 0 });
     }
 
@@ -272,10 +271,10 @@ public class SolicitudesController : ControllerBase
     [HttpDelete("eliminar")]
     public async Task<IActionResult> Eliminar([FromQuery] int id_cliente, [FromQuery] int id_servicio)
     {
-        using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+        using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
         await conn.OpenAsync();
 
-        var cmd = new SqlCommand(@"
+        var cmd = new NpgsqlCommand(@"
         DELETE FROM solicitudes
         WHERE id_cliente = @id_cliente AND id_servicio = @id_servicio
         AND estado NOT IN ('Rechazada', 'Cancelada')

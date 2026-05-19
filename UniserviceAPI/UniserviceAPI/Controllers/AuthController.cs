@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using Npgsql;
 using Microsoft.IdentityModel.Tokens;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
@@ -77,30 +77,27 @@ public class AuthController : ControllerBase
         codigos.Remove(dto.correo);
 
         try {
-            using (SqlConnection conn = new SqlConnection(_config.GetConnectionString("DefaultConnection")))
+            using (NpgsqlConnection conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection")))
             {
                 await conn.OpenAsync();
 
-                // Verificar si ya existe
-                var check = new SqlCommand("SELECT COUNT(*) FROM usuarios WHERE correo = @correo", conn);
+                var check = new NpgsqlCommand("SELECT COUNT(*) FROM usuarios WHERE correo = @correo", conn);
                 check.Parameters.AddWithValue("@correo", dto.correo);
 
-                int existe = (int)await check.ExecuteScalarAsync();
+                int existe = Convert.ToInt32(await check.ExecuteScalarAsync());
                 if (existe > 0)
                     return BadRequest(new { error = "Correo ya registrado" });
 
-                // Hash password
                 string hash = BCrypt.Net.BCrypt.HashPassword(dto.password);
 
-                // Usar tu SP
-                var cmd = new SqlCommand("sp_CrearUsuario", conn);
-                cmd.CommandType = CommandType.StoredProcedure;
-
+                var cmd = new NpgsqlCommand(@"
+                    INSERT INTO usuarios (correo, password_hash, nombre, id_rol)
+                    VALUES (@correo, @password_hash, @nombre, 2)
+                    RETURNING id_usuario", conn);
                 cmd.Parameters.AddWithValue("@correo", dto.correo);
                 cmd.Parameters.AddWithValue("@password_hash", hash);
                 cmd.Parameters.AddWithValue("@nombre", dto.nombre);
 
-                // 👇 ExecuteScalar en vez de ExecuteNonQuery porque el SP retorna SCOPE_IDENTITY
                 var resultado = await cmd.ExecuteScalarAsync();
 
                 if (resultado == null)
@@ -111,9 +108,8 @@ public class AuthController : ControllerBase
                 return Ok(new { ok = true });
             }
         }
-        catch (SqlException ex)
+        catch (NpgsqlException ex)
         {
-            // 👇 Ahora captura el RAISERROR del SP y lo devuelve al frontend
             return BadRequest(new { error = ex.Message });
         }
         catch (Exception ex)
@@ -129,11 +125,11 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDTO dto)
     {
-        using (SqlConnection conn = new SqlConnection(_config.GetConnectionString("DefaultConnection")))
+        using (NpgsqlConnection conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection")))
         {
             await conn.OpenAsync();
 
-            var cmd = new SqlCommand("SELECT * FROM usuarios WHERE correo = @correo", conn);
+            var cmd = new NpgsqlCommand("SELECT * FROM usuarios WHERE correo = @correo", conn);
             cmd.Parameters.AddWithValue("@correo", dto.correo);
 
             var reader = await cmd.ExecuteReaderAsync();
@@ -143,18 +139,20 @@ public class AuthController : ControllerBase
 
             await reader.ReadAsync();
 
-            string hash = reader["password_hash"].ToString();
+            string hash = reader["password_hash"]?.ToString() ?? "";
 
-            if (!BCrypt.Net.BCrypt.Verify(dto.password, hash))
+            if (string.IsNullOrEmpty(hash) || !BCrypt.Net.BCrypt.Verify(dto.password, hash))
                 return Unauthorized(new { error = "Contraseña incorrecta" });
 
             int id = (int)reader["id_usuario"];
+            int idRol = reader["id_rol"] != DBNull.Value ? Convert.ToInt32(reader["id_rol"]) : 2;
 
             // JWT
-            var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
+            var jwtKey = _config["Jwt:Key"] ?? "uniservice_super_secret_key_2026_segura_12345";
+            var key = Encoding.UTF8.GetBytes(jwtKey);
 
             var token = new JwtSecurityToken(
-                claims: new[] { new Claim("id", id.ToString()) },
+                claims: new[] { new Claim("id", id.ToString()), new Claim("id_rol", idRol.ToString()) },
                 expires: DateTime.UtcNow.AddDays(1),
                 signingCredentials: new SigningCredentials(
                     new SymmetricSecurityKey(key),
@@ -164,8 +162,89 @@ public class AuthController : ControllerBase
 
             return Ok(new
             {
-                token = new JwtSecurityTokenHandler().WriteToken(token)
+                token = new JwtSecurityTokenHandler().WriteToken(token),
+                user = new
+                {
+                    id = id,
+                    nombre = reader["nombre"]?.ToString(),
+                    correo = reader["correo"]?.ToString(),
+                    id_rol = idRol
+                }
             });
+        }
+    }
+
+    // =========================
+    // FORGOT PASSWORD (ENVÍA CÓDIGO DE RECUPERACIÓN)
+    // =========================
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] EmailDTO data)
+    {
+        try
+        {
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            var cmd = new NpgsqlCommand("SELECT COUNT(*) FROM usuarios WHERE correo = @correo", conn);
+            cmd.Parameters.AddWithValue("@correo", data.correo);
+            int existe = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+
+            if (existe == 0)
+                return NotFound(new { error = "Correo no registrado" });
+
+            var codigo = new Random().Next(100000, 999999).ToString();
+            codigos[data.correo] = codigo;
+
+            _ = Task.Delay(300000).ContinueWith(_ =>
+            {
+                if (codigos.ContainsKey(data.correo) && codigos[data.correo] == codigo)
+                    codigos.Remove(data.correo);
+            });
+
+            await _emailService.EnviarCodigoVerificacion(data.correo, codigo);
+
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    // =========================
+    // RESET PASSWORD (GUARDA NUEVA CONTRASEÑA)
+    // =========================
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO dto)
+    {
+        if (string.IsNullOrEmpty(dto.codigo) ||
+            !codigos.ContainsKey(dto.correo) ||
+            codigos[dto.correo] != dto.codigo)
+            return BadRequest(new { error = "Código de verificación inválido o expirado" });
+
+        try
+        {
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            string hash = BCrypt.Net.BCrypt.HashPassword(dto.nuevaPassword);
+
+            var cmd = new NpgsqlCommand(
+                "UPDATE usuarios SET password_hash = @hash WHERE correo = @correo", conn);
+            cmd.Parameters.AddWithValue("@hash", hash);
+            cmd.Parameters.AddWithValue("@correo", dto.correo);
+
+            int filas = await cmd.ExecuteNonQueryAsync();
+            if (filas == 0)
+                return NotFound(new { error = "Usuario no encontrado" });
+
+            codigos.Remove(dto.correo);
+
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
         }
     }
 }

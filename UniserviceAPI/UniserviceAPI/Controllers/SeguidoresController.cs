@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using Npgsql;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Data;
@@ -22,10 +22,10 @@ public class SeguidoresController : ControllerBase
     {
         try
         {
-            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            using var cmd = new SqlCommand("sp_ToggleSeguimiento", conn);
+            using var cmd = new NpgsqlCommand("sp_ToggleSeguimiento", conn);
             cmd.CommandType = CommandType.StoredProcedure;
 
             cmd.Parameters.AddWithValue("@id_seguidor", dto.id_seguidor);
@@ -47,10 +47,10 @@ public class SeguidoresController : ControllerBase
     {
         try
         {
-            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            using var cmd = new SqlCommand(@"
+            using var cmd = new NpgsqlCommand(@"
                 SELECT COUNT(*) 
                 FROM seguidores 
                 WHERE id_seguidor = @seguidor AND id_seguido = @seguido
@@ -59,7 +59,7 @@ public class SeguidoresController : ControllerBase
             cmd.Parameters.AddWithValue("@seguidor", seguidor);
             cmd.Parameters.AddWithValue("@seguido", seguido);
 
-            int total = (int)await cmd.ExecuteScalarAsync();
+            int total = Convert.ToInt32(await cmd.ExecuteScalarAsync());
 
             return Ok(new { sigues = total > 0 });
         }
@@ -74,10 +74,10 @@ public class SeguidoresController : ControllerBase
     {
         try
         {
-            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            using var cmd = new SqlCommand(@"
+            using var cmd = new NpgsqlCommand(@"
             SELECT u.id_usuario, u.nombre, u.universidad, u.avatar
             FROM seguidores s
             INNER JOIN usuarios u ON s.id_seguidor = u.id_usuario
@@ -112,10 +112,10 @@ public class SeguidoresController : ControllerBase
     {
         try
         {
-            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            using var cmd = new SqlCommand(@"
+            using var cmd = new NpgsqlCommand(@"
             SELECT u.id_usuario, u.nombre, u.universidad, u.avatar
             FROM seguidores s
             INNER JOIN usuarios u ON s.id_seguido = u.id_usuario
