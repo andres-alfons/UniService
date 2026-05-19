@@ -25,6 +25,7 @@ export default function Servicio() {
   const [error, setError] = useState(false);
   const [imagenActual, setImagenActual] = useState(0);
   const [recargarResenas, setRecargarResenas] = useState(0);
+  const [imagenesError, setImagenesError] = useState({});
   const [modalMapa, setModalMapa] = useState(false);
   const [modal, setModal] = useState({ show: false, type: "", message: "" });
 
@@ -105,7 +106,6 @@ export default function Servicio() {
   const esArriendo = servicio.nombre_categoria?.toLowerCase().includes("arriendo");
 
   const imagenes = servicio.imagenes && servicio.imagenes.length > 0 ? servicio.imagenes : null;
-  const [imagenesError, setImagenesError] = useState({});
 
   const iconosGaleria = [
     servicio.icono?.startsWith("bi-") ? servicio.icono : "bi-pin",
