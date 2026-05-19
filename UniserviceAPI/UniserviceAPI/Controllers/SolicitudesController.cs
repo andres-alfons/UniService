@@ -157,7 +157,7 @@ public class SolicitudesController : ControllerBase
         await conn.OpenAsync();
 
         var cmd = new NpgsqlCommand(@"
-            SELECT s.id_solicitud, s.estado, s.descripcion,
+            SELECT s.id_solicitud, s.id_servicio, s.estado, s.descripcion,
                    u.nombre AS nombre_proveedor,
                    se.titulo AS titulo_servicio, se.icono
             FROM solicitudes s
@@ -176,6 +176,7 @@ public class SolicitudesController : ControllerBase
             lista.Add(new
             {
                 id_solicitud = reader["id_solicitud"],
+                id_servicio = reader["id_servicio"],
                 estado = reader["estado"],
                 descripcion = reader["descripcion"] == DBNull.Value ? "" : reader["descripcion"].ToString(),
                 nombre_proveedor = reader["nombre_proveedor"],
