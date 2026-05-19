@@ -90,6 +90,12 @@ const [modalSiguiendo, setModalSiguiendo] = useState(false);
 const [listaSiguiendo, setListaSiguiendo] = useState([]);
 const [cargandoSiguiendo, setCargandoSiguiendo] = useState(false);
 
+// Modal de gestión de imágenes
+const [editandoImagenes, setEditandoImagenes] = useState(null);
+const [imagenesServicio, setImagenesServicio] = useState([]);
+const [cargandoImagenes, setCargandoImagenes] = useState(false);
+const fileInputRefImagenes = useRef(null);
+
 
   const abrirModalSeguidores = async () => {
   setModalSeguidores(true);
@@ -304,6 +310,95 @@ const getAvatarUrl = (avatar) => {
       setConfirmEliminar(null);
     } else {
       alert("Error al eliminar el servicio.");
+    }
+  };
+
+  // ════════════════════════════════
+  // GESTIÓN DE IMÁGENES DEL SERVICIO
+  // ════════════════════════════════
+  const abrirEditorImagenes = async (servicio) => {
+    setEditandoImagenes(servicio);
+    setCargandoImagenes(true);
+    try {
+      const res = await fetch(`/api/services/${servicio.id_servicio}`);
+      const data = await res.json();
+      setImagenesServicio(data.imagenes || []);
+    } catch (err) {
+      console.error("Error cargando imágenes:", err);
+      setImagenesServicio([]);
+    } finally {
+      setCargandoImagenes(false);
+    }
+  };
+
+  const handleSubirImagenesServicio = async (event) => {
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
+
+    if (imagenesServicio.length + files.length > 5) {
+      alert("Máximo 5 imágenes permitidas. Puedes subir " + (5 - imagenesServicio.length) + " más.");
+      return;
+    }
+
+    const formData = new FormData();
+    files.forEach((file) => formData.append("imagenes", file));
+
+    try {
+      const res = await fetch(`/api/services/${editandoImagenes.id_servicio}/imagenes`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.ok) {
+        const res = await fetch(`/api/services/${editandoImagenes.id_servicio}`);
+        const servicioData = await res.json();
+        setImagenesServicio(servicioData.imagenes || []);
+      } else {
+        alert("Error: " + (data.error || "No se pudieron subir las imágenes"));
+      }
+    } catch (err) {
+      console.error("Error subiendo imágenes:", err);
+      alert("Error de conexión al subir imágenes");
+    }
+
+    event.target.value = "";
+  };
+
+  const eliminarImagenServicio = async (idImagen) => {
+    if (!confirm("¿Eliminar esta imagen?")) return;
+
+    try {
+      const res = await fetch(`/api/services/${editandoImagenes.id_servicio}/imagenes/${idImagen}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setImagenesServicio((prev) => prev.filter((img) => img.id_imagen !== idImagen));
+      } else {
+        alert("Error al eliminar la imagen");
+      }
+    } catch (err) {
+      console.error("Error eliminando imagen:", err);
+      alert("Error de conexión al eliminar imagen");
+    }
+  };
+
+  const establecerComoPrincipal = async (idImagen) => {
+    try {
+      const res = await fetch(`/api/services/${editandoImagenes.id_servicio}/imagenes/${idImagen}/principal`, {
+        method: "PUT",
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setImagenesServicio((prev) =>
+          prev.map((img) => ({
+            ...img,
+            es_principal: img.id_imagen === idImagen ? 1 : 0,
+          }))
+        );
+      }
+    } catch (err) {
+      console.error("Error estableciendo imagen principal:", err);
     }
   };
 
@@ -699,15 +794,37 @@ const getAvatarUrl = (avatar) => {
                             </div>
                           </div>
 
-                          <div
-                            style={{
-                              display: "flex",
-                              gap: "8px",
-                              flexShrink: 0,
-                              alignItems: "center",
-                            }}
-                          >
-                            {/* Botón editar: carga el servicio en el estado "editando" */}
+                           <div
+                             style={{
+                               display: "flex",
+                               gap: "8px",
+                               flexShrink: 0,
+                               alignItems: "center",
+                             }}
+                           >
+                             {/* Botón gestionar imágenes */}
+                             <button
+                               className="btn btn-primary"
+                               style={{
+                                 width: "36px",
+                                 height: "36px",
+                                 display: "flex",
+                                 alignItems: "center",
+                                 justifyContent: "center",
+                                 fontSize: "0.85rem",
+                                 padding: 0,
+                                 margin: 0,
+                                 lineHeight: 1,
+                                 background: "transparent",
+                                 borderColor: "rgba(52, 211, 153, 0.4)",
+                                 color: "#34d399",
+                               }}
+                               onClick={() => abrirEditorImagenes(s)}
+                               title="Gestionar imágenes"
+                             >
+                               <i className="bi bi-images"></i>
+                             </button>
+                             {/* Botón editar: carga el servicio en el estado "editando" */}
                             <button
                               className="btn btn-primary"
                               style={{
@@ -915,6 +1032,177 @@ const getAvatarUrl = (avatar) => {
                         <span className="image-option-icon"><i className="bi bi-save"></i></span>
                         <div className="image-option-text">
                           <b>Guardar cambios</b>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ══ MODAL: Gestionar imágenes del servicio ══ */}
+              {editandoImagenes && (
+                <div
+                  className="image-menu-overlay active"
+                  onClick={() => setEditandoImagenes(null)}
+                >
+                  <div
+                    className="image-menu"
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                      maxWidth: "550px",
+                      maxHeight: "85vh",
+                      overflowY: "auto",
+                    }}
+                  >
+                    <h3 className="image-menu-title">
+                      <i className="bi bi-images"></i> Imágenes de "{editandoImagenes.titulo}"
+                    </h3>
+                    <p style={{ opacity: 0.6, fontSize: "0.85rem", margin: "0 0 16px" }}>
+                      {imagenesServicio.length}/5 imágenes — Haz clic en "Principal" para elegir la portada
+                    </p>
+
+                    <input
+                      type="file"
+                      ref={fileInputRefImagenes}
+                      onChange={handleSubirImagenesServicio}
+                      accept="image/jpeg,image/png,image/webp"
+                      multiple
+                      style={{ display: "none" }}
+                    />
+
+                    {cargandoImagenes ? (
+                      <p style={{ textAlign: "center", padding: "20px", opacity: 0.6 }}>
+                        <i className="bi bi-hourglass-split"></i> Cargando...
+                      </p>
+                    ) : (
+                      <>
+                        {/* Grid de imágenes existentes */}
+                        <div style={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
+                          gap: "10px",
+                          marginBottom: "16px",
+                        }}>
+                          {imagenesServicio.map((img) => (
+                            <div
+                              key={img.id_imagen}
+                              style={{
+                                position: "relative",
+                                borderRadius: "8px",
+                                overflow: "hidden",
+                                border: img.es_principal ? "2px solid #34d399" : "1px solid rgba(255,255,255,0.1)",
+                                aspectRatio: "1",
+                              }}
+                            >
+                              <img
+                                src={img.url_imagen}
+                                alt="Imagen del servicio"
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                  display: "block",
+                                }}
+                                onError={(e) => {
+                                  e.currentTarget.src = "/img/default_avatar.png";
+                                }}
+                              />
+                              {img.es_principal && (
+                                <span style={{
+                                  position: "absolute",
+                                  top: "4px",
+                                  left: "4px",
+                                  background: "#34d399",
+                                  color: "#000",
+                                  fontSize: "0.65rem",
+                                  fontWeight: "bold",
+                                  padding: "2px 6px",
+                                  borderRadius: "4px",
+                                }}>
+                                  Principal
+                                </span>
+                              )}
+                              <div style={{
+                                position: "absolute",
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                display: "flex",
+                                justifyContent: "space-between",
+                                padding: "4px",
+                                background: "linear-gradient(transparent, rgba(0,0,0,0.7))",
+                              }}>
+                                {!img.es_principal && (
+                                  <button
+                                    onClick={() => establecerComoPrincipal(img.id_imagen)}
+                                    style={{
+                                      background: "rgba(255,255,255,0.2)",
+                                      border: "none",
+                                      color: "#fff",
+                                      fontSize: "0.6rem",
+                                      padding: "2px 6px",
+                                      borderRadius: "4px",
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    Principal
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => eliminarImagenServicio(img.id_imagen)}
+                                  style={{
+                                    background: "rgba(239,68,68,0.3)",
+                                    border: "none",
+                                    color: "#f87171",
+                                    fontSize: "0.7rem",
+                                    padding: "2px 6px",
+                                    borderRadius: "4px",
+                                    cursor: "pointer",
+                                    marginLeft: "auto",
+                                  }}
+                                >
+                                  <i className="bi bi-trash"></i>
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+
+                          {/* Botón agregar más */}
+                          {imagenesServicio.length < 5 && (
+                            <button
+                              type="button"
+                              onClick={() => fileInputRefImagenes.current?.click()}
+                              style={{
+                                aspectRatio: "1",
+                                borderRadius: "8px",
+                                border: "2px dashed rgba(255,255,255,0.2)",
+                                background: "rgba(255,255,255,0.03)",
+                                cursor: "pointer",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: "4px",
+                                color: "inherit",
+                                opacity: 0.6,
+                              }}
+                            >
+                              <i className="bi bi-plus-lg" style={{ fontSize: "1.5rem" }}></i>
+                              <span style={{ fontSize: "0.7rem" }}>Agregar</span>
+                            </button>
+                          )}
+                        </div>
+                      </>
+                    )}
+
+                    <div className="image-menu-options">
+                      <button
+                        className="image-option"
+                        onClick={() => setEditandoImagenes(null)}
+                      >
+                        <span className="image-option-icon"><i className="bi bi-arrow-return-left"></i></span>
+                        <div className="image-option-text">
+                          <b>Cerrar</b>
                         </div>
                       </button>
                     </div>
