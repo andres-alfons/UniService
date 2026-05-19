@@ -5,7 +5,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { formatHora } from "./utilidades";
 
-const API_SOLICITUD = "http://localhost:5165/api/Solicitudes";
+const API_SOLICITUD = "/api/solicitudes";
 
 function FormSolicitud({
   servicioId,

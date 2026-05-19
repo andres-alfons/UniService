@@ -27,7 +27,7 @@ import BotonTema from "../Components/B_StyleHome";
 // ════════════════════════════════════════════════════════════════
 
 // URL base del API de usuarios
-const API_USUARIO = "http://localhost:5165/api/users";
+const API_USUARIO = "/api/users";
 
 const Perfil = () => {
   // Hook de navegación — redirige programáticamente a otras rutas
@@ -96,7 +96,7 @@ const [cargandoSiguiendo, setCargandoSiguiendo] = useState(false);
   setCargandoSeguidores(true);
   try {
     const res = await fetch(
-      `http://localhost:5165/api/seguidores/lista?id_usuario=${id_a_consultar}`
+      `/api/seguidores/lista?id_usuario=${id_a_consultar}`
     );
     const data = await res.json();
     setListaSeguidores(data);
@@ -112,7 +112,7 @@ const abrirModalSiguiendo = async () => {
   setCargandoSiguiendo(true);
   try {
     const res = await fetch(
-      `http://localhost:5165/api/seguidores/siguiendo?id_usuario=${id_a_consultar}`
+      `/api/seguidores/siguiendo?id_usuario=${id_a_consultar}`
     );
     const data = await res.json();
     setListaSiguiendo(data);
@@ -128,7 +128,7 @@ const getAvatarUrl = (avatar) => {
   if (avatar === "img/default_avatar.png") return "/img/default_avatar.png"; // 👈 este caso
   if (avatar.startsWith("http")) return avatar;
   if (avatar.startsWith("/src") || avatar.startsWith("../")) return avatar;
-  return `http://localhost:5165/${avatar}`;
+  return `/${avatar}`;
 };
 
   // ════════════════════════════════════════════════════════════
@@ -137,7 +137,7 @@ const getAvatarUrl = (avatar) => {
 
   useEffect(() => {
     if (esPerfilExterno && id_usuario_logueado && id_a_consultar) {
-      fetch(`http://localhost:5165/api/seguidores/estado?seguidor=${id_usuario_logueado}&seguido=${id_a_consultar}`)
+      fetch(`/api/seguidores/estado?seguidor=${id_usuario_logueado}&seguido=${id_a_consultar}`)
         .then((res) => res.json())
         .then((data) => setSiguiendo(data.sigues))  // ← también cambia esSeguidor → sigues
         .catch((err) => console.error("Error al verificar seguimiento:", err));
@@ -155,7 +155,7 @@ const getAvatarUrl = (avatar) => {
     }
 
     // GET al endpoint de usuarios con el token JWT en el header para autenticar
-    fetch(`http://localhost:5165/api/users/${id_a_consultar}`, {
+    fetch(`/api/users/${id_a_consultar}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     })
       .then((res) => res.json())
@@ -194,7 +194,7 @@ const getAvatarUrl = (avatar) => {
       return;
 
     // Traemos todos los servicios y filtramos los que le pertenecen al usuario
-    fetch(`http://localhost:5165/api/services`)
+    fetch(`/api/services`)
       .then((r) => r.json())
       .then((data) =>
         setMisServicios(
@@ -265,7 +265,7 @@ const getAvatarUrl = (avatar) => {
     };
 
     const res = await fetch(
-      `http://localhost:5165/api/services/${s.id_servicio}`,
+      `/api/services/${s.id_servicio}`,
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -290,7 +290,7 @@ const getAvatarUrl = (avatar) => {
   // Llama al endpoint DELETE y elimina el servicio de la lista local si el servidor responde OK
   const confirmarEliminar = async () => {
     const res = await fetch(
-      `http://localhost:5165/api/services/${confirmEliminar}?id_proveedor=${id_usuario_logueado}`,
+      `/api/services/${confirmEliminar}?id_proveedor=${id_usuario_logueado}`,
       {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -342,7 +342,7 @@ const getAvatarUrl = (avatar) => {
 
     try {
       const response = await fetch(
-        "http://localhost:5165/api/usuarios/upload-avatar",
+        "/api/usuarios/upload-avatar",
         {
           method: "POST",
           headers: {
@@ -410,7 +410,7 @@ const getAvatarUrl = (avatar) => {
   const accionActual = siguiendo;
 
   try {
-    const response = await fetch(`http://localhost:5165/api/seguidores/toggle`, {
+    const response = await fetch(`/api/seguidores/toggle`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { formatFecha } from "./UtilidadesAdmin";
 
-const API = "http://localhost:5165/api";
+const API = "/api";
 
 export default function SeccionServiciosAdmin() {
   const [servicios, setServicios] = useState([]);

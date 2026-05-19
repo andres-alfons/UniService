@@ -17,8 +17,8 @@ import FormCalificacion from "./Servicio/FormularioCalificacion";
 import { mostrarModalidad, mostrarDisponibilidad, colorAvatar } from "./Servicio/utilidades";
 import BotonTema from "../Components/B_StyleHome";
 
-const API = "http://localhost:5165/api/Services";
-const API_USUARIO = "http://localhost:5165/api/Users";
+const API = "/api/services";
+const API_USUARIO = "/api/users";
 
 export default function Servicio() {
   const navigate = useNavigate();

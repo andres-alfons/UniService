@@ -185,7 +185,7 @@ export default function Login() {
     }
     setEnviandoCodigo(true); // Cambia el botón a "Enviando..."
     try {
-      const res = await fetch("http://localhost:5165/api/Auth/send-code", {
+      const res = await fetch("/api/Auth/send-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo: correoReg }),
@@ -211,10 +211,10 @@ export default function Login() {
       return;
     }
     try {
-      const res = await fetch("http://localhost:5165/api/Auth/verify-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ correo: correoReg, codigo: codigoInput }),
+const res = await fetch("/api/Auth/verify-code", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ correo: correoReg, codigo: codigoInput }),
       });
       const data = await res.json();
       if (data.valido) {
@@ -244,7 +244,7 @@ export default function Login() {
     setResetCargando(true);
     try {
       const res = await fetch(
-        "http://localhost:5165/api/Auth/forgot-password",
+        "/api/Auth/forgot-password",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -267,7 +267,7 @@ export default function Login() {
   const handleResetReenviarCodigo = async () => {
     setResetCargando(true);
     try {
-      await fetch("http://localhost:5165/api/Auth/forgot-password", {
+      await fetch("/api/Auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo: resetCorreo }),
@@ -288,7 +288,7 @@ export default function Login() {
     }
     setResetCargando(true);
     try {
-      const res = await fetch("http://localhost:5165/api/Auth/verify-code", {
+      const res = await fetch("/api/Auth/verify-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo: resetCorreo, codigo: resetCodigo }),
@@ -319,7 +319,7 @@ export default function Login() {
     setResetCargando(true);
     try {
       const res = await fetch(
-        "http://localhost:5165/api/Auth/reset-password",
+        "/api/Auth/reset-password",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -444,7 +444,7 @@ export default function Login() {
 
     // FLUJO NORMAL: Si no es un admin hardcodeado, autentica contra la base de datos
     try {
-      const res = await fetch("http://localhost:5165/api/Users/login", {
+      const res = await fetch("/api/Users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo, password: pass }),
@@ -496,7 +496,7 @@ export default function Login() {
       return;
     }
     try {
-      const res = await fetch("http://localhost:5165/api/Auth/register", {
+      const res = await fetch("/api/Auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -67,9 +67,9 @@ export const mapaCategoriaId = {
   otros: 7,
 };
 
-export const API_HOME = "http://localhost:5165/api/services";
-export const API_USUARIO = "http://localhost:5165/api/users";
-export const API_SOLICITUD = "http://localhost:5165/api/solicitudes";
+export const API_HOME = "/api/services";
+export const API_USUARIO = "/api/users";
+export const API_SOLICITUD = "/api/solicitudes";
 
 // Iconos Bootstrap para cada tipo de modalidad
 export const MAPA_ICONOS_MODALIDAD = {

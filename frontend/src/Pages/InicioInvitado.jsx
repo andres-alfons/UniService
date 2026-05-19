@@ -15,7 +15,7 @@ import Presentacion from "./shared/Presentacion";
 import { promedioEstrellas } from "./shared/utilidades";
 import BotonTema from "../Components/B_StyleHome";
 
-const API = "http://localhost:5165/api/services";
+const API = "/api/services";
 
 export default function HomeGuest() {
   // Estado del scroll para cambiar estilo del navbar
