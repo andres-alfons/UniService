@@ -354,3 +354,28 @@ export const establecerImagenPrincipal = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// 🔹 ACTUALIZAR ORDEN DE IMAGEN
+export const actualizarOrdenImagen = async (req, res) => {
+  try {
+    const { idImagen } = req.params;
+    const { orden, es_principal } = req.body;
+    const conn = await pool;
+
+    await conn.request()
+      .input("idImagen", sql.Int, parseInt(idImagen))
+      .input("orden", sql.Int, orden)
+      .input("es_principal", sql.Bit, es_principal)
+      .query(`
+        UPDATE servicios_imagenes
+        SET fecha_subida = DATEADD(second, @orden, fecha_subida),
+            es_principal = @es_principal
+        WHERE id_imagen = @idImagen
+      `);
+
+    res.json({ ok: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+};

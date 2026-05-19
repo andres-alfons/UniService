@@ -322,7 +322,12 @@ const getAvatarUrl = (avatar) => {
     try {
       const res = await fetch(`/api/services/${servicio.id_servicio}`);
       const data = await res.json();
-      setImagenesServicio(data.imagenes || []);
+      const imgs = (data.imagenes || []).sort((a, b) => {
+        if (a.es_principal && !b.es_principal) return -1;
+        if (!a.es_principal && b.es_principal) return 1;
+        return new Date(a.fecha_subida) - new Date(b.fecha_subida);
+      });
+      setImagenesServicio(imgs);
     } catch (err) {
       console.error("Error cargando imágenes:", err);
       setImagenesServicio([]);
@@ -352,7 +357,12 @@ const getAvatarUrl = (avatar) => {
       if (data.ok) {
         const res = await fetch(`/api/services/${editandoImagenes.id_servicio}`);
         const servicioData = await res.json();
-        setImagenesServicio(servicioData.imagenes || []);
+        const imgs = (servicioData.imagenes || []).sort((a, b) => {
+          if (a.es_principal && !b.es_principal) return -1;
+          if (!a.es_principal && b.es_principal) return 1;
+          return new Date(a.fecha_subida) - new Date(b.fecha_subida);
+        });
+        setImagenesServicio(imgs);
       } else {
         alert("Error: " + (data.error || "No se pudieron subir las imágenes"));
       }
@@ -383,22 +393,32 @@ const getAvatarUrl = (avatar) => {
     }
   };
 
-  const establecerComoPrincipal = async (idImagen) => {
+  const moverImagen = (index, direccion) => {
+    const nuevoIndex = index + direccion;
+    if (nuevoIndex < 0 || nuevoIndex >= imagenesServicio.length) return;
+
+    setImagenesServicio((prev) => {
+      const nuevo = [...prev];
+      [nuevo[index], nuevo[nuevoIndex]] = [nuevo[nuevoIndex], nuevo[index]];
+      return nuevo;
+    });
+  };
+
+  const guardarOrdenImagenes = async () => {
     try {
-      const res = await fetch(`/api/services/${editandoImagenes.id_servicio}/imagenes/${idImagen}/principal`, {
-        method: "PUT",
-      });
-      const data = await res.json();
-      if (data.ok) {
-        setImagenesServicio((prev) =>
-          prev.map((img) => ({
-            ...img,
-            es_principal: img.id_imagen === idImagen ? 1 : 0,
-          }))
-        );
+      for (let i = 0; i < imagenesServicio.length; i++) {
+        const img = imagenesServicio[i];
+        await fetch(`/api/services/${editandoImagenes.id_servicio}/imagenes/${img.id_imagen}/orden`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orden: i, es_principal: i === 0 ? 1 : 0 }),
+        });
       }
+      alert("Orden guardado correctamente");
+      setEditandoImagenes(null);
     } catch (err) {
-      console.error("Error estableciendo imagen principal:", err);
+      console.error("Error guardando orden:", err);
+      alert("Error al guardar el orden");
     }
   };
 
@@ -1058,7 +1078,7 @@ const getAvatarUrl = (avatar) => {
                       <i className="bi bi-images"></i> Imágenes de "{editandoImagenes.titulo}"
                     </h3>
                     <p style={{ opacity: 0.6, fontSize: "0.85rem", margin: "0 0 16px" }}>
-                      {imagenesServicio.length}/5 imágenes — Haz clic en "Principal" para elegir la portada
+                      {imagenesServicio.length}/5 — Usa ↑↓ para cambiar el orden. La primera es la portada.
                     </p>
 
                     <input
@@ -1074,125 +1094,170 @@ const getAvatarUrl = (avatar) => {
                       <p style={{ textAlign: "center", padding: "20px", opacity: 0.6 }}>
                         <i className="bi bi-hourglass-split"></i> Cargando...
                       </p>
+                    ) : imagenesServicio.length === 0 ? (
+                      <p style={{ textAlign: "center", padding: "20px", opacity: 0.5 }}>
+                        No hay imágenes. ¡Agrega una!
+                      </p>
                     ) : (
-                      <>
-                        {/* Grid de imágenes existentes */}
-                        <div style={{
-                          display: "grid",
-                          gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
-                          gap: "10px",
-                          marginBottom: "16px",
-                        }}>
-                          {imagenesServicio.map((img) => (
-                            <div
-                              key={img.id_imagen}
+                      <div style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "8px",
+                        marginBottom: "16px",
+                      }}>
+                        {imagenesServicio.map((img, index) => (
+                          <div
+                            key={img.id_imagen}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "10px",
+                              padding: "8px",
+                              borderRadius: "8px",
+                              background: index === 0 ? "rgba(52, 211, 153, 0.08)" : "rgba(255,255,255,0.03)",
+                              border: index === 0 ? "1px solid rgba(52, 211, 153, 0.3)" : "1px solid rgba(255,255,255,0.08)",
+                            }}
+                          >
+                            {/* Número de orden */}
+                            <span style={{
+                              minWidth: "24px",
+                              height: "24px",
+                              borderRadius: "50%",
+                              background: index === 0 ? "#34d399" : "rgba(255,255,255,0.1)",
+                              color: index === 0 ? "#000" : "inherit",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: "0.75rem",
+                              fontWeight: "bold",
+                              flexShrink: 0,
+                            }}>
+                              {index + 1}
+                            </span>
+
+                            {/* Miniatura */}
+                            <img
+                              src={img.url_imagen}
+                              alt={`Imagen ${index + 1}`}
                               style={{
-                                position: "relative",
-                                borderRadius: "8px",
-                                overflow: "hidden",
-                                border: img.es_principal ? "2px solid #34d399" : "1px solid rgba(255,255,255,0.1)",
-                                aspectRatio: "1",
+                                width: "56px",
+                                height: "56px",
+                                borderRadius: "6px",
+                                objectFit: "cover",
+                                flexShrink: 0,
                               }}
-                            >
-                              <img
-                                src={img.url_imagen}
-                                alt="Imagen del servicio"
-                                style={{
-                                  width: "100%",
-                                  height: "100%",
-                                  objectFit: "cover",
-                                  display: "block",
-                                }}
-                                onError={(e) => {
-                                  e.currentTarget.src = "/img/default_avatar.png";
-                                }}
-                              />
-                              {img.es_principal && (
-                                <span style={{
-                                  position: "absolute",
-                                  top: "4px",
-                                  left: "4px",
-                                  background: "#34d399",
-                                  color: "#000",
-                                  fontSize: "0.65rem",
-                                  fontWeight: "bold",
-                                  padding: "2px 6px",
-                                  borderRadius: "4px",
-                                }}>
-                                  Principal
-                                </span>
-                              )}
+                              onError={(e) => {
+                                e.currentTarget.src = "/img/default_avatar.png";
+                              }}
+                            />
+
+                            {/* Info */}
+                            <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{
-                                position: "absolute",
-                                bottom: 0,
-                                left: 0,
-                                right: 0,
-                                display: "flex",
-                                justifyContent: "space-between",
-                                padding: "4px",
-                                background: "linear-gradient(transparent, rgba(0,0,0,0.7))",
+                                fontSize: "0.8rem",
+                                fontWeight: "bold",
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
                               }}>
-                                {!img.es_principal && (
-                                  <button
-                                    onClick={() => establecerComoPrincipal(img.id_imagen)}
-                                    style={{
-                                      background: "rgba(255,255,255,0.2)",
-                                      border: "none",
-                                      color: "#fff",
-                                      fontSize: "0.6rem",
-                                      padding: "2px 6px",
-                                      borderRadius: "4px",
-                                      cursor: "pointer",
-                                    }}
-                                  >
-                                    Principal
-                                  </button>
-                                )}
-                                <button
-                                  onClick={() => eliminarImagenServicio(img.id_imagen)}
-                                  style={{
-                                    background: "rgba(239,68,68,0.3)",
-                                    border: "none",
-                                    color: "#f87171",
-                                    fontSize: "0.7rem",
-                                    padding: "2px 6px",
-                                    borderRadius: "4px",
-                                    cursor: "pointer",
-                                    marginLeft: "auto",
-                                  }}
-                                >
-                                  <i className="bi bi-trash"></i>
-                                </button>
+                                {index === 0 && "⭐ Portada"}
+                              </div>
+                              <div style={{ fontSize: "0.7rem", opacity: 0.5 }}>
+                                {img.url_imagen.split("/").pop()}
                               </div>
                             </div>
-                          ))}
 
-                          {/* Botón agregar más */}
-                          {imagenesServicio.length < 5 && (
+                            {/* Flechas de orden */}
+                            <div style={{ display: "flex", flexDirection: "column", gap: "2px", flexShrink: 0 }}>
+                              <button
+                                onClick={() => moverImagen(index, -1)}
+                                disabled={index === 0}
+                                style={{
+                                  background: "transparent",
+                                  border: "1px solid rgba(255,255,255,0.15)",
+                                  color: index === 0 ? "rgba(255,255,255,0.2)" : "inherit",
+                                  width: "28px",
+                                  height: "24px",
+                                  borderRadius: "4px",
+                                  cursor: index === 0 ? "default" : "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "0.7rem",
+                                }}
+                              >
+                                ↑
+                              </button>
+                              <button
+                                onClick={() => moverImagen(index, 1)}
+                                disabled={index === imagenesServicio.length - 1}
+                                style={{
+                                  background: "transparent",
+                                  border: "1px solid rgba(255,255,255,0.15)",
+                                  color: index === imagenesServicio.length - 1 ? "rgba(255,255,255,0.2)" : "inherit",
+                                  width: "28px",
+                                  height: "24px",
+                                  borderRadius: "4px",
+                                  cursor: index === imagenesServicio.length - 1 ? "default" : "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "0.7rem",
+                                }}
+                              >
+                                ↓
+                              </button>
+                            </div>
+
+                            {/* Eliminar */}
                             <button
-                              type="button"
-                              onClick={() => fileInputRefImagenes.current?.click()}
+                              onClick={() => eliminarImagenServicio(img.id_imagen)}
                               style={{
-                                aspectRatio: "1",
-                                borderRadius: "8px",
-                                border: "2px dashed rgba(255,255,255,0.2)",
-                                background: "rgba(255,255,255,0.03)",
+                                background: "rgba(239,68,68,0.15)",
+                                border: "1px solid rgba(239,68,68,0.3)",
+                                color: "#f87171",
+                                width: "32px",
+                                height: "32px",
+                                borderRadius: "6px",
                                 cursor: "pointer",
                                 display: "flex",
-                                flexDirection: "column",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                gap: "4px",
-                                color: "inherit",
-                                opacity: 0.6,
+                                fontSize: "0.8rem",
+                                flexShrink: 0,
                               }}
                             >
-                              <i className="bi bi-plus-lg" style={{ fontSize: "1.5rem" }}></i>
-                              <span style={{ fontSize: "0.7rem" }}>Agregar</span>
+                              <i className="bi bi-trash"></i>
                             </button>
-                          )}
-                        </div>
-                      </>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Botón agregar más */}
+                    {imagenesServicio.length < 5 && (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRefImagenes.current?.click()}
+                        style={{
+                          width: "100%",
+                          padding: "12px",
+                          borderRadius: "8px",
+                          border: "2px dashed rgba(255,255,255,0.15)",
+                          background: "transparent",
+                          cursor: "pointer",
+                          color: "inherit",
+                          opacity: 0.6,
+                          marginBottom: "16px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "8px",
+                          fontSize: "0.85rem",
+                        }}
+                      >
+                        <i className="bi bi-plus-lg"></i> Agregar imágenes
+                      </button>
                     )}
 
                     <div className="image-menu-options">
@@ -1202,7 +1267,17 @@ const getAvatarUrl = (avatar) => {
                       >
                         <span className="image-option-icon"><i className="bi bi-arrow-return-left"></i></span>
                         <div className="image-option-text">
-                          <b>Cerrar</b>
+                          <b>Cancelar</b>
+                        </div>
+                      </button>
+                      <button
+                        className="image-option"
+                        onClick={guardarOrdenImagenes}
+                        disabled={imagenesServicio.length === 0}
+                      >
+                        <span className="image-option-icon"><i className="bi bi-save"></i></span>
+                        <div className="image-option-text">
+                          <b>Guardar orden</b>
                         </div>
                       </button>
                     </div>
