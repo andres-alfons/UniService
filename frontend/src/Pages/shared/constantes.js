@@ -90,6 +90,7 @@ export const BADGE = {
   Pendiente: { bg: "#FFF3CD", color: "#856404", texto: "Pendiente", icono: "bi-hourglass-split" },
   Aceptada: { bg: "#D1E7DD", color: "#0A5C36", texto: "Aceptada", icono: "bi-check-circle-fill" },
   Rechazada: { bg: "#F8D7DA", color: "#721C24", texto: "Rechazada", icono: "bi-x-circle-fill" },
+  Completada: { bg: "#CCE5FF", color: "#004085", texto: "Completada", icono: "bi-check2-all" },
 };
 
 // Mapa de nombre_categoria (display name) a iconos Bootstrap

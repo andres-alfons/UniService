@@ -238,7 +238,6 @@ public class SolicitudesController : ControllerBase
         await conn.OpenAsync();
 
         string estado = dto.accion == "aceptar" ? "Aceptada" : "Rechazada";
-        // PostgreSQL usa booleanos reales (true/false), no 1/0
         bool fueAceptada = dto.accion == "aceptar";
 
         var cmd = new NpgsqlCommand(@"
@@ -259,6 +258,33 @@ public class SolicitudesController : ControllerBase
         await cmd.ExecuteNonQueryAsync();
 
         return Ok(new { message = "Solicitud actualizada" });
+    }
+
+    // 🔹 MARCAR SERVICIO COMO COMPLETADO (Proveedor)
+    [HttpPost("completar")]
+    public async Task<IActionResult> Completar([FromBody] CompletarSolicitudDTO dto)
+    {
+        using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+        await conn.OpenAsync();
+
+        // Solo se puede completar si está "Aceptada"
+        var checkCmd = new NpgsqlCommand("SELECT estado FROM solicitudes WHERE id_solicitud = @id", conn);
+        checkCmd.Parameters.AddWithValue("@id", dto.id_solicitud);
+        var estadoActual = await checkCmd.ExecuteScalarAsync();
+
+        if (estadoActual?.ToString() != "Aceptada")
+            return BadRequest(new { error = "Solo se pueden completar solicitudes aceptadas." });
+
+        var cmd = new NpgsqlCommand(@"
+            UPDATE solicitudes
+            SET estado = 'Completada'
+            WHERE id_solicitud = @id
+        ", conn);
+        cmd.Parameters.AddWithValue("@id", dto.id_solicitud);
+
+        await cmd.ExecuteNonQueryAsync();
+
+        return Ok(new { message = "Servicio marcado como completado. El cliente ya puede calificar." });
     }
 
 

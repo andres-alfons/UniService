@@ -71,13 +71,13 @@ public class CalificacionesController : ControllerBase
             using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            // Verificar que la solicitud existe y fue aceptada
+            // Verificar que la solicitud existe y fue completada
             using var checkCmd = new NpgsqlCommand(@"
                 SELECT COUNT(*) FROM solicitudes
                 WHERE id_solicitud = @id_solicitud
                   AND id_cliente   = @id_cliente
                   AND id_servicio  = @id_servicio
-                  AND estado       = 'Aceptada'
+                  AND estado       = 'Completada'
             ", conn);
 
             checkCmd.Parameters.AddWithValue("@id_solicitud", dto.id_solicitud);
@@ -86,7 +86,7 @@ public class CalificacionesController : ControllerBase
 
             int valida = Convert.ToInt32(await checkCmd.ExecuteScalarAsync());
             if (valida == 0)
-                return BadRequest(new { error = "Solo puedes calificar servicios con solicitud aceptada" });
+                return BadRequest(new { error = "Solo puedes calificar servicios que han sido completados por el proveedor" });
 
             // Insertar calificación
             using var cmd = new NpgsqlCommand(@"
@@ -125,12 +125,12 @@ public class CalificacionesController : ControllerBase
             using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            // ¿Tiene solicitud aceptada?
+            // ¿Tiene solicitud COMPLETADA? (Solo se puede calificar si el proveedor marcó como completada)
             using var cmdSol = new NpgsqlCommand(@"
                 SELECT COUNT(*) FROM solicitudes
                 WHERE id_cliente  = @id_cliente
                   AND id_servicio = @id_servicio
-                  AND estado      = 'Aceptada'
+                  AND estado      = 'Completada'
             ", conn);
             cmdSol.Parameters.AddWithValue("@id_cliente", id_cliente);
             cmdSol.Parameters.AddWithValue("@id_servicio", id_servicio);
@@ -154,7 +154,7 @@ public class CalificacionesController : ControllerBase
                     SELECT id_solicitud FROM solicitudes
                     WHERE id_cliente  = @id_cliente
                       AND id_servicio = @id_servicio
-                      AND estado      = 'Aceptada'
+                      AND estado      = 'Completada'
                     LIMIT 1
                 ", conn);
                 cmdId.Parameters.AddWithValue("@id_cliente", id_cliente);

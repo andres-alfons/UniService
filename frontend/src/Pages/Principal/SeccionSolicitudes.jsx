@@ -42,6 +42,20 @@ export default function SeccionSolicitudes() {
     setRecibidas(await res.json());
   };
 
+  const completar = async (id_solicitud) => {
+    const res = await fetch(`${API_SOLICITUD}/completar`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id_solicitud }),
+    });
+
+    if (res.ok) {
+      window.dispatchEvent(new CustomEvent("solicitud-actualizada"));
+      const resActualizada = await fetch(`${API_SOLICITUD}/recibidas/${id}`);
+      setRecibidas(await resActualizada.json());
+    }
+  };
+
   const lista = tab === "enviadas" ? enviadas : recibidas;
 
   return (
@@ -85,6 +99,7 @@ export default function SeccionSolicitudes() {
                   tipo={tab === "enviadas" ? "enviada" : "recibida"}
                   responder={responder}
                   setRechazando={setRechazando}
+                  onCompletar={completar}
                 />
               ))}
             </div>

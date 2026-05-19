@@ -32,5 +32,10 @@ public class ResponderSolicitudDTO
     public decimal? contraoferta { get; set; }
 }
 
+public class CompletarSolicitudDTO
+{
+    public int id_solicitud { get; set; }
+}
+
 //esto sera lo que va a recibir el controlador de solicitudes, es decir,
 //lo que el cliente va a enviar para crear una nueva solicitud.

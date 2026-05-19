@@ -1,6 +1,6 @@
 import { BADGE, ICONOS_POR_NOMBRE_CATEGORIA } from "../shared/constantes";
 
-export default function TarjetaSolicitud({ sol, tipo, responder, setRechazando }) {
+export default function TarjetaSolicitud({ sol, tipo, responder, setRechazando, onCompletar }) {
   const badge = BADGE[sol.estado] || BADGE.Pendiente;
   const nombre = tipo === "enviada" ? sol.nombre_proveedor : sol.nombre_cliente;
   const subtitulo = tipo === "enviada" ? "Proveedor" : "Cliente";
@@ -64,6 +64,26 @@ export default function TarjetaSolicitud({ sol, tipo, responder, setRechazando }
           >
             <><i className="bi bi-x-circle"></i> Rechazar</>
           </button>
+        </div>
+      )}
+
+      {tipo === "recibida" && sol.estado === "Aceptada" && (
+        <div className="solicitud-acciones">
+          <button
+            type="button"
+            className="btn btn-completar"
+            onClick={() => onCompletar(sol.id_solicitud)}
+          >
+            <><i className="bi bi-check2-all"></i> Marcar como completado</>
+          </button>
+        </div>
+      )}
+
+      {tipo === "recibida" && sol.estado === "Completada" && (
+        <div className="solicitud-acciones">
+          <p className="solicitud-completada-msg">
+            <><i className="bi bi-check-circle-fill"></i> Servicio completado. El cliente puede calificar.</>
+          </p>
         </div>
       )}
     </div>
