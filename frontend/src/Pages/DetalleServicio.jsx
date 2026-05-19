@@ -118,7 +118,7 @@ export default function Servicio() {
     setImagenesError(prev => ({ ...prev, [index]: true }));
   };
 
-  const esUrlValida = (url) => url && url.startsWith("http");
+  const esUrlValida = (url) => url && typeof url === "string" && url.trim() !== "";
 
   return (
     <>
