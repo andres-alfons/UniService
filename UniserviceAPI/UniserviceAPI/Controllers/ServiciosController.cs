@@ -320,6 +320,31 @@ public class ServicesController : ControllerBase
         }
     }
 
+    // ── PUT /api/services/{id}/pausar (Admin)
+    [HttpPut("{id}/pausar")]
+    public async Task<IActionResult> Pausar(int id)
+    {
+        try
+        {
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            using var cmd = new NpgsqlCommand(
+                "UPDATE servicios SET disponibilidad = 0 WHERE id_servicio = @id", conn);
+            cmd.Parameters.AddWithValue("@id", id);
+
+            int filas = await cmd.ExecuteNonQueryAsync();
+            if (filas == 0)
+                return NotFound(new { error = "Servicio no encontrado" });
+
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
     // ── DELETE /api/services/{id}
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id, [FromQuery] int id_proveedor)

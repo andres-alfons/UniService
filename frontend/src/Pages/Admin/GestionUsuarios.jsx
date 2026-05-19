@@ -29,10 +29,14 @@ export default function SeccionUsuarios() {
   // Suspende un usuario cambiando su estado a "Suspendido"
   const suspender = async (id) => {
     if (!confirm("¿Suspender este usuario?")) return;
-    await fetch(`${API}/users/${id}/suspender`, { method: "PUT" });
+    await fetch(`${API}/users/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ estado: 0 }),
+    });
     setUsuarios((prev) =>
       prev.map((u) =>
-        u.id_usuario === id ? { ...u, estado: "Suspendido" } : u,
+        u.id_usuario === id ? { ...u, estado: "inactivo" } : u,
       ),
     );
   };

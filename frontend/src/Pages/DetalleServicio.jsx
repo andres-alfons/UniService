@@ -83,10 +83,10 @@ export default function Servicio() {
   const handleCerrarSesion = async () => {
     const id = localStorage.getItem("usuarioId");
     try {
-      await fetch(API_USUARIO, {
+      await fetch(`${API_USUARIO}/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_usuario: id, estado: 0 }),
+        body: JSON.stringify({ estado: 0 }),
       });
     } catch {}
     localStorage.clear();

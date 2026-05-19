@@ -139,6 +139,91 @@ public class UsersController : ControllerBase
         }
     }
 
+    // 🔹 UPDATE USER (PUT /api/users/{id})
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserDTO dto)
+    {
+        try
+        {
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            var fields = new List<string>();
+            var cmd = new NpgsqlCommand("", conn);
+
+            if (dto.nombre != null)
+            {
+                fields.Add("nombre = @nombre");
+                cmd.Parameters.AddWithValue("@nombre", dto.nombre);
+            }
+            if (dto.descripcion != null)
+            {
+                fields.Add("descripcion = @descripcion");
+                cmd.Parameters.AddWithValue("@descripcion", dto.descripcion);
+            }
+            if (dto.telefono != null)
+            {
+                fields.Add("telefono = @telefono");
+                cmd.Parameters.AddWithValue("@telefono", dto.telefono);
+            }
+            if (dto.universidad != null)
+            {
+                fields.Add("universidad = @universidad");
+                cmd.Parameters.AddWithValue("@universidad", dto.universidad);
+            }
+            if (dto.avatar != null)
+            {
+                fields.Add("avatar = @avatar");
+                cmd.Parameters.AddWithValue("@avatar", dto.avatar);
+            }
+            if (dto.estado != null)
+            {
+                fields.Add("estado = @estado");
+                cmd.Parameters.AddWithValue("@estado", dto.estado);
+            }
+
+            if (fields.Count == 0)
+                return BadRequest(new { error = "No hay campos para actualizar" });
+
+            cmd.CommandText = $"UPDATE usuarios SET {string.Join(", ", fields)} WHERE id_usuario = @id";
+            cmd.Parameters.AddWithValue("@id", id);
+
+            int filas = await cmd.ExecuteNonQueryAsync();
+            if (filas == 0)
+                return NotFound(new { error = "Usuario no encontrado" });
+
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    // 🔹 DELETE USER (DELETE /api/users/{id})
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteUser(int id)
+    {
+        try
+        {
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            using var cmd = new NpgsqlCommand("DELETE FROM usuarios WHERE id_usuario = @id", conn);
+            cmd.Parameters.AddWithValue("@id", id);
+
+            int filas = await cmd.ExecuteNonQueryAsync();
+            if (filas == 0)
+                return NotFound(new { error = "Usuario no encontrado" });
+
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
     //METODO PARA OBTENER TODOS LOS USUARIOS (PARA ADMIN)
     [HttpGet]
     public async Task<IActionResult> GetAllUsers()

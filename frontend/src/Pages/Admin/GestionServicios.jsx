@@ -22,7 +22,9 @@ export default function SeccionServiciosAdmin() {
   // Elimina un servicio de forma permanente previa confirmación
   const eliminar = async (id) => {
     if (!confirm("¿Eliminar este servicio?")) return;
-    await fetch(`${API}/services/${id}`, { method: "DELETE" });
+    const servicio = servicios.find(s => s.id_servicio === id);
+    const idProveedor = servicio?.id_proveedor ?? 0;
+    await fetch(`${API}/services/${id}?id_proveedor=${idProveedor}`, { method: "DELETE" });
     setServicios((prev) => prev.filter((s) => s.id_servicio !== id));
   };
 
