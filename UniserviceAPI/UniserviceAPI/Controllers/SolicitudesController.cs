@@ -28,104 +28,118 @@ public class SolicitudesController : ControllerBase
             using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            using var cmd = new NpgsqlCommand("sp_GestionarSolicitud", conn);
-            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            if (dto.id_cliente == dto.id_proveedor)
+                return BadRequest(new { error = "No puedes solicitar tu propio servicio." });
 
-            cmd.Parameters.AddWithValue("@id_cliente", dto.id_cliente);
-            cmd.Parameters.AddWithValue("@id_proveedor", dto.id_proveedor);
-            cmd.Parameters.AddWithValue("@id_servicio", dto.id_servicio);
+            using var checkCmd = new NpgsqlCommand(@"
+                SELECT COUNT(*) FROM solicitudes
+                WHERE id_cliente = @id_cliente AND id_servicio = @id_servicio AND estado = 'Pendiente'
+            ", conn);
+            checkCmd.Parameters.AddWithValue("@id_cliente", dto.id_cliente);
+            checkCmd.Parameters.AddWithValue("@id_servicio", dto.id_servicio);
+            int pendientes = Convert.ToInt32(await checkCmd.ExecuteScalarAsync());
+            if (pendientes > 0)
+                return BadRequest(new { error = "Ya tienes una solicitud pendiente para este servicio." });
 
-            cmd.Parameters.AddWithValue("@tipo_servicio", dto.tipo_servicio ?? "");
-            cmd.Parameters.AddWithValue("@tema", dto.tema ?? "");
-            cmd.Parameters.AddWithValue("@descripcion", dto.descripcion ?? "");
+            using var insertCmd = new NpgsqlCommand(@"
+                INSERT INTO solicitudes (
+                    id_cliente, id_proveedor, id_servicio, fue_aceptada,
+                    tipo_servicio, tema, descripcion,
+                    fecha_deseada, hora_deseada, duracion, modalidad,
+                    metodo_pago, presupuesto, pago_anticipado,
+                    urgencia, archivo, estado
+                ) VALUES (
+                    @id_cliente, @id_proveedor, @id_servicio, FALSE,
+                    @tipo_servicio, @tema, @descripcion,
+                    @fecha_deseada, @hora_deseada, @duracion, @modalidad,
+                    @metodo_pago, @presupuesto, @pago_anticipado,
+                    @urgencia, @archivo, 'Pendiente'
+                )
+                RETURNING id_solicitud
+            ", conn);
 
-            cmd.Parameters.AddWithValue("@fecha_deseada", dto.fecha_deseada);
-
-            cmd.Parameters.AddWithValue("@hora_deseada",
-                dto.hora_deseada.HasValue ? (object)dto.hora_deseada.Value : DBNull.Value
-            );
-
-            cmd.Parameters.AddWithValue("@duracion", dto.duracion ?? "");
-            cmd.Parameters.AddWithValue("@modalidad", dto.modalidad ?? "");
-
-            cmd.Parameters.AddWithValue("@metodo_pago", dto.metodo_pago ?? "");
-            cmd.Parameters.AddWithValue("@presupuesto", dto.presupuesto);
-            cmd.Parameters.AddWithValue("@pago_anticipado", dto.pago_anticipado);
-
-            cmd.Parameters.AddWithValue("@urgencia", dto.urgencia ?? "");
-            cmd.Parameters.AddWithValue("@archivo", dto.archivo ?? (object)DBNull.Value);
-
-            using var reader = await cmd.ExecuteReaderAsync();
-
-            if (await reader.ReadAsync())
+            insertCmd.Parameters.Add(new NpgsqlParameter("@id_cliente", NpgsqlTypes.NpgsqlDbType.Integer) { Value = dto.id_cliente });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@id_proveedor", NpgsqlTypes.NpgsqlDbType.Integer) { Value = dto.id_proveedor });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@id_servicio", NpgsqlTypes.NpgsqlDbType.Integer) { Value = dto.id_servicio });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@tipo_servicio", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = dto.tipo_servicio ?? "" });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@tema", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = dto.tema ?? "" });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@descripcion", NpgsqlTypes.NpgsqlDbType.Text) { Value = dto.descripcion ?? "" });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@fecha_deseada", NpgsqlTypes.NpgsqlDbType.Date) { Value = dto.fecha_deseada.Date });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@hora_deseada", NpgsqlTypes.NpgsqlDbType.Time)
             {
-                var resultado = reader["Resultado"]?.ToString();
-                var idSolicitud = reader["id_solicitud"]?.ToString();
+                Value = dto.hora_deseada.HasValue ? (object)dto.hora_deseada.Value : DBNull.Value
+            });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@duracion", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = dto.duracion ?? "" });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@modalidad", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = dto.modalidad ?? "" });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@metodo_pago", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = dto.metodo_pago ?? "" });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@presupuesto", NpgsqlTypes.NpgsqlDbType.Numeric) { Value = dto.presupuesto });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@pago_anticipado", NpgsqlTypes.NpgsqlDbType.Boolean) { Value = dto.pago_anticipado });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@urgencia", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = dto.urgencia ?? "" });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@archivo", NpgsqlTypes.NpgsqlDbType.Varchar)
+            {
+                Value = string.IsNullOrEmpty(dto.archivo) ? DBNull.Value : (object)dto.archivo
+            });
 
-                if (!string.IsNullOrWhiteSpace(idSolicitud))
+            var idSolicitud = await insertCmd.ExecuteScalarAsync();
+
+            try
+            {
+                using var connEmail = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+                await connEmail.OpenAsync();
+
+                var cmdEmail = new NpgsqlCommand(@"
+                    SELECT u.correo AS email_proveedor, u.nombre AS nombre_proveedor,
+                           c.nombre AS nombre_cliente, se.titulo AS titulo_servicio
+                    FROM usuarios u
+                    INNER JOIN servicios se ON se.id_servicio = @id_servicio
+                    INNER JOIN usuarios c ON c.id_usuario = @id_cliente
+                    WHERE u.id_usuario = @id_proveedor AND se.id_servicio = @id_servicio
+                ", connEmail);
+                cmdEmail.Parameters.AddWithValue("@id_proveedor", dto.id_proveedor);
+                cmdEmail.Parameters.AddWithValue("@id_cliente", dto.id_cliente);
+                cmdEmail.Parameters.AddWithValue("@id_servicio", dto.id_servicio);
+
+                using var readerEmail = await cmdEmail.ExecuteReaderAsync();
+                if (await readerEmail.ReadAsync())
                 {
-                    try
+                    var emailProveedor = readerEmail["email_proveedor"]?.ToString();
+                    var nombreProveedor = readerEmail["nombre_proveedor"]?.ToString();
+                    var nombreCliente = readerEmail["nombre_cliente"]?.ToString();
+                    var tituloServicio = readerEmail["titulo_servicio"]?.ToString();
+
+                    if (!string.IsNullOrEmpty(emailProveedor))
                     {
-                        using var connEmail = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
-                        await connEmail.OpenAsync();
-
-                        var cmdEmail = new NpgsqlCommand(@"
-                            SELECT u.correo AS email_proveedor, u.nombre AS nombre_proveedor,
-                                   c.nombre AS nombre_cliente, se.titulo AS titulo_servicio
-                            FROM usuarios u
-                            INNER JOIN servicios se ON se.id_servicio = @id_servicio
-                            INNER JOIN usuarios c ON c.id_usuario = @id_cliente
-                            WHERE u.id_usuario = @id_proveedor AND se.id_servicio = @id_servicio
-                        ", connEmail);
-                        cmdEmail.Parameters.AddWithValue("@id_proveedor", dto.id_proveedor);
-                        cmdEmail.Parameters.AddWithValue("@id_cliente", dto.id_cliente);
-                        cmdEmail.Parameters.AddWithValue("@id_servicio", dto.id_servicio);
-
-                        using var readerEmail = await cmdEmail.ExecuteReaderAsync();
-                        if (await readerEmail.ReadAsync())
+                        try
                         {
-                            var emailProveedor = readerEmail["email_proveedor"]?.ToString();
-                            var nombreProveedor = readerEmail["nombre_proveedor"]?.ToString();
-                            var nombreCliente = readerEmail["nombre_cliente"]?.ToString();
-                            var tituloServicio = readerEmail["titulo_servicio"]?.ToString();
-
-                            if (!string.IsNullOrEmpty(emailProveedor))
-                            {
-                                try
-                                {
-                                    Console.WriteLine("ENTRÓ AL ENVÍO DE CORREO");
-                                    await _emailService.EnviarNotificacionSolicitud(
-                                        emailProveedor,
-                                        nombreProveedor ?? "Proveedor",
-                                        nombreCliente ?? "Un estudiante",
-                                        tituloServicio ?? "Tu servicio",
-                                        dto.tipo_servicio ?? "No especificado",
-                                        dto.descripcion ?? "",
-                                        dto.presupuesto.ToString(),
-                                        dto.urgencia ?? ""
-                                    );
-                                }
-                                catch (Exception emailEx)
-                                {
-                                    Console.WriteLine($"❌ Error enviando correo: {emailEx.Message}");
-                                }
-                            }
+                            Console.WriteLine("📧 Intentando enviar correo a:", emailProveedor);
+                            await _emailService.EnviarNotificacionSolicitud(
+                                emailProveedor,
+                                nombreProveedor ?? "Proveedor",
+                                nombreCliente ?? "Un estudiante",
+                                tituloServicio ?? "Tu servicio",
+                                dto.tipo_servicio ?? "No especificado",
+                                dto.descripcion ?? "",
+                                dto.presupuesto.ToString(),
+                                dto.urgencia ?? ""
+                            );
+                        }
+                        catch (Exception emailEx)
+                        {
+                            Console.WriteLine($"❌ Error enviando correo: {emailEx.Message}");
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"ERROR CORREO: {ex.Message}");
-                    }
                 }
-
-                return Ok(new
-                {
-                    message = resultado,
-                    id = idSolicitud
-                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR CORREO: {ex.Message}");
             }
 
-            return BadRequest(new { message = "No se pudo crear la solicitud" });
+            return Ok(new
+            {
+                message = "Solicitud enviada correctamente",
+                id = idSolicitud?.ToString()
+            });
         }
         catch (Exception ex)
         {
@@ -224,7 +238,8 @@ public class SolicitudesController : ControllerBase
         await conn.OpenAsync();
 
         string estado = dto.accion == "aceptar" ? "Aceptada" : "Rechazada";
-        int fueAceptada = dto.accion == "aceptar" ? 1 : 0;
+        // PostgreSQL usa booleanos reales (true/false), no 1/0
+        bool fueAceptada = dto.accion == "aceptar";
 
         var cmd = new NpgsqlCommand(@"
             UPDATE solicitudes

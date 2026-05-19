@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import TarjetaSolicitud from "./TarjetaSolicitud";
 import ModalRechazo from "./ModalRechazo";
 import { API_SOLICITUD } from "../shared/constantes";
@@ -44,60 +45,63 @@ export default function SeccionSolicitudes() {
   const lista = tab === "enviadas" ? enviadas : recibidas;
 
   return (
-    <section className="seccion section-dynamic" id="solicitudes">
-      <div className="bg-canvas bg-canvas-code" />
-      <div className="container">
-        <p className="label-seccion reveal"><i className="bi bi-bell-fill"></i> Bandeja</p>
-        <h2 className="reveal delay-1">Mis solicitudes</h2>
+    <>
+      <section className="seccion section-dynamic" id="solicitudes">
+        <div className="bg-canvas bg-canvas-code" />
+        <div className="container">
+          <p className="label-seccion reveal"><i className="bi bi-bell-fill"></i> Bandeja</p>
+          <h2 className="reveal delay-1">Mis solicitudes</h2>
 
-        <div className="solicitud-tabs reveal delay-2">
-          {[
-            ["enviadas", "Enviadas"],
-            ["recibidas", "Recibidas"],
-          ].map(([val, label]) => (
-            <button
-              key={val}
-              type="button"
-              onClick={() => setTab(val)}
-              className={tab === val ? "btn btn-verde" : "btn btn-borde"}
-            >
-              {label} ({val === "enviadas" ? enviadas.length : recibidas.length})
-            </button>
-          ))}
-        </div>
-
-        {cargando ? (
-          <p className="texto-muted solicitud-mensaje">Cargando solicitudes...</p>
-        ) : lista.length === 0 ? (
-          <p className="texto-muted solicitud-mensaje">
-            {tab === "enviadas"
-              ? "Aún no has enviado solicitudes."
-              : "Aún no tienes solicitudes recibidas."}
-          </p>
-        ) : (
-          <div className="solicitud-grid">
-            {lista.map((sol) => (
-              <TarjetaSolicitud
-                key={sol.id_solicitud}
-                sol={sol}
-                tipo={tab === "enviadas" ? "enviada" : "recibida"}
-                responder={responder}
-                setRechazando={setRechazando}
-              />
+          <div className="solicitud-tabs reveal delay-2">
+            {[
+              ["enviadas", "Enviadas"],
+              ["recibidas", "Recibidas"],
+            ].map(([val, label]) => (
+              <button
+                key={val}
+                type="button"
+                onClick={() => setTab(val)}
+                className={tab === val ? "btn btn-verde" : "btn btn-borde"}
+              >
+                {label} ({val === "enviadas" ? enviadas.length : recibidas.length})
+              </button>
             ))}
           </div>
-        )}
-      </div>
 
-      {rechazando && (
+          {cargando ? (
+            <p className="texto-muted solicitud-mensaje">Cargando solicitudes...</p>
+          ) : lista.length === 0 ? (
+            <p className="texto-muted solicitud-mensaje">
+              {tab === "enviadas"
+                ? "Aún no has enviado solicitudes."
+                : "Aún no tienes solicitudes recibidas."}
+            </p>
+          ) : (
+            <div className="solicitud-grid">
+              {lista.map((sol) => (
+                <TarjetaSolicitud
+                  key={sol.id_solicitud}
+                  sol={sol}
+                  tipo={tab === "enviadas" ? "enviada" : "recibida"}
+                  responder={responder}
+                  setRechazando={setRechazando}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {rechazando && createPortal(
         <ModalRechazo
           onConfirmar={(motivo, contraoferta) => {
             responder(rechazando, "rechazar", motivo, contraoferta);
             setRechazando(null);
           }}
           onCancelar={() => setRechazando(null)}
-        />
+        />,
+        document.body
       )}
-    </section>
+    </>
   );
 }

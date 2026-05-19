@@ -25,15 +25,33 @@ public class SeguidoresController : ControllerBase
             using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            using var cmd = new NpgsqlCommand("sp_ToggleSeguimiento", conn);
-            cmd.CommandType = CommandType.StoredProcedure;
+            if (dto.id_seguidor == dto.id_seguido)
+                return BadRequest(new { error = "Un usuario no puede seguirse a sí mismo." });
 
-            cmd.Parameters.AddWithValue("@id_seguidor", dto.id_seguidor);
-            cmd.Parameters.AddWithValue("@id_seguido", dto.id_seguido);
+            using var checkCmd = new NpgsqlCommand(
+                "SELECT COUNT(*) FROM seguidores WHERE id_seguidor = @seguidor AND id_seguido = @seguido", conn);
+            checkCmd.Parameters.AddWithValue("@seguidor", dto.id_seguidor);
+            checkCmd.Parameters.AddWithValue("@seguido", dto.id_seguido);
+            int existe = Convert.ToInt32(await checkCmd.ExecuteScalarAsync());
 
-            var result = await cmd.ExecuteScalarAsync();
-
-            return Ok(new { resultado = result?.ToString() });
+            if (existe > 0)
+            {
+                using var delCmd = new NpgsqlCommand(
+                    "DELETE FROM seguidores WHERE id_seguidor = @seguidor AND id_seguido = @seguido", conn);
+                delCmd.Parameters.AddWithValue("@seguidor", dto.id_seguidor);
+                delCmd.Parameters.AddWithValue("@seguido", dto.id_seguido);
+                await delCmd.ExecuteNonQueryAsync();
+                return Ok(new { resultado = "Dejado de seguir" });
+            }
+            else
+            {
+                using var insCmd = new NpgsqlCommand(
+                    "INSERT INTO seguidores (id_seguidor, id_seguido) VALUES (@seguidor, @seguido)", conn);
+                insCmd.Parameters.AddWithValue("@seguidor", dto.id_seguidor);
+                insCmd.Parameters.AddWithValue("@seguido", dto.id_seguido);
+                await insCmd.ExecuteNonQueryAsync();
+                return Ok(new { resultado = "Siguiendo" });
+            }
         }
         catch (Exception ex)
         {
