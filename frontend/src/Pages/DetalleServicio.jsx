@@ -106,11 +106,13 @@ export default function Servicio() {
   const esArriendo = servicio.nombre_categoria?.toLowerCase().includes("arriendo");
 
   const imagenes = servicio.imagenes && servicio.imagenes.length > 0
-    ? [...servicio.imagenes].sort((a, b) => {
-        if (a.es_principal && !b.es_principal) return -1;
-        if (!a.es_principal && b.es_principal) return 1;
-        return new Date(a.fecha_subida) - new Date(b.fecha_subida);
-      })
+    ? servicio.imagenes
+        .filter((img) => !img.url_imagen?.includes("default") && !img.url_imagen?.startsWith("img/"))
+        .sort((a, b) => {
+          if (a.es_principal && !b.es_principal) return -1;
+          if (!a.es_principal && b.es_principal) return 1;
+          return new Date(a.fecha_subida) - new Date(b.fecha_subida);
+        })
     : null;
 
   const iconosGaleria = [

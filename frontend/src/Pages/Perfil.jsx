@@ -322,11 +322,13 @@ const getAvatarUrl = (avatar) => {
     try {
       const res = await fetch(`/api/services/${servicio.id_servicio}`);
       const data = await res.json();
-      const imgs = (data.imagenes || []).sort((a, b) => {
-        if (a.es_principal && !b.es_principal) return -1;
-        if (!a.es_principal && b.es_principal) return 1;
-        return new Date(a.fecha_subida) - new Date(b.fecha_subida);
-      });
+      const imgs = (data.imagenes || [])
+        .filter((img) => !img.url_imagen?.includes("default") && !img.url_imagen?.startsWith("img/"))
+        .sort((a, b) => {
+          if (a.es_principal && !b.es_principal) return -1;
+          if (!a.es_principal && b.es_principal) return 1;
+          return new Date(a.fecha_subida) - new Date(b.fecha_subida);
+        });
       setImagenesServicio(imgs);
     } catch (err) {
       console.error("Error cargando imágenes:", err);

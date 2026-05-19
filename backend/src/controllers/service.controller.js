@@ -270,6 +270,13 @@ export const subirImagenes = async (req, res) => {
     if (!req.files || req.files.length === 0)
       return res.status(400).json({ error: "No se enviaron imagenes" });
 
+    // Eliminar imagen(es) default antes de insertar las reales
+    await conn.request()
+      .input("id", sql.Int, parseInt(id))
+      .query(`DELETE FROM servicios_imagenes 
+              WHERE id_servicio = @id 
+              AND (url_imagen LIKE '%default%' OR url_imagen LIKE 'img/%')`);
+
     const countResult = await conn.request()
       .input("id", sql.Int, parseInt(id))
       .query("SELECT COUNT(*) as total FROM servicios_imagenes WHERE id_servicio = @id");
@@ -321,14 +328,21 @@ export const eliminarImagen = async (req, res) => {
       .input("idImagen", sql.Int, parseInt(idImagen))
       .query("DELETE FROM servicios_imagenes WHERE id_imagen = @idImagen");
 
-    const filePath = path.join(process.cwd(), "public", url.replace(/^\//, ""));
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    // Solo borrar archivo si es una imagen subida (no default)
+    if (url.startsWith("/imagenes-servicios/")) {
+      const filePath = path.join(process.cwd(), "public", url.replace(/^\//, ""));
+      try {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch (fileErr) {
+        console.warn("No se pudo eliminar archivo:", fileErr.message);
+      }
     }
 
     res.json({ ok: true });
   } catch (error) {
-    console.error(error);
+    console.error("Error eliminando imagen:", error);
     res.status(500).json({ error: error.message });
   }
 };
