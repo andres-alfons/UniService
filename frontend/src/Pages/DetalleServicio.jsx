@@ -48,6 +48,8 @@ export default function Servicio() {
       .then((data) => {
         const s = Array.isArray(data) ? data[0] : data;
         if (!s || !s.id_servicio) { setError(true); return; }
+        console.log("Servicio cargado:", s);
+        console.log("Imagenes:", s.imagenes);
         setServicio(s);
       })
       .catch((err) => { console.error("Error cargando servicio:", err); setError(true); })
@@ -128,9 +130,10 @@ export default function Servicio() {
       </section>
 
       <main className="container" style={{ marginBottom: "80px" }}>
-        <div className="grid_detalle">
-          <div>
-            {/* GALERÍA DE IMÁGENES - diseño original con soporte para imágenes reales */}
+        <div className="grid-detalle">
+          {/* COLUMNA IZQUIERDA: Galeria + Info + Reseñas */}
+          <div className="columna-izquierda">
+            {/* GALERÍA DE IMÁGENES */}
             <div className="galeria-principal">
               <div className="imagen-grande">
                 {imagenes ? (
@@ -283,7 +286,8 @@ export default function Servicio() {
             />
           </div>
 
-          <div>
+          {/* COLUMNA DERECHA: Proveedor + Contacto + Formulario */}
+          <div className="columna-derecha">
             <div>
               <Link
                 to={`/perfil/${servicio.id_proveedor}`}

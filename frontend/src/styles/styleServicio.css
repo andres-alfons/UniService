@@ -49,6 +49,14 @@ body {
   margin-bottom: 60px;
 }
 
+.columna-izquierda {
+  min-width: 0;
+}
+
+.columna-derecha {
+  min-width: 0;
+}
+
 /* ── GALERÍA ── */
 .galeria-principal {
   background: var(--card);
@@ -968,6 +976,11 @@ input[type="file"].form-input-custom {
   height: 100%;
   object-fit: cover;
   border-radius: 6px;
+  display: block;
+}
+
+.miniatura {
+  overflow: hidden;
 }
 
 /* Botón Ver en Mapa */
@@ -1060,6 +1073,8 @@ input[type="file"].form-input-custom {
   position: relative;
   border-radius: 12px;
   overflow: hidden;
+  height: 400px;
+  background: #1a1a2e;
 }
 
 .mapa-loading {
@@ -1069,6 +1084,7 @@ input[type="file"].form-input-custom {
   transform: translate(-50%, -50%);
   text-align: center;
   color: var(--texto2);
+  z-index: 1;
 }
 
 .mapa-modal-footer {
