@@ -105,6 +105,7 @@ export default function Servicio() {
   const esArriendo = servicio.nombre_categoria?.toLowerCase().includes("arriendo");
 
   const imagenes = servicio.imagenes && servicio.imagenes.length > 0 ? servicio.imagenes : null;
+  const [imagenesError, setImagenesError] = useState({});
 
   const iconosGaleria = [
     servicio.icono?.startsWith("bi-") ? servicio.icono : "bi-pin",
@@ -112,6 +113,12 @@ export default function Servicio() {
     "bi-keyboard",
     "bi-tools",
   ];
+
+  const handleImagenError = (index) => {
+    setImagenesError(prev => ({ ...prev, [index]: true }));
+  };
+
+  const esUrlValida = (url) => url && url.startsWith("http");
 
   return (
     <>
@@ -136,41 +143,35 @@ export default function Servicio() {
             {/* GALERÍA DE IMÁGENES */}
             <div className="galeria-principal">
               <div className="imagen-grande">
-                {imagenes ? (
+                {imagenes && esUrlValida(imagenes[imagenActual]?.url_imagen) && !imagenesError[imagenActual] ? (
                   <img
-                    key={imagenActual}
-                    src={imagenes[imagenActual]?.url_imagen || ""}
+                    src={imagenes[imagenActual].url_imagen}
                     alt={servicio.titulo}
                     className="imagen-servicio-real"
-                    onError={(e) => {
-                      e.target.style.display = "none";
-                      const fallback = document.createElement("i");
-                      fallback.className = `bi ${iconosGaleria[0]}`;
-                      e.target.parentElement.appendChild(fallback);
-                    }}
+                    onError={() => handleImagenError(imagenActual)}
                   />
                 ) : (
-                  <i className={`bi ${iconosGaleria[imagenActual]}`}></i>
+                  <i className={`bi ${iconosGaleria[0]}`}></i>
                 )}
               </div>
               <div className="galeria-miniaturas">
-                {imagenes ? imagenes.map((img, i) => (
+                {imagenes && imagenes.map((img, i) => (
                   <button
                     key={img.id_imagen || i}
                     type="button"
                     className={`miniatura${imagenActual === i ? " activa" : ""}`}
                     onClick={() => setImagenActual(i)}
                   >
-                    <img src={img.url_imagen} alt={`Imagen ${i + 1}`} className="miniatura-img" />
-                  </button>
-                )) : iconosGaleria.map((icono, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    className={`miniatura${imagenActual === i ? " activa" : ""}`}
-                    onClick={() => setImagenActual(i)}
-                  >
-                    <i className={`bi ${icono}`}></i>
+                    {esUrlValida(img.url_imagen) && !imagenesError[i] ? (
+                      <img
+                        src={img.url_imagen}
+                        alt={`Imagen ${i + 1}`}
+                        className="miniatura-img"
+                        onError={() => handleImagenError(i)}
+                      />
+                    ) : (
+                      <i className={`bi ${iconosGaleria[0]}`}></i>
+                    )}
                   </button>
                 ))}
               </div>

@@ -71,9 +71,9 @@
 
 [data-theme="claro"] .galeria-miniaturas {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  padding: 12px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  padding: 10px;
   background: var(--bg2);
 }
 
@@ -81,7 +81,7 @@
   aspect-ratio: 1;
   background: var(--card);
   border: 2px solid var(--borde);
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
