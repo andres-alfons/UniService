@@ -3246,6 +3246,15 @@ html {
   background: #0056b3;
 }
 
+.btn-ir-calificar {
+  background: #f5c842;
+  color: #031424;
+}
+
+.btn-ir-calificar:hover {
+  background: #e0b530;
+}
+
 .solicitud-completada-msg {
   margin: 8px 0 0;
   padding: 10px;

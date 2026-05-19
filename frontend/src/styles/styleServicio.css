@@ -744,6 +744,17 @@ input[type="file"].form-input-custom {
   word-break: break-word;
 }
 
+.solicitud-existente-info {
+  margin-top: 12px;
+  font-size: 0.82rem;
+  color: var(--texto2);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
 /* ── CHECKBOX BONITO ── */
 .checkbox-custom {
   display: flex;

@@ -295,10 +295,11 @@ public class SolicitudesController : ControllerBase
         using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
         await conn.OpenAsync();
 
+        // Excluir completadas y rechazadas para permitir nuevas solicitudes
         var cmd = new NpgsqlCommand(@"
         SELECT COUNT(*) FROM solicitudes
         WHERE id_cliente = @id_cliente AND id_servicio = @id_servicio
-        AND estado NOT IN ('Rechazada', 'Cancelada')
+        AND estado NOT IN ('Rechazada', 'Cancelada', 'Completada')
     ", conn);
 
         cmd.Parameters.AddWithValue("@id_cliente", id_cliente);
@@ -315,16 +316,20 @@ public class SolicitudesController : ControllerBase
         using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
         await conn.OpenAsync();
 
+        // Solo se pueden eliminar solicitudes pendientes o rechazadas
         var cmd = new NpgsqlCommand(@"
         DELETE FROM solicitudes
         WHERE id_cliente = @id_cliente AND id_servicio = @id_servicio
-        AND estado NOT IN ('Rechazada', 'Cancelada')
+        AND estado IN ('Pendiente', 'Rechazada')
     ", conn);
 
         cmd.Parameters.AddWithValue("@id_cliente", id_cliente);
         cmd.Parameters.AddWithValue("@id_servicio", id_servicio);
 
-        await cmd.ExecuteNonQueryAsync();
+        int filas = await cmd.ExecuteNonQueryAsync();
+        if (filas == 0)
+            return BadRequest(new { message = "No se puede eliminar esta solicitud" });
+
         return Ok(new { message = "Solicitud eliminada" });
     }
 

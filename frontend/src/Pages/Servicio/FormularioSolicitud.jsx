@@ -384,6 +384,12 @@ function FormSolicitud({
         >
           {solicitudExiste ? <><i className="bi bi-trash"></i> Eliminar solicitud</> : <><i className="bi bi-envelope"></i> Enviar solicitud</>}
         </button>
+
+        {solicitudExiste && (
+          <p className="solicitud-existente-info">
+            <><i className="bi bi-info-circle"></i> Ya tienes una solicitud activa para este servicio.</>
+          </p>
+        )}
       </form>
     </>
   );

@@ -1,6 +1,8 @@
 import { BADGE, ICONOS_POR_NOMBRE_CATEGORIA } from "../shared/constantes";
+import { useNavigate } from "react-router-dom";
 
 export default function TarjetaSolicitud({ sol, tipo, responder, setRechazando, onCompletar }) {
+  const navigate = useNavigate();
   const badge = BADGE[sol.estado] || BADGE.Pendiente;
   const nombre = tipo === "enviada" ? sol.nombre_proveedor : sol.nombre_cliente;
   const subtitulo = tipo === "enviada" ? "Proveedor" : "Cliente";
@@ -84,6 +86,18 @@ export default function TarjetaSolicitud({ sol, tipo, responder, setRechazando, 
           <p className="solicitud-completada-msg">
             <><i className="bi bi-check-circle-fill"></i> Servicio completado. El cliente puede calificar.</>
           </p>
+        </div>
+      )}
+
+      {tipo === "enviada" && sol.estado === "Completada" && (
+        <div className="solicitud-acciones">
+          <button
+            type="button"
+            className="btn btn-completar btn-ir-calificar"
+            onClick={() => navigate(`/servicio?id=${sol.id_servicio}`)}
+          >
+            <><i className="bi bi-star-fill"></i> Ir a calificar</>
+          </button>
         </div>
       )}
     </div>
