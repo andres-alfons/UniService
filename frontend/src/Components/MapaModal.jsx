@@ -3,16 +3,18 @@ import { loadGoogleMapsApi } from '../utils/googleMaps';
 
 export default function MapaModal({ lat, lng, direccion, onClose }) {
   const mapRef = useRef(null);
-  const mapInstanceRef = useRef(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!mapRef.current || !lat || !lng) return;
 
-    // Small delay to ensure modal is fully rendered
+    let cancelled = false;
+
     const timer = setTimeout(() => {
       loadGoogleMapsApi().then(() => {
+        if (cancelled) return;
+
         try {
           const location = { lat: Number(lat), lng: Number(lng) };
           
@@ -26,30 +28,29 @@ export default function MapaModal({ lat, lng, direccion, onClose }) {
             fullscreenControl: true,
           });
 
-          mapInstanceRef.current = map;
-
           new google.maps.Marker({
             position: location,
             map,
             title: direccion || 'Ubicacion del servicio',
           });
 
-          // Trigger resize to fix black screen
-          google.maps.event.trigger(map, 'resize');
-          map.setCenter(location);
-
-          setMapLoaded(true);
+          google.maps.event.addListenerOnce(map, 'tilesloaded', () => {
+            if (!cancelled) setMapLoaded(true);
+          });
         } catch (err) {
           console.error('Error loading map:', err);
-          setError('No se pudo cargar el mapa');
+          if (!cancelled) setError('No se pudo cargar el mapa');
         }
       }).catch((err) => {
         console.error('Error loading Google Maps API:', err);
-        setError('Error cargando Google Maps');
+        if (!cancelled) setError('Error cargando Google Maps');
       });
     }, 100);
 
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [lat, lng, direccion]);
 
   if (!lat || !lng) return null;
@@ -72,15 +73,18 @@ export default function MapaModal({ lat, lng, direccion, onClose }) {
           </p>
         )}
 
-        <div className="mapa-container" ref={mapRef}>
+        <div className="mapa-wrapper">
+          <div className="mapa-container" ref={mapRef} />
+          
           {!mapLoaded && !error && (
-            <div className="mapa-loading">
+            <div className="mapa-loading-overlay">
               <div className="spinner" />
               <p>Cargando mapa...</p>
             </div>
           )}
+          
           {error && (
-            <div className="mapa-loading">
+            <div className="mapa-loading-overlay">
               <p style={{ color: '#ef4444' }}>{error}</p>
             </div>
           )}
