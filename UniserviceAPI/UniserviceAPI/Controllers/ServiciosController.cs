@@ -130,23 +130,31 @@ public class ServicesController : ControllerBase
 
             using var reader = await cmd.ExecuteReaderAsync();
             if (!await reader.ReadAsync())
+            {
+                reader.Close();
                 return NotFound(new { error = "Servicio no encontrado" });
+            }
+
+            // Conversiones seguras para evitar excepciones por tipos nulos
+            int idServicio = reader["id_servicio"] != DBNull.Value ? Convert.ToInt32(reader["id_servicio"]) : 0;
+            int idProveedor = reader["id_proveedor"] != DBNull.Value ? Convert.ToInt32(reader["id_proveedor"]) : 0;
+            DateTime fechaPub = reader["fecha_publicacion"] != DBNull.Value ? Convert.ToDateTime(reader["fecha_publicacion"]) : DateTime.Now;
 
             var servicio = new
             {
-                id_servicio = (int)reader["id_servicio"],
-                id_proveedor = (int)reader["id_proveedor"],
-                titulo = reader["titulo"]?.ToString(),
-                descripcion = reader["descripcion"]?.ToString(),
-                precio_hora = reader["precio_hora"],
-                icono = reader["icono"]?.ToString() ?? "📌",
-                contacto = reader["contacto"]?.ToString(),
-                fecha_publicacion = Convert.ToDateTime(reader["fecha_publicacion"]).ToString("yyyy-MM-dd"),
+                id_servicio = idServicio,
+                id_proveedor = idProveedor,
+                titulo = reader["titulo"]?.ToString() ?? "Sin título",
+                descripcion = reader["descripcion"]?.ToString() ?? "Sin descripción",
+                precio_hora = reader["precio_hora"] != DBNull.Value ? reader["precio_hora"] : 0,
+                icono = reader["icono"]?.ToString() ?? "bi-pin",
+                contacto = reader["contacto"]?.ToString() ?? "",
+                fecha_publicacion = fechaPub.ToString("yyyy-MM-dd"),
                 modalidad = MapModalidad(reader["modalidad"]),
                 disponibilidad = MapDisponibilidad(reader["disponibilidad"]),
-                nombre_categoria = reader["nombre_categoria"]?.ToString(),
-                proveedor = reader["proveedor"]?.ToString(),
-                universidad = reader["universidad"]
+                nombre_categoria = reader["nombre_categoria"]?.ToString() ?? "",
+                proveedor = reader["proveedor"]?.ToString() ?? "Proveedor anónimo",
+                universidad = reader["universidad"]?.ToString() ?? ""
             };
             reader.Close();
 
@@ -168,12 +176,15 @@ public class ServicesController : ControllerBase
             using var rReader = await cmdResenas.ExecuteReaderAsync();
             while (await rReader.ReadAsync())
             {
+                byte puntuacion = rReader["puntuacion"] != DBNull.Value ? Convert.ToByte(rReader["puntuacion"]) : (byte)5;
+                DateTime fechaCal = rReader["fecha_calificacion"] != DBNull.Value ? Convert.ToDateTime(rReader["fecha_calificacion"]) : DateTime.Now;
+
                 resenas.Add(new
                 {
-                    estrellas = (byte)rReader["puntuacion"],
-                    comentario = rReader["comentario"]?.ToString(),
-                    fecha = ((DateTime)rReader["fecha_calificacion"]).ToString("dd MMM yyyy"),
-                    autor = rReader["autor"]?.ToString()
+                    estrellas = puntuacion,
+                    comentario = rReader["comentario"]?.ToString() ?? "",
+                    fecha = fechaCal.ToString("dd MMM yyyy"),
+                    autor = rReader["autor"]?.ToString() ?? "Anónimo"
                 });
             }
             rReader.Close();
@@ -204,7 +215,7 @@ public class ServicesController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { error = ex.Message });
+            return StatusCode(500, new { error = ex.Message, detalle = ex.StackTrace });
         }
     }
 

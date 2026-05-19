@@ -65,16 +65,28 @@ export default function Servicio() {
     }
 
     fetch(`${API}/${idServicio}`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then(err => {
+            console.error("Error API:", err);
+            throw new Error(err.error || "Servicio no encontrado");
+          });
+        }
+        return res.json();
+      })
       .then((data) => {
+        console.log("Datos del servicio:", data);
         const s = Array.isArray(data) ? data[0] : data;
-        if (!s) {
+        if (!s || !s.id_servicio) {
           setError(true);
           return;
         }
         setServicio(s);
       })
-      .catch(() => setError(true))
+      .catch((err) => {
+        console.error("Error cargando servicio:", err);
+        setError(true);
+      })
       .finally(() => setCargando(false));
     // recargarResenas cambia para refrescar después de una nueva reseña
     }, [idServicio, recargarResenas]);
