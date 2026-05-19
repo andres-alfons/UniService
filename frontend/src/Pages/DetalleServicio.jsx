@@ -102,10 +102,7 @@ export default function Servicio() {
   const tieneUbicacion = servicio.ubicacion_lat && servicio.ubicacion_lng;
   const esArriendo = servicio.nombre_categoria?.toLowerCase().includes("arriendo");
 
-  // Galería: usar imágenes reales si existen, sino usar iconos fallback
-  const imagenes = servicio.imagenes && servicio.imagenes.length > 0
-    ? servicio.imagenes
-    : null;
+  const imagenes = servicio.imagenes && servicio.imagenes.length > 0 ? servicio.imagenes : null;
 
   const iconosGaleria = [
     servicio.icono?.startsWith("bi-") ? servicio.icono : "bi-pin",
@@ -133,52 +130,47 @@ export default function Servicio() {
       <main className="container" style={{ marginBottom: "80px" }}>
         <div className="grid_detalle">
           <div>
-            {/* GALERÍA DE IMÁGENES */}
+            {/* GALERÍA DE IMÁGENES - diseño original con soporte para imágenes reales */}
             <div className="galeria-principal">
-              {imagenes ? (
-                <>
-                  <div className="imagen-grande imagen-grande-real">
-                    <img
-                      src={imagenes[imagenActual]?.url_imagen || ""}
-                      alt={servicio.titulo}
-                      onError={(e) => {
-                        e.target.style.display = "none";
-                        e.target.parentElement.innerHTML = `<i class="bi ${iconosGaleria[0]}"></i>`;
-                      }}
-                    />
-                  </div>
-                  <div className="galeria-miniaturas">
-                    {imagenes.map((img, i) => (
-                      <button
-                        key={img.id_imagen || i}
-                        type="button"
-                        className={`miniatura${imagenActual === i ? " activa" : ""}`}
-                        onClick={() => setImagenActual(i)}
-                      >
-                        <img src={img.url_imagen} alt={`Imagen ${i + 1}`} />
-                      </button>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="imagen-grande">
-                    <i className={`bi ${iconosGaleria[imagenActual]}`}></i>
-                  </div>
-                  <div className="galeria-miniaturas">
-                    {iconosGaleria.map((icono, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        className={`miniatura${imagenActual === i ? " activa" : ""}`}
-                        onClick={() => setImagenActual(i)}
-                      >
-                        <i className={`bi ${icono}`}></i>
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
+              <div className="imagen-grande">
+                {imagenes ? (
+                  <img
+                    key={imagenActual}
+                    src={imagenes[imagenActual]?.url_imagen || ""}
+                    alt={servicio.titulo}
+                    className="imagen-servicio-real"
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                      const fallback = document.createElement("i");
+                      fallback.className = `bi ${iconosGaleria[0]}`;
+                      e.target.parentElement.appendChild(fallback);
+                    }}
+                  />
+                ) : (
+                  <i className={`bi ${iconosGaleria[imagenActual]}`}></i>
+                )}
+              </div>
+              <div className="galeria-miniaturas">
+                {imagenes ? imagenes.map((img, i) => (
+                  <button
+                    key={img.id_imagen || i}
+                    type="button"
+                    className={`miniatura${imagenActual === i ? " activa" : ""}`}
+                    onClick={() => setImagenActual(i)}
+                  >
+                    <img src={img.url_imagen} alt={`Imagen ${i + 1}`} className="miniatura-img" />
+                  </button>
+                )) : iconosGaleria.map((icono, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    className={`miniatura${imagenActual === i ? " activa" : ""}`}
+                    onClick={() => setImagenActual(i)}
+                  >
+                    <i className={`bi ${icono}`}></i>
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* BOTÓN VER EN MAPA (solo arriendo con ubicación) */}

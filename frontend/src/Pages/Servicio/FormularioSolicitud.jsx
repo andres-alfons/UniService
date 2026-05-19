@@ -86,6 +86,24 @@ function FormSolicitud({
     const id_servicio_num = Number(servicioId);
     const id_proveedor_num = Number(proveedorId);
 
+    const camposPersonalizados = {};
+    config.campos.forEach((campo) => {
+      if (!["descripcion", "fecha_deseada", "hora_deseada", "presupuesto", "archivo"].includes(campo.nombre)) {
+        if (form[campo.nombre]) {
+          camposPersonalizados[campo.nombre] = form[campo.nombre];
+        }
+      }
+    });
+
+    let fechaDeseada = null;
+    if (form.fecha_deseada) {
+      fechaDeseada = form.fecha_deseada + "T00:00:00";
+    }
+    if (form.fecha_inicio) {
+      fechaDeseada = form.fecha_inicio + "T00:00:00";
+      camposPersonalizados.fecha_inicio = form.fecha_inicio;
+    }
+
     const payload = {
       id_cliente,
       id_proveedor: id_proveedor_num,
@@ -93,7 +111,7 @@ function FormSolicitud({
       tipo_servicio: categoria || "Otro",
       tema: "",
       descripcion: form.descripcion || "",
-      fecha_deseada: form.fecha_deseada ? form.fecha_deseada + "T00:00:00" : null,
+      fecha_deseada: fechaDeseada,
       hora_deseada: form.hora_deseada || null,
       duracion: form.duracion || form.dias_estadia || null,
       modalidad: null,
@@ -102,23 +120,8 @@ function FormSolicitud({
       pago_anticipado: false,
       urgencia: null,
       archivo: form.archivo ? form.archivo.name : null,
-      campos_personalizados: {},
+      campos_personalizados: JSON.stringify(camposPersonalizados),
     };
-
-    // Agregar campos personalizados al JSONB
-    config.campos.forEach((campo) => {
-      if (!["descripcion", "fecha_deseada", "hora_deseada", "presupuesto", "archivo"].includes(campo.nombre)) {
-        if (form[campo.nombre]) {
-          payload.campos_personalizados[campo.nombre] = form[campo.nombre];
-        }
-      }
-    });
-
-    // Para arriendo, usar fecha_inicio en lugar de fecha_deseada
-    if (form.fecha_inicio) {
-      payload.fecha_deseada = form.fecha_inicio + "T00:00:00";
-      payload.campos_personalizados.fecha_inicio = form.fecha_inicio;
-    }
 
     return payload;
   };

@@ -70,11 +70,7 @@ public class SolicitudesController : ControllerBase
             }
 
             // Serializar campos personalizados a JSONB
-            string camposJson = "{}";
-            if (dto.campos_personalizados != null && dto.campos_personalizados.Count > 0)
-            {
-                camposJson = JsonSerializer.Serialize(dto.campos_personalizados);
-            }
+            string camposJson = dto.campos_personalizados ?? "{}";
 
             using var insertCmd = new NpgsqlCommand(@"
                 INSERT INTO solicitudes (
@@ -96,9 +92,9 @@ public class SolicitudesController : ControllerBase
             insertCmd.Parameters.Add(new NpgsqlParameter("@id_cliente", NpgsqlTypes.NpgsqlDbType.Integer) { Value = dto.id_cliente });
             insertCmd.Parameters.Add(new NpgsqlParameter("@id_proveedor", NpgsqlTypes.NpgsqlDbType.Integer) { Value = dto.id_proveedor });
             insertCmd.Parameters.Add(new NpgsqlParameter("@id_servicio", NpgsqlTypes.NpgsqlDbType.Integer) { Value = dto.id_servicio });
-            insertCmd.Parameters.Add(new NpgsqlParameter("@tipo_servicio", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = dto.tipo_servicio ?? "" });
-            insertCmd.Parameters.Add(new NpgsqlParameter("@tema", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = dto.tema ?? "" });
-            insertCmd.Parameters.Add(new NpgsqlParameter("@descripcion", NpgsqlTypes.NpgsqlDbType.Text) { Value = dto.descripcion ?? "" });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@tipo_servicio", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = (object?)dto.tipo_servicio ?? "" });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@tema", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = (object?)dto.tema ?? "" });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@descripcion", NpgsqlTypes.NpgsqlDbType.Text) { Value = (object?)dto.descripcion ?? "" });
             insertCmd.Parameters.Add(new NpgsqlParameter("@fecha_deseada", NpgsqlTypes.NpgsqlDbType.Date) 
             { 
                 Value = dto.fecha_deseada.HasValue ? (object)dto.fecha_deseada.Value.Date : DBNull.Value 
@@ -107,12 +103,12 @@ public class SolicitudesController : ControllerBase
             {
                 Value = dto.hora_deseada.HasValue ? (object)dto.hora_deseada.Value : DBNull.Value
             });
-            insertCmd.Parameters.Add(new NpgsqlParameter("@duracion", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = (object)dto.duracion ?? DBNull.Value });
-            insertCmd.Parameters.Add(new NpgsqlParameter("@modalidad", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = (object)dto.modalidad ?? DBNull.Value });
-            insertCmd.Parameters.Add(new NpgsqlParameter("@metodo_pago", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = (object)dto.metodo_pago ?? DBNull.Value });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@duracion", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = (object?)dto.duracion ?? DBNull.Value });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@modalidad", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = (object?)dto.modalidad ?? DBNull.Value });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@metodo_pago", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = (object?)dto.metodo_pago ?? DBNull.Value });
             insertCmd.Parameters.Add(new NpgsqlParameter("@presupuesto", NpgsqlTypes.NpgsqlDbType.Numeric) { Value = dto.presupuesto });
             insertCmd.Parameters.Add(new NpgsqlParameter("@pago_anticipado", NpgsqlTypes.NpgsqlDbType.Boolean) { Value = dto.pago_anticipado });
-            insertCmd.Parameters.Add(new NpgsqlParameter("@urgencia", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = (object)dto.urgencia ?? DBNull.Value });
+            insertCmd.Parameters.Add(new NpgsqlParameter("@urgencia", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = (object?)dto.urgencia ?? DBNull.Value });
             insertCmd.Parameters.Add(new NpgsqlParameter("@archivo", NpgsqlTypes.NpgsqlDbType.Varchar)
             {
                 Value = string.IsNullOrEmpty(dto.archivo) ? DBNull.Value : (object)dto.archivo
