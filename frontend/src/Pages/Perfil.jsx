@@ -342,8 +342,13 @@ const getAvatarUrl = (avatar) => {
     const files = Array.from(event.target.files);
     if (files.length === 0) return;
 
-    if (imagenesServicio.length + files.length > 5) {
-      alert("Máximo 5 imágenes permitidas. Puedes subir " + (5 - imagenesServicio.length) + " más.");
+    // Contar solo imágenes reales (excluir default)
+    const imagenesReales = imagenesServicio.filter(img => 
+      !img.url_imagen?.includes("default") && !img.url_imagen?.startsWith("img/")
+    );
+
+    if (imagenesReales.length + files.length > 5) {
+      alert("Máximo 5 imágenes permitidas. Puedes subir " + (5 - imagenesReales.length) + " más.");
       return;
     }
 

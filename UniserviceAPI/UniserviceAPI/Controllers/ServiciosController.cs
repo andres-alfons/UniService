@@ -362,6 +362,19 @@ public class ServicesController : ControllerBase
 
             Console.WriteLine($"[DEBUG] Validación OK. Subiendo a Supabase...");
 
+            // Eliminar imagen por defecto ANTES de subir las nuevas
+            using var connPre = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+            await connPre.OpenAsync();
+            using var cmdDeleteDefault = new NpgsqlCommand(@"
+                DELETE FROM servicios_imagenes 
+                WHERE id_servicio = @id 
+                AND (url_imagen LIKE '%default%' OR url_imagen LIKE 'img/%')
+            ", connPre);
+            cmdDeleteDefault.Parameters.AddWithValue("@id", id);
+            int eliminadas = await cmdDeleteDefault.ExecuteNonQueryAsync();
+            Console.WriteLine($"[DEBUG] Imágenes default eliminadas: {eliminadas}");
+            connPre.Close();
+
             // Subir a Supabase Storage
             var urls = await _storageService.SubirMultiplesImagenesAsync(id, imagenes);
 
@@ -420,8 +433,11 @@ public class ServicesController : ControllerBase
             if (string.IsNullOrEmpty(urlImagen))
                 return NotFound(new { error = "Imagen no encontrada" });
 
-            // Eliminar de Supabase Storage
-            await _storageService.EliminarImagenAsync(urlImagen);
+            // Solo eliminar de Supabase si es una imagen real (no default)
+            if (!urlImagen.Contains("default") && !urlImagen.StartsWith("img/"))
+            {
+                await _storageService.EliminarImagenAsync(urlImagen);
+            }
 
             // Eliminar de la base de datos
             using var cmdDelete = new NpgsqlCommand("DELETE FROM servicios_imagenes WHERE id_imagen = @id AND id_servicio = @id_servicio", conn);
