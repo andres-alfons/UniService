@@ -181,16 +181,25 @@ public class AuthController : ControllerBase
     [HttpPost("google-login")]
     public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDTO dto)
     {
-        if (string.IsNullOrEmpty(dto.credential))
+        Console.WriteLine($"[GoogleLogin] Received credential: {dto?.credential?.Substring(0, Math.Min(20, dto?.credential?.Length ?? 0))}...");
+
+        if (string.IsNullOrEmpty(dto?.credential))
+        {
+            Console.WriteLine("[GoogleLogin] ERROR: credential is null or empty");
             return BadRequest(new { error = "Token de Google requerido" });
+        }
 
         try
         {
             var googleClientId = _config["Google:ClientId"];
+            Console.WriteLine($"[GoogleLogin] Validating with ClientId: {googleClientId}");
+
             var payload = await GoogleJsonWebSignature.ValidateAsync(dto.credential, new GoogleJsonWebSignature.ValidationSettings
             {
                 Audience = new[] { googleClientId }
             });
+
+            Console.WriteLine($"[GoogleLogin] Validated! Email: {payload.Email}, Name: {payload.Name}");
 
             string correo = payload.Email;
             string nombre = payload.Name ?? correo.Split('@')[0];
@@ -254,12 +263,14 @@ public class AuthController : ControllerBase
                 });
             }
         }
-        catch (InvalidJwtException)
+        catch (InvalidJwtException ex)
         {
+            Console.WriteLine($"[GoogleLogin] InvalidJwtException: {ex.Message}");
             return Unauthorized(new { error = "Token de Google inválido" });
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"[GoogleLogin] Exception: {ex.GetType().Name} - {ex.Message}");
             return StatusCode(500, new { error = ex.Message });
         }
     }
