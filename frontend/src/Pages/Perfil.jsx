@@ -1169,8 +1169,17 @@ const getAvatarUrl = (avatar) => {
                               }}>
                                 {index === 0 && "⭐ Portada"}
                               </div>
-                              <div style={{ fontSize: "0.7rem", opacity: 0.5 }}>
-                                {img.url_imagen.split("/").pop()}
+                              <div 
+                                style={{ 
+                                  fontSize: "0.7rem", 
+                                  opacity: 0.5,
+                                  cursor: "pointer",
+                                  textDecoration: "underline",
+                                }}
+                                onClick={() => window.open(img.url_imagen, "_blank")}
+                                title="Click para ver imagen"
+                              >
+                                Click para ver imagen
                               </div>
                             </div>
 

@@ -443,6 +443,51 @@ public class ServicesController : ControllerBase
     }
 
     // =========================
+    // ACTUALIZAR ORDEN DE IMAGEN
+    // =========================
+    [HttpPut("{idServicio}/imagenes/{idImagen}/orden")]
+    public async Task<IActionResult> ActualizarOrdenImagen(int idServicio, int idImagen, [FromBody] dynamic data)
+    {
+        try
+        {
+            int orden = data.orden;
+            bool esPrincipal = data.es_principal;
+
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            // Primero desmarcar todas como principal si esta sera la principal
+            if (esPrincipal)
+            {
+                using var cmdReset = new NpgsqlCommand(
+                    "UPDATE servicios_imagenes SET es_principal = FALSE WHERE id_servicio = @id", conn);
+                cmdReset.Parameters.AddWithValue("@id", idServicio);
+                await cmdReset.ExecuteNonQueryAsync();
+            }
+
+            // Actualizar el orden usando fecha_subida (agregando segundos para ordenar)
+            using var cmd = new NpgsqlCommand(@"
+                UPDATE servicios_imagenes 
+                SET es_principal = @es_principal,
+                    fecha_subida = fecha_subida + INTERVAL '1 second' * @orden
+                WHERE id_imagen = @id AND id_servicio = @id_servicio
+            ", conn);
+            cmd.Parameters.AddWithValue("@id", idImagen);
+            cmd.Parameters.AddWithValue("@id_servicio", idServicio);
+            cmd.Parameters.AddWithValue("@es_principal", esPrincipal);
+            cmd.Parameters.AddWithValue("@orden", orden);
+            await cmd.ExecuteNonQueryAsync();
+
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] Actualizando orden: {ex.Message}");
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    // =========================
     // ELIMINAR IMAGEN DE SERVICIO
     // =========================
     [HttpDelete("{idServicio}/imagenes/{idImagen}")]

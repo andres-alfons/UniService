@@ -68,13 +68,21 @@ body {
 
 .imagen-grande {
   width: 100%;
-  height: 480px;
+  height: 520px;
   background: linear-gradient(135deg, #0b1420 0%, #0f1c2e 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 5rem;
   transition: var(--trans);
+  overflow: hidden;
+}
+
+.imagen-grande img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .galeria-miniaturas {
@@ -98,6 +106,14 @@ body {
   transition: var(--trans);
   outline: none;
   padding: 0;
+  overflow: hidden;
+}
+
+.miniatura img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .miniatura:hover {
