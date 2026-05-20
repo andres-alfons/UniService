@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../Components/Navbar_Perfil";
+import Modal from "../Components/Modal";
 import "../styles/styleHome.css";
 import "../styles/stylePerfil.css";
 import StatItem from "./Perfil/ElementoEstadistica";
@@ -87,6 +88,13 @@ const Perfil = () => {
 
   // Modal de siguiendo
 const [modalSiguiendo, setModalSiguiendo] = useState(false);
+
+  // Modal de alertas (reemplaza alert())
+  const [modalAlerta, setModalAlerta] = useState({ show: false, type: "info", title: "", message: "" });
+
+  const mostrarAlerta = (type, title, message) => {
+    setModalAlerta({ show: true, type, title, message });
+  };
 const [listaSiguiendo, setListaSiguiendo] = useState([]);
 const [cargandoSiguiendo, setCargandoSiguiendo] = useState(false);
 
@@ -232,7 +240,7 @@ const getAvatarUrl = (avatar) => {
         setActiveModal(null);
       }
     } catch {
-      alert("Error al actualizar");
+      mostrarAlerta("error", "Error", "No se pudo actualizar el campo.");
     }
   };
 
@@ -289,7 +297,7 @@ const getAvatarUrl = (avatar) => {
       setEditando(null);
     } else {
       const err = await res.json();
-      alert("Error: " + (err.error || "No se pudo guardar"));
+      mostrarAlerta("error", "Error", err.error || "No se pudo guardar.");
     }
   };
 
@@ -309,7 +317,7 @@ const getAvatarUrl = (avatar) => {
       );
       setConfirmEliminar(null);
     } else {
-      alert("Error al eliminar el servicio.");
+      mostrarAlerta("error", "Error", "No se pudo eliminar el servicio.");
     }
   };
 
@@ -324,11 +332,7 @@ const getAvatarUrl = (avatar) => {
       const data = await res.json();
       const imgs = (data.imagenes || [])
         .filter((img) => !img.url_imagen?.includes("default") && !img.url_imagen?.startsWith("img/"))
-        .sort((a, b) => {
-          if (a.es_principal && !b.es_principal) return -1;
-          if (!a.es_principal && b.es_principal) return 1;
-          return new Date(a.fecha_subida) - new Date(b.fecha_subida);
-        });
+        .sort((a, b) => new Date(a.fecha_subida) - new Date(b.fecha_subida));
       setImagenesServicio(imgs);
     } catch (err) {
       console.error("Error cargando imágenes:", err);
@@ -348,7 +352,7 @@ const getAvatarUrl = (avatar) => {
     );
 
     if (imagenesReales.length + files.length > 5) {
-      alert("Máximo 5 imágenes permitidas. Puedes subir " + (5 - imagenesReales.length) + " más.");
+      mostrarAlerta("advertencia", "Límite alcanzado", `Máximo 5 imágenes permitidas. Puedes subir ${5 - imagenesReales.length} más.`);
       return;
     }
 
@@ -364,18 +368,17 @@ const getAvatarUrl = (avatar) => {
       if (data.ok) {
         const res = await fetch(`/api/services/${editandoImagenes.id_servicio}`);
         const servicioData = await res.json();
-        const imgs = (servicioData.imagenes || []).sort((a, b) => {
-          if (a.es_principal && !b.es_principal) return -1;
-          if (!a.es_principal && b.es_principal) return 1;
-          return new Date(a.fecha_subida) - new Date(b.fecha_subida);
-        });
+        const imgs = (servicioData.imagenes || [])
+          .filter(img => !img.url_imagen?.includes("default") && !img.url_imagen?.startsWith("img/"))
+          .sort((a, b) => new Date(a.fecha_subida) - new Date(b.fecha_subida));
         setImagenesServicio(imgs);
+        mostrarAlerta("exito", "Imágenes subidas", "Las imágenes se subieron correctamente.");
       } else {
-        alert("Error: " + (data.error || "No se pudieron subir las imágenes"));
+        mostrarAlerta("error", "Error", data.error || "No se pudieron subir las imágenes.");
       }
     } catch (err) {
       console.error("Error subiendo imágenes:", err);
-      alert("Error de conexión al subir imágenes");
+      mostrarAlerta("error", "Error de conexión", "No se pudo conectar con el servidor para subir las imágenes.");
     }
 
     event.target.value = "";
@@ -392,11 +395,11 @@ const getAvatarUrl = (avatar) => {
       if (data.ok) {
         setImagenesServicio((prev) => prev.filter((img) => img.id_imagen !== idImagen));
       } else {
-        alert("Error al eliminar la imagen");
+        mostrarAlerta("error", "Error", "No se pudo eliminar la imagen.");
       }
     } catch (err) {
       console.error("Error eliminando imagen:", err);
-      alert("Error de conexión al eliminar imagen");
+      mostrarAlerta("error", "Error de conexión", "No se pudo conectar con el servidor para eliminar la imagen.");
     }
   };
 
@@ -418,14 +421,14 @@ const getAvatarUrl = (avatar) => {
         await fetch(`/api/services/${editandoImagenes.id_servicio}/imagenes/${img.id_imagen}/orden`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ orden: i, es_principal: i === 0 ? 1 : 0 }),
+          body: JSON.stringify({ orden: i, es_principal: i === 0 }),
         });
       }
-      alert("Orden guardado correctamente");
+      mostrarAlerta("exito", "Orden guardado", "El orden de las imágenes se guardó correctamente.");
       setEditandoImagenes(null);
     } catch (err) {
       console.error("Error guardando orden:", err);
-      alert("Error al guardar el orden");
+      mostrarAlerta("error", "Error", "No se pudo guardar el orden de las imágenes.");
     }
   };
 
@@ -443,7 +446,7 @@ const getAvatarUrl = (avatar) => {
       } else {
         // Fallback: copiar el enlace al portapapeles en navegadores de escritorio
         await navigator.clipboard.writeText(window.location.href);
-        alert("¡Enlace copiado al portapapeles!");
+        mostrarAlerta("exito", "Enlace copiado", "¡El enlace de tu perfil se copió al portapapeles!");
       }
     } catch (err) {
       console.error("Error al compartir:", err);
@@ -482,11 +485,11 @@ const getAvatarUrl = (avatar) => {
         setUserData((prev) => ({ ...prev, avatar: result.avatarUrl }));
         setActiveModal(null);
       } else {
-        alert("Error al subir: " + (result.error || "Error en el servidor"));
+        mostrarAlerta("error", "Error al subir", result.error || "Error en el servidor.");
       }
     } catch (err) {
       console.error("Error en subida:", err);
-      alert("Error de conexión con el servidor de C#");
+      mostrarAlerta("error", "Error de conexión", "No se pudo conectar con el servidor.");
     }
   };
 
@@ -555,11 +558,11 @@ const getAvatarUrl = (avatar) => {
           : Math.max(0, (prev.total_seguidores || 0) - 1),
       }));
     } else {
-      alert("Error al procesar el seguimiento");
+      mostrarAlerta("error", "Error", "No se pudo procesar el seguimiento.");
     }
   } catch (error) {
     console.error("Error de conexión:", error);
-    alert("Error de conexión al procesar el seguimiento");
+    mostrarAlerta("error", "Error de conexión", "No se pudo conectar con el servidor para procesar el seguimiento.");
   } finally {
     setEnviandoSeguimiento(false);
   }
@@ -1720,6 +1723,14 @@ const getAvatarUrl = (avatar) => {
   </div>
 )}
       </div>
+
+      <Modal
+        show={modalAlerta.show}
+        onClose={() => setModalAlerta({ ...modalAlerta, show: false })}
+        type={modalAlerta.type}
+        title={modalAlerta.title}
+        message={modalAlerta.message}
+      />
     </>
   );
 };

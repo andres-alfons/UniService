@@ -1,0 +1,111 @@
+.modal-overlay-custom {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.modal-overlay-custom.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-overlay-custom.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.modal-box-custom {
+  background: var(--card, #1a2332);
+  border: 1px solid var(--borde, rgba(255, 255, 255, 0.08));
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  transform: scale(0.9) translateY(20px);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.modal-overlay-custom.show .modal-box-custom {
+  transform: scale(1) translateY(0);
+}
+
+.modal-overlay-custom.hide .modal-box-custom {
+  transform: scale(0.9) translateY(20px);
+}
+
+.modal-icon-custom {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 1.8rem;
+}
+
+.modal-box-custom.exito .modal-icon-custom {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+}
+
+.modal-box-custom.error .modal-icon-custom {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.modal-box-custom.info .modal-icon-custom {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+
+.modal-box-custom.advertencia .modal-icon-custom {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.modal-title-custom {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 12px;
+  color: var(--texto, #e2e8f0);
+}
+
+.modal-message-custom {
+  font-size: 0.95rem;
+  color: var(--texto2, #94a3b8);
+  margin: 0 0 24px;
+  line-height: 1.5;
+}
+
+.modal-btn-custom {
+  background: var(--teal, #0ea5a0);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 32px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.modal-btn-custom:hover {
+  background: var(--teal-hover, #0c8d89);
+  transform: translateY(-1px);
+}
+
+.modal-btn-custom:active {
+  transform: translateY(0);
+}

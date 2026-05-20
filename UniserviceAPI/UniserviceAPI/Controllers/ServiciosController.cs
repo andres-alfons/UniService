@@ -96,7 +96,7 @@ public class ServicesController : ControllerBase
             using var cmdImg = new NpgsqlCommand(@"
                 SELECT id_servicio, id_imagen, url_imagen, es_principal, fecha_subida
                 FROM servicios_imagenes
-                ORDER BY id_servicio, es_principal DESC, id_imagen ASC
+                ORDER BY id_servicio, fecha_subida ASC
             ", conn);
             using var rImg = await cmdImg.ExecuteReaderAsync();
             
@@ -228,7 +228,7 @@ public class ServicesController : ControllerBase
                 SELECT id_imagen, url_imagen, es_principal, fecha_subida
                 FROM servicios_imagenes
                 WHERE id_servicio = @id
-                ORDER BY es_principal DESC, id_imagen ASC
+                ORDER BY fecha_subida ASC
             ", conn);
             cmdImagenes.Parameters.AddWithValue("@id", id);
             using var rImagenes = await cmdImagenes.ExecuteReaderAsync();
@@ -453,23 +453,23 @@ public class ServicesController : ControllerBase
             int orden = data.orden;
             bool esPrincipal = data.es_principal;
 
+            Console.WriteLine($"[DEBUG] Actualizando orden: idImagen={idImagen}, orden={orden}, esPrincipal={esPrincipal}");
+
             using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            // Primero desmarcar todas como principal si esta sera la principal
-            if (esPrincipal)
-            {
-                using var cmdReset = new NpgsqlCommand(
-                    "UPDATE servicios_imagenes SET es_principal = FALSE WHERE id_servicio = @id", conn);
-                cmdReset.Parameters.AddWithValue("@id", idServicio);
-                await cmdReset.ExecuteNonQueryAsync();
-            }
+            // Desmarcar todas como principal primero
+            using var cmdReset = new NpgsqlCommand(
+                "UPDATE servicios_imagenes SET es_principal = FALSE WHERE id_servicio = @id", conn);
+            cmdReset.Parameters.AddWithValue("@id", idServicio);
+            await cmdReset.ExecuteNonQueryAsync();
 
-            // Actualizar el orden usando fecha_subida (agregando segundos para ordenar)
+            // Marcar la imagen seleccionada como principal si corresponde
+            // y actualizar fecha_subida para reflejar el orden
             using var cmd = new NpgsqlCommand(@"
                 UPDATE servicios_imagenes 
                 SET es_principal = @es_principal,
-                    fecha_subida = fecha_subida + INTERVAL '1 second' * @orden
+                    fecha_subida = NOW() + INTERVAL '1 second' * @orden
                 WHERE id_imagen = @id AND id_servicio = @id_servicio
             ", conn);
             cmd.Parameters.AddWithValue("@id", idImagen);
@@ -477,6 +477,17 @@ public class ServicesController : ControllerBase
             cmd.Parameters.AddWithValue("@es_principal", esPrincipal);
             cmd.Parameters.AddWithValue("@orden", orden);
             await cmd.ExecuteNonQueryAsync();
+
+            Console.WriteLine($"[DEBUG] Orden actualizado exitosamente");
+
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] Actualizando orden: {ex.Message}");
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
 
             return Ok(new { ok = true });
         }

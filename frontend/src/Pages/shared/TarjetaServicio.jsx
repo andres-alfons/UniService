@@ -28,11 +28,6 @@ export default function TarjetaServicio({ servicio, linkBase = "/servicio?id=" }
     ? imagenesReales.find((img) => img.es_principal)?.url_imagen || imagenesReales[0].url_imagen
     : null;
 
-  console.log("TarjetaServicio - servicio:", servicio.titulo);
-  console.log("TarjetaServicio - imagenes:", servicio.imagenes);
-  console.log("TarjetaServicio - imagenesReales:", imagenesReales);
-  console.log("TarjetaServicio - portada:", portada);
-
   return (
     <a href={`${linkBase}${servicio.id_servicio}`} className="card-servicio card-3d">
       {/* Imagen de portada o icono de categoría */}
