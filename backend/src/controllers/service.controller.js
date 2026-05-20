@@ -270,38 +270,62 @@ export const subirImagenes = async (req, res) => {
     if (!req.files || req.files.length === 0)
       return res.status(400).json({ error: "No se enviaron imagenes" });
 
-    // Eliminar imagen(es) default antes de insertar las reales
-    await conn.request()
-      .input("id", sql.Int, parseInt(id))
-      .query(`DELETE FROM servicios_imagenes 
-              WHERE id_servicio = @id 
-              AND (url_imagen LIKE '%default%' OR url_imagen LIKE 'img/%')`);
-
-    const countResult = await conn.request()
+    // Obtener count actual ANTES de borrar default
+    const countBefore = await conn.request()
       .input("id", sql.Int, parseInt(id))
       .query("SELECT COUNT(*) as total FROM servicios_imagenes WHERE id_servicio = @id");
 
-    if (countResult.recordset[0].total + req.files.length > 5)
-      return res.status(400).json({ error: "Maximo 5 imagenes permitidas" });
+    const totalActuales = countBefore.recordset[0].total;
 
-    const imagenesInsertadas = [];
-    for (const file of req.files) {
-      const url = `/imagenes-servicios/${file.filename}`;
-      const esPrincipal = countResult.recordset[0].total === 0 && imagenesInsertadas.length === 0;
+    // Contar cuántas son default
+    const defaultCount = await conn.request()
+      .input("id", sql.Int, parseInt(id))
+      .query(`SELECT COUNT(*) as total FROM servicios_imagenes 
+              WHERE id_servicio = @id 
+              AND (url_imagen LIKE '%default%' OR url_imagen LIKE 'img/%')`);
 
+    const numDefault = defaultCount.recordset[0].total;
+    const numReales = totalActuales - numDefault;
+
+    if (numReales + req.files.length > 5)
+      return res.status(400).json({ error: `Ya tienes ${numReales} imagenes. Maximo 5 permitidas.` });
+
+    // Desactivar trigger de validación para esta transacción
+    await conn.request()
+      .query("DISABLE TRIGGER tr_validar_max_imagenes ON servicios_imagenes");
+
+    try {
+      // Eliminar imagen(es) default
       await conn.request()
-        .input("id_servicio", sql.Int, parseInt(id))
-        .input("url", sql.NVarChar, url)
-        .input("es_principal", sql.Bit, esPrincipal ? 1 : 0)
-        .query(`
-          INSERT INTO servicios_imagenes (id_servicio, url_imagen, es_principal)
-          VALUES (@id_servicio, @url, @es_principal)
-        `);
+        .input("id", sql.Int, parseInt(id))
+        .query(`DELETE FROM servicios_imagenes 
+                WHERE id_servicio = @id 
+                AND (url_imagen LIKE '%default%' OR url_imagen LIKE 'img/%')`);
 
-      imagenesInsertadas.push({ url_imagen: url, es_principal: esPrincipal });
+      const imagenesInsertadas = [];
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+        const url = `/imagenes-servicios/${file.filename}`;
+        const esPrincipal = numReales === 0 && i === 0;
+
+        await conn.request()
+          .input("id_servicio", sql.Int, parseInt(id))
+          .input("url", sql.NVarChar, url)
+          .input("es_principal", sql.Bit, esPrincipal ? 1 : 0)
+          .query(`
+            INSERT INTO servicios_imagenes (id_servicio, url_imagen, es_principal)
+            VALUES (@id_servicio, @url, @es_principal)
+          `);
+
+        imagenesInsertadas.push({ url_imagen: url, es_principal: esPrincipal });
+      }
+
+      res.status(201).json({ ok: true, imagenes: imagenesInsertadas });
+    } finally {
+      // Reactivar trigger siempre
+      await conn.request()
+        .query("ENABLE TRIGGER tr_validar_max_imagenes ON servicios_imagenes");
     }
-
-    res.status(201).json({ ok: true, imagenes: imagenesInsertadas });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
