@@ -10,6 +10,10 @@ export default defineConfig({
       "/api": {
         target: "http://localhost:5165",
         changeOrigin: true,
+      },
+      "/imagenes-servicios": {
+        target: "http://localhost:5165",
+        changeOrigin: true,
       }
     }
   }
