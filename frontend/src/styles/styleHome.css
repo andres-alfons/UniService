@@ -975,6 +975,24 @@ fieldset {
   font-size: 2rem;
   padding: 24px;
   border-bottom: 1px solid var(--borde);
+  overflow: hidden;
+}
+
+.card-icono-imagen {
+  background: linear-gradient(135deg, rgba(14, 165, 160, 0.08), rgba(14, 165, 160, 0.02));
+  padding: 0;
+}
+
+.card-icono-imagen img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.card-servicio:hover .card-icono-imagen img {
+  transform: scale(1.05);
 }
 
 /* ICONOS CON GRADIENTES ELEGANTES */

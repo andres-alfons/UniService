@@ -915,6 +915,24 @@ html[data-theme="claro"] {
   font-size: 2rem;
   padding: 24px;
   border-bottom: 1px solid var(--borde);
+  overflow: hidden;
+}
+
+[data-theme="claro"] .card-icono-imagen {
+  background: linear-gradient(135deg, rgba(163, 215, 213, 0.15), rgba(181, 243, 241, 0.739));
+  padding: 0;
+}
+
+[data-theme="claro"] .card-icono-imagen img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+[data-theme="claro"] .card-servicio:hover .card-icono-imagen img {
+  transform: scale(1.05);
 }
 
 /* ICONOS CON GRADIENTES ELEGANTES */
