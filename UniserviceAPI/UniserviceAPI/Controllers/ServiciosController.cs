@@ -489,15 +489,6 @@ public class ServicesController : ControllerBase
         }
     }
 
-            return Ok(new { ok = true });
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[ERROR] Actualizando orden: {ex.Message}");
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
     // =========================
     // ELIMINAR IMAGEN DE SERVICIO
     // =========================

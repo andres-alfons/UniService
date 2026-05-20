@@ -8,6 +8,7 @@ using System.Text;
 using UniserviceAPI.DTOs;
 using UniserviceAPI.Services;
 using UniServiceAPI.Models;
+using Google.Apis.Auth;
 
 [ApiController]
 [Route("api/auth")]
@@ -171,6 +172,95 @@ public class AuthController : ControllerBase
                     id_rol = idRol
                 }
             });
+        }
+    }
+
+    // =========================
+    // GOOGLE LOGIN
+    // =========================
+    [HttpPost("google-login")]
+    public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDTO dto)
+    {
+        if (string.IsNullOrEmpty(dto.credential))
+            return BadRequest(new { error = "Token de Google requerido" });
+
+        try
+        {
+            var googleClientId = _config["Google:ClientId"];
+            var payload = await GoogleJsonWebSignature.ValidateAsync(dto.credential, new GoogleJsonWebSignature.ValidationSettings
+            {
+                Audience = new[] { googleClientId }
+            });
+
+            string correo = payload.Email;
+            string nombre = payload.Name ?? correo.Split('@')[0];
+            string googleId = payload.Subject;
+
+            using (NpgsqlConnection conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection")))
+            {
+                await conn.OpenAsync();
+
+                var cmd = new NpgsqlCommand("SELECT * FROM usuarios WHERE correo = @correo", conn);
+                cmd.Parameters.AddWithValue("@correo", correo);
+
+                var reader = await cmd.ExecuteReaderAsync();
+
+                int id, idRol;
+
+                if (reader.HasRows)
+                {
+                    await reader.ReadAsync();
+                    id = (int)reader["id_usuario"];
+                    idRol = reader["id_rol"] != DBNull.Value ? Convert.ToInt32(reader["id_rol"]) : 2;
+                }
+                else
+                {
+                    reader.Close();
+
+                    var insertCmd = new NpgsqlCommand(@"
+                        INSERT INTO usuarios (correo, nombre, id_rol)
+                        VALUES (@correo, @nombre, 2)
+                        RETURNING id_usuario", conn);
+                    insertCmd.Parameters.AddWithValue("@correo", correo);
+                    insertCmd.Parameters.AddWithValue("@nombre", nombre);
+
+                    var result = await insertCmd.ExecuteScalarAsync();
+                    id = Convert.ToInt32(result);
+                    idRol = 2;
+                }
+
+                var jwtKey = _config["Jwt:Key"] ?? "uniservice_super_secret_key_2026_segura_12345";
+                var key = Encoding.UTF8.GetBytes(jwtKey);
+
+                var token = new JwtSecurityToken(
+                    claims: new[] { new Claim("id", id.ToString()), new Claim("id_rol", idRol.ToString()) },
+                    expires: DateTime.UtcNow.AddDays(1),
+                    signingCredentials: new SigningCredentials(
+                        new SymmetricSecurityKey(key),
+                        SecurityAlgorithms.HmacSha256
+                    )
+                );
+
+                return Ok(new
+                {
+                    token = new JwtSecurityTokenHandler().WriteToken(token),
+                    user = new
+                    {
+                        id = id,
+                        nombre = nombre,
+                        correo = correo,
+                        id_rol = idRol
+                    }
+                });
+            }
+        }
+        catch (InvalidJwtException)
+        {
+            return Unauthorized(new { error = "Token de Google inválido" });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
         }
     }
 
