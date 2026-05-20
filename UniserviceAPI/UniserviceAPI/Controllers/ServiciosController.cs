@@ -64,6 +64,7 @@ public class ServicesController : ControllerBase
 
             using var reader = await cmd.ExecuteReaderAsync();
 
+            var serviciosTemp = new List<dynamic>();
             while (await reader.ReadAsync())
             {
                 double prom = (double)reader["promedio_estrellas"];
@@ -72,32 +73,7 @@ public class ServicesController : ControllerBase
 
                 var estrellasArr = Enumerable.Repeat(prom, numResenas).ToArray();
 
-                // Obtener imágenes de este servicio
-                var imagenes = new List<object>();
-                var connImagenes = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
-                await connImagenes.OpenAsync();
-                using var cmdImg = new NpgsqlCommand(@"
-                    SELECT id_imagen, url_imagen, es_principal, fecha_subida
-                    FROM servicios_imagenes
-                    WHERE id_servicio = @id
-                    ORDER BY es_principal DESC, id_imagen ASC
-                ", connImagenes);
-                cmdImg.Parameters.AddWithValue("@id", idServicio);
-                using var rImg = await cmdImg.ExecuteReaderAsync();
-                while (await rImg.ReadAsync())
-                {
-                    imagenes.Add(new
-                    {
-                        id_imagen = rImg["id_imagen"],
-                        url_imagen = rImg["url_imagen"],
-                        es_principal = Convert.ToBoolean(rImg["es_principal"]),
-                        fecha_subida = rImg["fecha_subida"]
-                    });
-                }
-                rImg.Close();
-                connImagenes.Close();
-
-                servicios.Add(new
+                serviciosTemp.Add(new
                 {
                     id_servicio = idServicio,
                     id_proveedor = (int)reader["id_proveedor"],
@@ -111,15 +87,68 @@ public class ServicesController : ControllerBase
                     nombre_categoria = reader["nombre_categoria"]?.ToString(),
                     proveedor = reader["proveedor"]?.ToString(),
                     universidad = reader["universidad"]?.ToString(),
-                    estrellas = estrellasArr,
-                    imagenes = imagenes
+                    estrellas = estrellasArr
                 });
             }
+            reader.Close();
+
+            // Obtener imágenes para todos los servicios en una sola consulta
+            using var cmdImg = new NpgsqlCommand(@"
+                SELECT id_servicio, id_imagen, url_imagen, es_principal, fecha_subida
+                FROM servicios_imagenes
+                ORDER BY id_servicio, es_principal DESC, id_imagen ASC
+            ", conn);
+            using var rImg = await cmdImg.ExecuteReaderAsync();
+            
+            var imagenesPorServicio = new Dictionary<int, List<object>>();
+            while (await rImg.ReadAsync())
+            {
+                int idServ = Convert.ToInt32(rImg["id_servicio"]);
+                if (!imagenesPorServicio.ContainsKey(idServ))
+                    imagenesPorServicio[idServ] = new List<object>();
+                
+                imagenesPorServicio[idServ].Add(new
+                {
+                    id_imagen = rImg["id_imagen"],
+                    url_imagen = rImg["url_imagen"],
+                    es_principal = Convert.ToBoolean(rImg["es_principal"]),
+                    fecha_subida = rImg["fecha_subida"]
+                });
+            }
+            rImg.Close();
+
+            // Combinar servicios con sus imágenes
+            foreach (var s in serviciosTemp)
+            {
+                int id = s.id_servicio;
+                imagenesPorServicio.TryGetValue(id, out var imgs);
+                
+                servicios.Add(new
+                {
+                    s.id_servicio,
+                    s.id_proveedor,
+                    s.titulo,
+                    s.descripcion,
+                    s.precio_hora,
+                    s.icono,
+                    s.fecha_publicacion,
+                    s.modalidad,
+                    s.disponibilidad,
+                    s.nombre_categoria,
+                    s.proveedor,
+                    s.universidad,
+                    s.estrellas,
+                    imagenes = imgs ?? new List<object>()
+                });
+            }
+
+            Console.WriteLine($"[DEBUG] GetAll: {servicios.Count} servicios, {imagenesPorServicio.Count} con imágenes");
 
             return Ok(servicios);
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"[ERROR] GetAll: {ex.Message}");
             return StatusCode(500, new { error = ex.Message });
         }
     }
