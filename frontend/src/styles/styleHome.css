@@ -976,11 +976,14 @@ fieldset {
   padding: 24px;
   border-bottom: 1px solid var(--borde);
   overflow: hidden;
+  height: 180px;
+  flex-shrink: 0;
 }
 
 .card-icono-imagen {
   background: linear-gradient(135deg, rgba(14, 165, 160, 0.08), rgba(14, 165, 160, 0.02));
   padding: 0;
+  height: 180px;
 }
 
 .card-icono-imagen img {

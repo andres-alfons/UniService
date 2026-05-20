@@ -1,9 +1,11 @@
 // Tarjeta de presentación de un servicio con icono, categoría, título, descripción, autor y precio
+import { useState } from "react";
 import { formatearFecha } from "../../utils/helpers";
 import { calcularEstrellas, truncar } from "./utilidades";
 import { COLORES_CATEGORIA, ICONOS_POR_NOMBRE_CATEGORIA } from "./constantes";
 
 export default function TarjetaServicio({ servicio, linkBase = "/servicio?id=" }) {
+  const [imagenError, setImagenError] = useState(false);
   const estrellas = calcularEstrellas(servicio.estrellas);
   const numReseñas = Array.isArray(servicio.estrellas)
     ? servicio.estrellas.length
@@ -20,19 +22,23 @@ export default function TarjetaServicio({ servicio, linkBase = "/servicio?id=" }
 
   const uniTexto = mostrarUniversidad();
 
-  // Obtener imagen de portada (primera imagen real, no default)
   const imagenesReales = (servicio.imagenes || [])
-    .filter((img) => !img.url_imagen?.includes("default") && !img.url_imagen?.startsWith("img/"));
-  const portada = imagenesReales.length > 0
+    .filter((img) => img.url_imagen && !img.url_imagen.includes("default") && !img.url_imagen.startsWith("img/"));
+  const portada = !imagenError && imagenesReales.length > 0
     ? imagenesReales.find((img) => img.es_principal)?.url_imagen || imagenesReales[0].url_imagen
     : null;
+
+  console.log("TarjetaServicio - servicio:", servicio.titulo);
+  console.log("TarjetaServicio - imagenes:", servicio.imagenes);
+  console.log("TarjetaServicio - imagenesReales:", imagenesReales);
+  console.log("TarjetaServicio - portada:", portada);
 
   return (
     <a href={`${linkBase}${servicio.id_servicio}`} className="card-servicio card-3d">
       {/* Imagen de portada o icono de categoría */}
       {portada ? (
         <div className="card-icono card-icono-imagen">
-          <img src={portada} alt={servicio.titulo} />
+          <img src={portada} alt={servicio.titulo} onError={() => setImagenError(true)} />
         </div>
       ) : (
         <div className="card-icono card-icono-azul">
