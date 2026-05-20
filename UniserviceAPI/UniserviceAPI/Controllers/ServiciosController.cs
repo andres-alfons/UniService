@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using UniserviceAPI.DTOs;
 using UniserviceAPI.Services;
 using System.Linq;
+using Microsoft.AspNetCore.Http.Features;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -67,12 +68,38 @@ public class ServicesController : ControllerBase
             {
                 double prom = (double)reader["promedio_estrellas"];
                 int numResenas = Convert.ToInt32(reader["num_resenas"]);
+                int idServicio = Convert.ToInt32(reader["id_servicio"]);
 
                 var estrellasArr = Enumerable.Repeat(prom, numResenas).ToArray();
 
+                // Obtener imágenes de este servicio
+                var imagenes = new List<object>();
+                var connImagenes = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+                await connImagenes.OpenAsync();
+                using var cmdImg = new NpgsqlCommand(@"
+                    SELECT id_imagen, url_imagen, es_principal, fecha_subida
+                    FROM servicios_imagenes
+                    WHERE id_servicio = @id
+                    ORDER BY es_principal DESC, id_imagen ASC
+                ", connImagenes);
+                cmdImg.Parameters.AddWithValue("@id", idServicio);
+                using var rImg = await cmdImg.ExecuteReaderAsync();
+                while (await rImg.ReadAsync())
+                {
+                    imagenes.Add(new
+                    {
+                        id_imagen = rImg["id_imagen"],
+                        url_imagen = rImg["url_imagen"],
+                        es_principal = Convert.ToBoolean(rImg["es_principal"]),
+                        fecha_subida = rImg["fecha_subida"]
+                    });
+                }
+                rImg.Close();
+                connImagenes.Close();
+
                 servicios.Add(new
                 {
-                    id_servicio = reader["id_servicio"],
+                    id_servicio = idServicio,
                     id_proveedor = (int)reader["id_proveedor"],
                     titulo = reader["titulo"]?.ToString(),
                     descripcion = reader["descripcion"]?.ToString(),
@@ -84,7 +111,8 @@ public class ServicesController : ControllerBase
                     nombre_categoria = reader["nombre_categoria"]?.ToString(),
                     proveedor = reader["proveedor"]?.ToString(),
                     universidad = reader["universidad"]?.ToString(),
-                    estrellas = estrellasArr
+                    estrellas = estrellasArr,
+                    imagenes = imagenes
                 });
             }
 
@@ -297,12 +325,24 @@ public class ServicesController : ControllerBase
     // SUBIR IMÁGENES DE SERVICIO (máx 5)
     // =========================
     [HttpPost("{id}/imagenes")]
-    public async Task<IActionResult> SubirImagenes(int id, List<IFormFile> imagenes)
+    [RequestSizeLimit(52428800)]
+    [DisableRequestSizeLimit]
+    public async Task<IActionResult> SubirImagenes(int id)
     {
         try
         {
+            var imagenes = Request.Form.Files.ToList();
+            
+            Console.WriteLine($"[DEBUG] Recibiendo imágenes para servicio {id}. Cantidad recibida: {imagenes?.Count ?? 0}");
+            
             if (imagenes == null || imagenes.Count == 0)
                 return BadRequest(new { error = "No se recibieron imágenes" });
+
+            Console.WriteLine($"[DEBUG] Archivos recibidos:");
+            foreach (var img in imagenes)
+            {
+                Console.WriteLine($"  - {img.FileName} ({img.Length} bytes, {img.ContentType})");
+            }
 
             if (imagenes.Count > 5)
                 return BadRequest(new { error = "Máximo 5 imágenes por servicio" });
@@ -320,8 +360,12 @@ public class ServicesController : ControllerBase
                     return BadRequest(new { error = "Cada imagen debe ser menor a 5MB" });
             }
 
+            Console.WriteLine($"[DEBUG] Validación OK. Subiendo a Supabase...");
+
             // Subir a Supabase Storage
             var urls = await _storageService.SubirMultiplesImagenesAsync(id, imagenes);
+
+            Console.WriteLine($"[DEBUG] URLs generadas: {urls.Count}");
 
             // Guardar URLs en la base de datos
             using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
@@ -340,6 +384,8 @@ public class ServicesController : ControllerBase
                 await cmd.ExecuteNonQueryAsync();
             }
 
+            Console.WriteLine($"[DEBUG] {urls.Count} imágenes guardadas en BD para servicio {id}");
+
             return Ok(new { ok = true, message = "Imágenes subidas correctamente", urls });
         }
         catch (NpgsqlException ex) when (ex.Message.Contains("más de 5 imágenes"))
@@ -348,6 +394,8 @@ public class ServicesController : ControllerBase
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"[ERROR] Subiendo imágenes: {ex.Message}");
+            Console.WriteLine($"[ERROR] Stack: {ex.StackTrace}");
             return StatusCode(500, new { error = ex.Message });
         }
     }

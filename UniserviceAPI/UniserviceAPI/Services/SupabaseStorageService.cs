@@ -91,12 +91,25 @@ namespace UniserviceAPI.Services
         {
             var urls = new List<string>();
             
+            Console.WriteLine($"[Supabase] Subiendo {archivos.Count} imágenes para servicio {idServicio}");
+            
             for (int i = 0; i < archivos.Count; i++)
             {
-                var url = await SubirImagenAsync(idServicio, archivos[i], i + 1);
-                urls.Add(url);
+                try
+                {
+                    Console.WriteLine($"[Supabase] Subiendo imagen {i + 1}/{archivos.Count}: {archivos[i].FileName}");
+                    var url = await SubirImagenAsync(idServicio, archivos[i], i + 1);
+                    urls.Add(url);
+                    Console.WriteLine($"[Supabase] Imagen {i + 1} subida exitosamente");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Supabase] ERROR subiendo imagen {i + 1}: {ex.Message}");
+                    throw;
+                }
             }
             
+            Console.WriteLine($"[Supabase] Total imágenes subidas: {urls.Count}");
             return urls;
         }
     }

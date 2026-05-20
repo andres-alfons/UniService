@@ -140,14 +140,25 @@ export default function SeccionPublicar({ onPublicado }) {
 
         // Subir imágenes si existen
         if (imagenes.length > 0 && idServicio) {
+          console.log("Subiendo imágenes:", imagenes.length, "archivos");
           const formData = new FormData();
-          imagenes.forEach((img) => formData.append("imagenes", img));
+          imagenes.forEach((img, index) => {
+            console.log(`Agregando imagen ${index + 1}:`, img.name, img.size, "bytes");
+            formData.append("imagenes", img);
+          });
           
           try {
-            await fetch(`${API_HOME}/${idServicio}/imagenes`, {
+            const imgRes = await fetch(`${API_HOME}/${idServicio}/imagenes`, {
               method: "POST",
               body: formData,
             });
+            const imgData = await imgRes.json();
+            console.log("Respuesta subida de imágenes:", imgData);
+            if (!imgData.ok) {
+              console.error("Error subiendo imágenes:", imgData.error);
+            } else {
+              console.log("Imágenes subidas exitosamente:", imgData.urls?.length || 0);
+            }
           } catch (imgErr) {
             console.error("Error subiendo imágenes:", imgErr);
           }
