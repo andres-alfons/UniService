@@ -11,6 +11,7 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
   const [editTitulo, setEditTitulo] = useState("");
   const [imagenesServicio, setImagenesServicio] = useState(null);
   const [imagenesCargando, setImagenesCargando] = useState(false);
+  const [accionandoId, setAccionandoId] = useState(null);
 
   const cargarServicios = async () => {
     setCargando(true);
@@ -30,40 +31,48 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
   }, []);
 
   const eliminar = async (id) => {
-    const s = servicios.find((x) => x.id_servicio === id);
-    if (!confirm("¿Eliminar este servicio permanentemente?")) return;
-    const idProveedor = s?.id_proveedor ?? 0;
+    const servicio = servicios.find((s) => s.id_servicio === id);
+    if (!confirm(`¿Eliminar "${servicio?.titulo}" permanentemente?`)) return;
+    setAccionandoId(id);
+    const idProveedor = servicio?.id_proveedor ?? 0;
     try {
       await fetch(`${API}/services/${id}?id_proveedor=${idProveedor}`, {
         method: "DELETE",
       });
-      setServicios((prev) => prev.filter((x) => x.id_servicio !== id));
+      setServicios((prev) => prev.filter((s) => s.id_servicio !== id));
       if (window.registrarLogAdmin) {
-        window.registrarLogAdmin("Eliminó servicio", `${s?.titulo || "Servicio"} (ID: ${id})`);
+        window.registrarLogAdmin("Eliminó servicio", `${servicio?.titulo} (ID: ${id})`);
       }
     } catch (err) {
       alert("Error al eliminar: " + err.message);
+    } finally {
+      setAccionandoId(null);
     }
   };
 
   const pausar = async (id) => {
-    const s = servicios.find((x) => x.id_servicio === id);
-    const esPausado = s?.disponibilidad === "Pausado";
+    const servicio = servicios.find((s) => s.id_servicio === id);
+    const estaPausado = servicio?.disponibilidad === "Pausado" || servicio?.disponibilidad === 0;
+    setAccionandoId(id);
     try {
       await fetch(`${API}/services/${id}/pausar`, { method: "PUT" });
       setServicios((prev) =>
-        prev.map((x) =>
-          x.id_servicio === id ? { ...x, disponibilidad: esPausado ? "Activo" : "Pausado" } : x
+        prev.map((s) =>
+          s.id_servicio === id
+            ? { ...s, disponibilidad: estaPausado ? "Activo" : "Pausado" }
+            : s
         )
       );
       if (window.registrarLogAdmin) {
         window.registrarLogAdmin(
-          esPausado ? "Activó servicio" : "Pausó servicio",
-          `${s?.titulo || "Servicio"} (ID: ${id})`
+          estaPausado ? "Activó servicio" : "Pausó servicio",
+          `${servicio?.titulo} (ID: ${id})`
         );
       }
     } catch (err) {
       alert("Error: " + err.message);
+    } finally {
+      setAccionandoId(null);
     }
   };
 
@@ -76,6 +85,7 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
     if (!editTitulo.trim()) return;
     const servicio = servicios.find((s) => s.id_servicio === id);
     const tituloAnterior = servicio?.titulo;
+    setAccionandoId(id);
     try {
       await fetch(`${API}/services/${id}`, {
         method: "PUT",
@@ -99,6 +109,8 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
       }
     } catch (err) {
       alert("Error al actualizar: " + err.message);
+    } finally {
+      setAccionandoId(null);
     }
   };
 
@@ -107,21 +119,19 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
       setImagenesServicio(null);
       return;
     }
+    setImagenesServicio(id);
     setImagenesCargando(true);
     try {
-      const res = await fetch(`${API}/services/${id}`);
-      const data = await res.json();
-      setImagenesServicio(id);
+      await fetch(`${API}/services/${id}`);
       setImagenesCargando(false);
-      return data;
     } catch {
       setImagenesCargando(false);
-      return null;
     }
   };
 
   const eliminarImagen = async (idServicio, idImagen) => {
     if (!confirm("¿Eliminar esta imagen del servicio?")) return;
+    setAccionandoId(idImagen);
     try {
       await fetch(`${API}/services/${idServicio}/imagenes/${idImagen}`, {
         method: "DELETE",
@@ -136,6 +146,8 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
       }
     } catch (err) {
       alert("Error al eliminar imagen: " + err.message);
+    } finally {
+      setAccionandoId(null);
     }
   };
 
@@ -182,123 +194,132 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
                 </td>
               </tr>
             ) : (
-              filtrados.map((s) => (
-                <tr key={s.id_servicio}>
-                  <td>
-                    <div className="admin-table__service-info">
-                      <span className="admin-table__service-icon">
-                        <i
-                          className={`bi ${
-                            s.icono?.startsWith("bi-") ? s.icono : "bi-pin"
-                          }`}
-                        ></i>
-                      </span>
-                      <div>
-                        {editandoId === s.id_servicio ? (
-                          <input
-                            type="text"
-                            value={editTitulo}
-                            onChange={(e) => setEditTitulo(e.target.value)}
-                            onKeyDown={(e) =>
-                              e.key === "Enter" && guardarTitulo(s.id_servicio)
-                            }
-                            style={{
-                              background: "var(--bg2)",
-                              border: "1px solid var(--teal)",
-                              color: "var(--texto)",
-                              padding: "2px 6px",
-                              borderRadius: "4px",
-                              fontSize: "0.85rem",
-                              width: "180px",
-                            }}
-                            autoFocus
-                          />
-                        ) : (
-                          <p
-                            className="admin-table__service-name"
-                            onDoubleClick={() => iniciarEdicion(s)}
-                            style={{ cursor: "pointer" }}
-                            title="Doble clic para editar"
-                          >
-                            {s.titulo}
-                          </p>
-                        )}
-                        <p className="admin-table__id">ID #{s.id_servicio}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="admin-table__provider">{s.proveedor}</td>
-                  <td className="admin-table__category">
-                    {s.nombre_categoria}
-                  </td>
-                  <td className="admin-table__price">
-                    ${(s.precio_hora || 0).toLocaleString("es-CO")}
-                  </td>
-                  <td>
-                    <span
-                      className={`admin-badge admin-badge--${
-                        s.disponibilidad === "Pausado" ? "inactivo" : "activo"
-                      }`}
-                    >
-                      {s.disponibilidad || "Activo"}
-                    </span>
-                  </td>
-                  <td className="admin-table__date">
-                    {formatFecha(s.fecha_publicacion)}
-                  </td>
-                  <td>
-                    <div className="admin-table__actions">
-                      {editandoId === s.id_servicio ? (
-                        <>
-                          <button
-                            className="admin-btn-action admin-btn-action--success"
-                            onClick={() => guardarTitulo(s.id_servicio)}
-                          >
-                            Guardar
-                          </button>
-                          <button
-                            className="admin-btn-action admin-btn-action--ghost"
-                            onClick={() => setEditandoId(null)}
-                          >
-                            ✕
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            className="admin-btn-action admin-btn-action--info"
-                            onClick={() => verImagenes(s.id_servicio)}
-                            title="Ver imágenes"
-                          >
-                            <i className="bi bi-image"></i>
-                          </button>
-                          {s.disponibilidad !== "Pausado" ? (
-                            <button
-                              className="admin-btn-action admin-btn-action--warning"
-                              onClick={() => pausar(s.id_servicio)}
-                            >
-                              Pausar
-                            </button>
+              filtrados.map((s) => {
+                const estaPausado = s.disponibilidad === "Pausado" || s.disponibilidad === 0;
+                return (
+                  <tr key={s.id_servicio}>
+                    <td>
+                      <div className="admin-table__service-info">
+                        <span className="admin-table__service-icon">
+                          <i
+                            className={`bi ${
+                              s.icono?.startsWith("bi-") ? s.icono : "bi-pin"
+                            }`}
+                          ></i>
+                        </span>
+                        <div>
+                          {editandoId === s.id_servicio ? (
+                            <input
+                              type="text"
+                              value={editTitulo}
+                              onChange={(e) => setEditTitulo(e.target.value)}
+                              onKeyDown={(e) =>
+                                e.key === "Enter" && guardarTitulo(s.id_servicio)
+                              }
+                              style={{
+                                background: "var(--bg2)",
+                                border: "1px solid var(--teal)",
+                                color: "var(--texto)",
+                                padding: "2px 6px",
+                                borderRadius: "4px",
+                                fontSize: "0.85rem",
+                                width: "180px",
+                              }}
+                              autoFocus
+                            />
                           ) : (
+                            <p
+                              className="admin-table__service-name"
+                              onDoubleClick={() => iniciarEdicion(s)}
+                              style={{ cursor: "pointer" }}
+                              title="Doble clic para editar"
+                            >
+                              {s.titulo}
+                            </p>
+                          )}
+                          <p className="admin-table__id">ID #{s.id_servicio}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="admin-table__provider">{s.proveedor}</td>
+                    <td className="admin-table__category">
+                      {s.nombre_categoria}
+                    </td>
+                    <td className="admin-table__price">
+                      ${(s.precio_hora || 0).toLocaleString("es-CO")}
+                    </td>
+                    <td>
+                      <span
+                        className={`admin-badge admin-badge--${
+                          estaPausado ? "inactivo" : "activo"
+                        }`}
+                      >
+                        {estaPausado ? "Pausado" : "Activo"}
+                      </span>
+                    </td>
+                    <td className="admin-table__date">
+                      {formatFecha(s.fecha_publicacion)}
+                    </td>
+                    <td>
+                      <div className="admin-table__actions">
+                        {editandoId === s.id_servicio ? (
+                          <>
                             <button
                               className="admin-btn-action admin-btn-action--success"
-                              onClick={() => pausar(s.id_servicio)}
+                              onClick={() => guardarTitulo(s.id_servicio)}
+                              disabled={accionandoId === s.id_servicio}
                             >
-                              Activar
+                              Guardar
                             </button>
-                          )}
-                          <button
-                            className="admin-btn-action admin-btn-action--danger"
-                            onClick={() => eliminar(s.id_servicio)}
-                          >
-                            Eliminar
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))
+                            <button
+                              className="admin-btn-action admin-btn-action--ghost"
+                              onClick={() => setEditandoId(null)}
+                              disabled={accionandoId === s.id_servicio}
+                            >
+                              ✕
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              className="admin-btn-action admin-btn-action--info"
+                              onClick={() => verImagenes(s.id_servicio)}
+                              title="Ver imágenes"
+                              disabled={accionandoId !== null}
+                            >
+                              <i className="bi bi-image"></i>
+                            </button>
+                            {!estaPausado ? (
+                              <button
+                                className="admin-btn-action admin-btn-action--warning"
+                                onClick={() => pausar(s.id_servicio)}
+                                disabled={accionandoId === s.id_servicio}
+                              >
+                                {accionandoId === s.id_servicio ? "..." : "Pausar"}
+                              </button>
+                            ) : (
+                              <button
+                                className="admin-btn-action admin-btn-action--activate"
+                                onClick={() => pausar(s.id_servicio)}
+                                disabled={accionandoId === s.id_servicio}
+                              >
+                                {accionandoId === s.id_servicio ? "..." : "Activar"}
+                              </button>
+                            )}
+                            <button
+                              className="admin-btn-action admin-btn-action--danger"
+                              onClick={() => eliminar(s.id_servicio)}
+                              disabled={accionandoId === s.id_servicio}
+                            >
+                              {accionandoId === s.id_servicio ? "..." : "Eliminar"}
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
@@ -314,23 +335,30 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
             border: "1px solid var(--borde)",
           }}
         >
-          <h3 style={{ color: "var(--texto)", marginBottom: "12px" }}>
-            Imágenes del servicio #{imagenesServicio}
-          </h3>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+            <h3 style={{ color: "var(--texto)", margin: 0 }}>
+              Imágenes del servicio #{imagenesServicio}
+            </h3>
+            <button
+              onClick={() => setImagenesServicio(null)}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "var(--texto2)",
+                cursor: "pointer",
+                fontSize: "1.2rem",
+              }}
+            >
+              ✕
+            </button>
+          </div>
           {imagenesCargando ? (
             <p style={{ color: "var(--texto2)" }}>Cargando imágenes...</p>
           ) : (
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                flexWrap: "wrap",
-              }}
-            >
+            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
               <ImagenesGrid
                 idServicio={imagenesServicio}
                 onEliminar={eliminarImagen}
-                onClose={() => setImagenesServicio(null)}
               />
             </div>
           )}
@@ -340,7 +368,7 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
   );
 }
 
-function ImagenesGrid({ idServicio, onEliminar, onClose }) {
+function ImagenesGrid({ idServicio, onEliminar }) {
   const [imagenes, setImagenes] = useState([]);
 
   useEffect(() => {

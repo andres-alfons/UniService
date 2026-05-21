@@ -9,6 +9,7 @@ export default function SeccionUsuarios({ onRefresh }) {
   const [cargando, setCargando] = useState(true);
   const [editandoId, setEditandoId] = useState(null);
   const [editNombre, setEditNombre] = useState("");
+  const [accionandoId, setAccionandoId] = useState(null);
 
   const cargarUsuarios = async () => {
     setCargando(true);
@@ -17,7 +18,7 @@ export default function SeccionUsuarios({ onRefresh }) {
       const data = await res.json();
       const normalizados = (Array.isArray(data) ? data : []).map((u) => ({
         ...u,
-        estado: u.estado === true || u.estado === 1 ? "activo" : "inactivo",
+        estado: u.estado === false || u.estado === 0 ? "inactivo" : "activo",
         rol: u.id_rol === 1 ? "admin" : "usuario",
       }));
       setUsuarios(normalizados);
@@ -33,63 +34,69 @@ export default function SeccionUsuarios({ onRefresh }) {
   }, []);
 
   const suspender = async (id) => {
-    const u = usuarios.find((x) => x.id_usuario === id);
-    if (!confirm("¿Suspender este usuario?")) return;
+    const usuario = usuarios.find((u) => u.id_usuario === id);
+    if (!confirm(`¿Suspender a "${usuario?.nombre}"?`)) return;
+    setAccionandoId(id);
     try {
       await fetch(`${API}/users/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ estado: 0 }),
+        body: JSON.stringify({ estado: false }),
       });
       setUsuarios((prev) =>
-        prev.map((x) =>
-          x.id_usuario === id ? { ...x, estado: "inactivo" } : x
+        prev.map((u) =>
+          u.id_usuario === id ? { ...u, estado: "inactivo" } : u
         )
       );
       if (window.registrarLogAdmin) {
-        window.registrarLogAdmin("Suspendió usuario", `${u?.nombre || u?.correo} (ID: ${id})`);
+        window.registrarLogAdmin("Suspendió usuario", `${usuario?.nombre} (ID: ${id})`);
       }
     } catch (err) {
       alert("Error al suspender: " + err.message);
+    } finally {
+      setAccionandoId(null);
     }
   };
 
   const activar = async (id) => {
-    const u = usuarios.find((x) => x.id_usuario === id);
-    if (!confirm("¿Activar este usuario?")) return;
+    const usuario = usuarios.find((u) => u.id_usuario === id);
+    if (!confirm(`¿Activar a "${usuario?.nombre}"?`)) return;
+    setAccionandoId(id);
     try {
       await fetch(`${API}/users/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ estado: 1 }),
+        body: JSON.stringify({ estado: true }),
       });
       setUsuarios((prev) =>
-        prev.map((x) =>
-          x.id_usuario === id ? { ...x, estado: "activo" } : x
+        prev.map((u) =>
+          u.id_usuario === id ? { ...u, estado: "activo" } : u
         )
       );
       if (window.registrarLogAdmin) {
-        window.registrarLogAdmin("Activó usuario", `${u?.nombre || u?.correo} (ID: ${id})`);
+        window.registrarLogAdmin("Activó usuario", `${usuario?.nombre} (ID: ${id})`);
       }
     } catch (err) {
       alert("Error al activar: " + err.message);
+    } finally {
+      setAccionandoId(null);
     }
   };
 
   const eliminar = async (id) => {
-    const u = usuarios.find((x) => x.id_usuario === id);
-    if (
-      !confirm("¿Eliminar este usuario? Esta acción no se puede deshacer.")
-    )
-      return;
+    const usuario = usuarios.find((u) => u.id_usuario === id);
+    if (!confirm(`¿Eliminar a "${usuario?.nombre}"? Esta acción no se puede deshacer.`)) return;
+    setAccionandoId(id);
     try {
       await fetch(`${API}/users/${id}`, { method: "DELETE" });
-      setUsuarios((prev) => prev.filter((x) => x.id_usuario !== id));
+      setUsuarios((prev) => prev.filter((u) => u.id_usuario !== id));
       if (window.registrarLogAdmin) {
-        window.registrarLogAdmin("Eliminó usuario", `${u?.nombre || u?.correo} (ID: ${id})`);
+        window.registrarLogAdmin("Eliminó usuario", `${usuario?.nombre} (ID: ${id})`);
       }
     } catch (err) {
       alert("Error al eliminar: " + err.message);
+    } finally {
+      setAccionandoId(null);
     }
   };
 
@@ -100,6 +107,9 @@ export default function SeccionUsuarios({ onRefresh }) {
 
   const guardarNombre = async (id) => {
     if (!editNombre.trim()) return;
+    const usuario = usuarios.find((u) => u.id_usuario === id);
+    const nombreAnterior = usuario?.nombre;
+    setAccionandoId(id);
     try {
       await fetch(`${API}/users/${id}`, {
         method: "PUT",
@@ -112,8 +122,13 @@ export default function SeccionUsuarios({ onRefresh }) {
         )
       );
       setEditandoId(null);
+      if (window.registrarLogAdmin) {
+        window.registrarLogAdmin("Editó nombre usuario", `"${nombreAnterior}" → "${editNombre}"`);
+      }
     } catch (err) {
       alert("Error al actualizar: " + err.message);
+    } finally {
+      setAccionandoId(null);
     }
   };
 
@@ -223,12 +238,14 @@ export default function SeccionUsuarios({ onRefresh }) {
                           <button
                             className="admin-btn-action admin-btn-action--success"
                             onClick={() => guardarNombre(u.id_usuario)}
+                            disabled={accionandoId === u.id_usuario}
                           >
                             Guardar
                           </button>
                           <button
                             className="admin-btn-action admin-btn-action--ghost"
                             onClick={() => setEditandoId(null)}
+                            disabled={accionandoId === u.id_usuario}
                           >
                             ✕
                           </button>
@@ -237,22 +254,25 @@ export default function SeccionUsuarios({ onRefresh }) {
                         <button
                           className="admin-btn-action admin-btn-action--warning"
                           onClick={() => suspender(u.id_usuario)}
+                          disabled={accionandoId === u.id_usuario}
                         >
-                          Suspender
+                          {accionandoId === u.id_usuario ? "..." : "Suspender"}
                         </button>
                       ) : (
                         <button
-                          className="admin-btn-action admin-btn-action--success"
+                          className="admin-btn-action admin-btn-action--activate"
                           onClick={() => activar(u.id_usuario)}
+                          disabled={accionandoId === u.id_usuario}
                         >
-                          Activar
+                          {accionandoId === u.id_usuario ? "..." : "Activar"}
                         </button>
                       )}
                       <button
                         className="admin-btn-action admin-btn-action--danger"
                         onClick={() => eliminar(u.id_usuario)}
+                        disabled={accionandoId === u.id_usuario}
                       >
-                        Eliminar
+                        {accionandoId === u.id_usuario ? "..." : "Eliminar"}
                       </button>
                     </div>
                   </td>

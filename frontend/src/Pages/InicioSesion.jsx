@@ -87,6 +87,8 @@ export default function Login() {
   // ESTADOS GENERALES DE UI
   // ════════════════════════════════
   const [errores, setErrores] = useState({}); // Objeto con mensajes de error por campo (ej: { correo: "Inválido" })
+  const [cargandoLogin, setCargandoLogin] = useState(false); // Evita doble clic en login
+  const [cargandoRegistro, setCargandoRegistro] = useState(false); // Evita doble clic en registro
   const [modal, setModal] = useState({
     // Modal genérico para mostrar mensajes al usuario
     visible: false,
@@ -462,6 +464,7 @@ const res = await fetch("/api/Auth/verify-code", {
   //   2. Si no → llama al backend C# para autenticar normalmente
   // ════════════════════════════════
   const handleLogin = async () => {
+    if (cargandoLogin) return;
     // Validaciones básicas antes de llamar a la API
     if (!correo || errores.correo) {
       notificar("Ingresa un correo válido");
@@ -487,6 +490,7 @@ const res = await fetch("/api/Auth/verify-code", {
     }
 
     // FLUJO NORMAL: Si no es un admin hardcodeado, autentica contra la base de datos
+    setCargandoLogin(true);
     try {
       const res = await fetch("/api/Users/login", {
         method: "POST",
@@ -515,6 +519,8 @@ const res = await fetch("/api/Auth/verify-code", {
       }
     } catch {
       notificar("Error de conexión con el servidor");
+    } finally {
+      setCargandoLogin(false);
     }
   };
 
@@ -524,6 +530,7 @@ const res = await fetch("/api/Auth/verify-code", {
   // haya sido verificado previamente con el código de 6 dígitos.
   // ════════════════════════════════
   const handleRegister = async () => {
+    if (cargandoRegistro) return;
     // No permite registrar si el correo no fue verificado con el código
     if (!correoVerificado) {
       notificar("Debes verificar tu correo primero");
@@ -539,6 +546,7 @@ const res = await fetch("/api/Auth/verify-code", {
       notificar("Revisa los campos del formulario");
       return;
     }
+    setCargandoRegistro(true);
     try {
       const res = await fetch("/api/Auth/register", {
         method: "POST",
@@ -568,6 +576,8 @@ const res = await fetch("/api/Auth/verify-code", {
       }
     } catch {
       notificar("Error de conexión");
+    } finally {
+      setCargandoRegistro(false);
     }
   };
 
@@ -707,8 +717,9 @@ const res = await fetch("/api/Auth/verify-code", {
                   className="btn-principal"
                   type="button"
                   onClick={handleLogin}
+                  disabled={cargandoLogin}
                 >
-                  Entrar →
+                  {cargandoLogin ? "Entrando..." : "Entrar →"}
                 </button>
                 {/* Permite explorar la app sin cuenta */}
                 <button
@@ -836,8 +847,9 @@ const res = await fetch("/api/Auth/verify-code", {
                 type="button"
                 className="btn-principal"
                 onClick={handleRegister}
+                disabled={cargandoRegistro}
               >
-                Crear cuenta →
+                {cargandoRegistro ? "Creando cuenta..." : "Crear cuenta →"}
               </button>
               <p className="pie">
                 ¿Ya tienes cuenta?{" "}

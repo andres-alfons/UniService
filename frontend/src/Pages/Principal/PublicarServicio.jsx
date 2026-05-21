@@ -412,9 +412,9 @@ export default function SeccionPublicar({ onPublicado }) {
       {modalExito && (
         <div className="modal-overlay" onClick={cerrarModalExito}>
           <div className="modal-content modal-exito" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-icon success-icon"><i className="bi bi-check-circle-fill" style={{fontSize:"2.5rem",color:"#10b981"}}></i></div>
-            <h3>Servicio publicado con éxito!</h3>
-            <p>Tu servicio ya está visible para la comunidad universitaria.</p>
+            <div className="modal-icon success-icon"><i className="bi bi-clock-fill" style={{fontSize:"2.5rem",color:"#f59e0b"}}></i></div>
+            <h3>Servicio enviado a revisión</h3>
+            <p>Tu servicio ha sido enviado correctamente. El equipo de administración lo revisará y aprobará antes de ser publicado en la plataforma.</p>
             <button className="btn btn-verde" onClick={cerrarModalExito}>Entendido</button>
           </div>
         </div>

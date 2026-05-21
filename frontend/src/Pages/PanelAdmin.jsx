@@ -4,6 +4,7 @@ import NavbarAdmin from "./Admin/BarraNavegacionAdmin";
 import SeccionDashboard from "./Admin/PanelControl";
 import SeccionUsuarios from "./Admin/GestionUsuarios";
 import SeccionServiciosAdmin from "./Admin/GestionServicios";
+import SeccionServiciosPendientes from "./Admin/GestionServiciosPendientes";
 import SeccionReportes from "./Admin/GestionReportes";
 import SeccionCategorias from "./Admin/GestionCategorias";
 import SeccionLogs from "./Admin/RegistroActividades";
@@ -42,6 +43,7 @@ export default function HomeAdmin() {
     dashboard: <SeccionDashboard key={refreshKey} refreshKey={refreshKey} />,
     usuarios: <SeccionUsuarios key={refreshKey} refreshKey={refreshKey} onRefresh={refresh} />,
     servicios: <SeccionServiciosAdmin key={refreshKey} refreshKey={refreshKey} onRefresh={refresh} />,
+    pendientes: <SeccionServiciosPendientes key={refreshKey} refreshKey={refreshKey} onRefresh={refresh} />,
     reportes: <SeccionReportes key={refreshKey} refreshKey={refreshKey} />,
     categorias: <SeccionCategorias key={refreshKey} refreshKey={refreshKey} onRefresh={refresh} />,
     logs: <SeccionLogs />,
