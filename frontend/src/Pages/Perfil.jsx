@@ -11,6 +11,7 @@ import QuickStatCard from "./Perfil/TarjetaRapida";
 import ProgressBar from "./Perfil/BarraProgreso";
 import ActivityItem from "./Perfil/ElementoActividad";
 import BotonTema from "../Components/B_StyleHome";
+import ChatPanel from "./Principal/ChatPanel";
 
 // ════════════════════════════════════════════════════════════════
 // PÁGINA DE PERFIL DE USUARIO
@@ -91,6 +92,7 @@ const [modalSiguiendo, setModalSiguiendo] = useState(false);
 
   // Modal de alertas (reemplaza alert())
   const [modalAlerta, setModalAlerta] = useState({ show: false, type: "info", title: "", message: "" });
+  const [chatPanelAbierto, setChatPanelAbierto] = useState(false);
 
   const mostrarAlerta = (type, title, message) => {
     setModalAlerta({ show: true, type, title, message });
@@ -655,7 +657,7 @@ const getAvatarUrl = (avatar) => {
 
                 <div className="action-buttons">
                   {esPerfilExterno ? (
-                    // Perfil ajeno: se muestran Seguir y Compartir
+                    // Perfil ajeno: se muestran Seguir, Chatear y Compartir
                     <>
                       <button
                         className={`btn-seguir ${siguiendo ? "btn-siguiendo" : ""}`}
@@ -663,6 +665,12 @@ const getAvatarUrl = (avatar) => {
                         disabled={enviandoSeguimiento}
                       >
                         {siguiendo ? <><i className="bi bi-check-lg"></i> Siguiendo</> : <><i className="bi bi-plus-lg"></i> Seguir</>}
+                      </button>
+                      <button
+                        className="btn btn-primary btn-chat-perfil"
+                        onClick={() => setChatPanelAbierto(true)}
+                      >
+                        <i className="bi bi-chat-dots-fill"></i> Chatear
                       </button>
                       <button
                         className="btn btn-secondary"
@@ -1733,6 +1741,8 @@ const getAvatarUrl = (avatar) => {
         title={modalAlerta.title}
         message={modalAlerta.message}
       />
+
+      <ChatPanel abierto={chatPanelAbierto} onCerrar={() => setChatPanelAbierto(false)} />
     </>
   );
 };

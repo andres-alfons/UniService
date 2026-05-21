@@ -98,6 +98,8 @@ function FormCalificacion({ servicioId, showModal, onNuevaResena }) {
 
   // Si ya calificó, mostrar su reseña con opción de editar
   if (permiso.yaCalifico) {
+    if (!permiso.mi_calificacion) return null;
+
     if (editando) {
       return (
         <div className="seccion-info">

@@ -123,24 +123,27 @@ public class SolicitudesController : ControllerBase
 
             // Obtener datos para el mensaje del chat
             string nombreCliente = null, tituloServicio = null, emailProveedor = null, nombreProveedor = null;
-            using var dataCmd = new NpgsqlCommand(@"
+            using (var dataCmd = new NpgsqlCommand(@"
                 SELECT c.nombre AS nombre_cliente, se.titulo AS titulo_servicio,
                        u.correo AS email_proveedor, u.nombre AS nombre_proveedor
                 FROM usuarios c
                 INNER JOIN servicios se ON se.id_servicio = @id_servicio
                 INNER JOIN usuarios u ON u.id_usuario = @id_proveedor
                 WHERE c.id_usuario = @id_cliente
-            ", conn);
-            dataCmd.Parameters.AddWithValue("@id_cliente", dto.id_cliente);
-            dataCmd.Parameters.AddWithValue("@id_proveedor", dto.id_proveedor);
-            dataCmd.Parameters.AddWithValue("@id_servicio", dto.id_servicio);
-            using var dataReader = await dataCmd.ExecuteReaderAsync();
-            if (await dataReader.ReadAsync())
+            ", conn))
             {
-                nombreCliente = dataReader["nombre_cliente"]?.ToString();
-                tituloServicio = dataReader["titulo_servicio"]?.ToString();
-                emailProveedor = dataReader["email_proveedor"]?.ToString();
-                nombreProveedor = dataReader["nombre_proveedor"]?.ToString();
+                dataCmd.Parameters.AddWithValue("@id_cliente", dto.id_cliente);
+                dataCmd.Parameters.AddWithValue("@id_proveedor", dto.id_proveedor);
+                dataCmd.Parameters.AddWithValue("@id_servicio", dto.id_servicio);
+                using var dataReader = await dataCmd.ExecuteReaderAsync();
+                if (await dataReader.ReadAsync())
+                {
+                    nombreCliente = dataReader["nombre_cliente"]?.ToString();
+                    tituloServicio = dataReader["titulo_servicio"]?.ToString();
+                    emailProveedor = dataReader["email_proveedor"]?.ToString();
+                    nombreProveedor = dataReader["nombre_proveedor"]?.ToString();
+                }
+                dataReader.Close();
             }
 
             // Crear chat automático entre cliente y proveedor si no existe
