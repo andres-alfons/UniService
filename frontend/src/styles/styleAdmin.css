@@ -1,11 +1,11 @@
-/* ═══════════════════════════════════════════
-   UniServicios — styleAdmin.css (Estilo Home - Tonos Rojizos)
-   Sin Bootstrap · Sin !important
-   ═══════════════════════════════════════════ */
+﻿/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   UniServicios â€” styleAdmin.css (Estilo Home - Tonos Rojizos)
+   Sin Bootstrap Â· Sin !important
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=DM+Serif+Display:ital@0;1&display=swap");
 
-/* ── Variables ── */
+/* â”€â”€ Variables â”€â”€ */
 :root {
   /* Base oscura adaptada del Home */
   --bg: #070d16;
@@ -36,7 +36,7 @@
   --color-info: #06b6d4;
 }
 
-/* ── Reset y Base ── */
+/* â”€â”€ Reset y Base â”€â”€ */
 *,
 *::before,
 *::after {
@@ -60,7 +60,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Layout Principal ── */
+/* â”€â”€ Layout Principal â”€â”€ */
 .admin-layout {
   display: flex;
   flex-direction: column;
@@ -81,7 +81,7 @@ body {
   z-index: 1;
 }
 
-/* Fondo decorativo dinámico tipo Home */
+/* Fondo decorativo dinÃ¡mico tipo Home */
 .admin-bg-decorative {
   position: fixed;
   inset: 0;
@@ -100,7 +100,7 @@ body {
   z-index: 0;
 }
 
-/* ── Navbar Admin (Estilo Home Navbar) ── */
+/* â”€â”€ Navbar Admin (Estilo Home Navbar) â”€â”€ */
 .admin-nav {
   position: fixed;
   top: 0;
@@ -210,7 +210,7 @@ body {
 .admin-nav__user {
   display: flex;
   align-items: center;
-  gap: 40px; /* Espacio entre el nombre y el botón */
+  gap: 40px; /* Espacio entre el nombre y el botÃ³n */
 }
 
 .admin-nav__user-info {
@@ -220,7 +220,7 @@ body {
   color: var(--texto);
   font-weight: 600;
   font-size: 0.9rem;
-  white-space: nowrap; /* Evita que el nombre se parta en dos líneas */
+  white-space: nowrap; /* Evita que el nombre se parta en dos lÃ­neas */
 }
 
 .admin-nav__logout {
@@ -229,7 +229,7 @@ body {
   padding: 8px 18px;
 }
 
-/* ── Encabezados de Sección (Animaciones y Gradientes Home) ── */
+/* â”€â”€ Encabezados de SecciÃ³n (Animaciones y Gradientes Home) â”€â”€ */
 .admin-header,
 .admin-section__header {
   margin-bottom: 36px;
@@ -272,7 +272,7 @@ body {
   background-clip: text;
 }
 
-/* ── Dashboard Stats (Estilo Cards 3D Home) ── */
+/* â”€â”€ Dashboard Stats (Estilo Cards 3D Home) â”€â”€ */
 .admin-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -358,7 +358,7 @@ body {
   font-weight: 700;
 }
 
-/* ── Tablas (Estilo Caja Formulario Home) ── */
+/* â”€â”€ Tablas (Estilo Caja Formulario Home) â”€â”€ */
 .admin-table-container {
   background: linear-gradient(
     135deg,
@@ -432,7 +432,7 @@ body {
   font-size: 1rem;
 }
 
-/* ── Botones y Acciones (Estilo Botones Home) ── */
+/* â”€â”€ Botones y Acciones (Estilo Botones Home) â”€â”€ */
 .admin-btn-action {
   padding: 8px 16px;
   border-radius: 8px;
@@ -484,7 +484,7 @@ body {
   box-shadow: 0 8px 24px rgba(239, 68, 68, 0.35);
 }
 
-/* ── Badges (Estilo Etiquetas Home) ── */
+/* â”€â”€ Badges (Estilo Etiquetas Home) â”€â”€ */
 .admin-badge {
   display: inline-block;
   padding: 3px 10px;
@@ -512,7 +512,7 @@ body {
   color: #a58e0e;
   border: 1px solid rgba(165, 82, 14, 0.2);
 }
-/* ── Inputs (Estilo Formularios Home) ── */
+/* â”€â”€ Inputs (Estilo Formularios Home) â”€â”€ */
 .admin-input-search {
   background: linear-gradient(
     135deg,
@@ -546,7 +546,7 @@ body {
   color: var(--texto3);
 }
 
-/* ── Report Cards (Estilo Card Servicio Home) ── */
+/* â”€â”€ Report Cards (Estilo Card Servicio Home) â”€â”€ */
 .admin-reports-list {
   display: grid;
   gap: 20px;
@@ -601,7 +601,7 @@ body {
   font-size: 0.95rem;
 }
 
-/* ── Actividad / Logs ── */
+/* â”€â”€ Actividad / Logs â”€â”€ */
 .admin-activity-item {
   display: flex;
   align-items: center;
@@ -634,7 +634,7 @@ body {
   background: var(--color-success);
 }
 
-/* ── Animaciones Reutilizables Home ── */
+/* â”€â”€ Animaciones Reutilizables Home â”€â”€ */
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -646,7 +646,7 @@ body {
   }
 }
 
-/* ── Responsive ── */
+/* â”€â”€ Responsive â”€â”€ */
 @media (max-width: 900px) {
   .admin-nav__links {
     display: none;
@@ -669,9 +669,9 @@ body {
   }
 }
 
-/* ═══════════════════════════════════════════
-   ── Estilos de Categorías (Tarjetas y Formulario) ──
-   ═══════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   â”€â”€ Estilos de CategorÃ­as (Tarjetas y Formulario) â”€â”€
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .admin-category-grid {
   display: grid;
@@ -751,7 +751,7 @@ body {
   color: var(--texto2);
 }
 
-/* ── Formulario de Nueva Categoría ── */
+/* â”€â”€ Formulario de Nueva CategorÃ­a â”€â”€ */
 .admin-category-form {
   display: flex;
   align-items: center;
@@ -789,10 +789,10 @@ body {
   box-shadow: 0 0 0 3px var(--rojo-dim);
 }
 
-/* ═══════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    FORZAR MODO OSCURO EN ADMIN
-   Elimina cualquier tema claro que cause distorsión
-   ═══════════════════════════════════════════ */
+   Elimina cualquier tema claro que cause distorsiÃ³n
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 body.admin-page {
   background-color: var(--bg) !important;
   color: var(--texto) !important;
@@ -867,5 +867,3 @@ body.admin-page .admin-tab.is-active {
   background: var(--rojo-dim) !important;
   color: var(--rojo) !important;
 }
- 
- 
