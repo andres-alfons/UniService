@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import ChatMessage from "./ChatMessage";
 import { API_CHAT } from "../shared/constantes";
-import { enviarMensaje, unirseChat, salirChat } from "../../Services/SignalRService";
+import { enviarMensaje, unirseChat, salirChat, on } from "../../Services/SignalRService";
 
 export default function ChatWindow({ chat, usuarioId, usuariosOnline }) {
   const [mensajes, setMensajes] = useState([]);
@@ -34,6 +34,32 @@ export default function ChatWindow({ chat, usuarioId, usuariosOnline }) {
     return () => {
       salirChat(chat.id_chat);
     };
+  }, [chat, usuarioId]);
+
+  useEffect(() => {
+    if (!chat) return;
+
+    const unsub = on("onMensaje", (data) => {
+      if (data.id_chat === chat.id_chat) {
+        setMensajes((prev) => {
+          const exists = prev.some((m) => m.mensaje === data.mensaje && m.id_remitente === data.id_remitente);
+          if (exists) return prev;
+          return [...prev, {
+            id_mensaje: Date.now(),
+            id_chat: data.id_chat,
+            id_remitente: data.id_remitente,
+            id_destinatario: data.id_destinatario,
+            mensaje: data.mensaje,
+            fecha_envio: data.fecha_envio,
+            leido: false,
+            tipo: data.tipo || "texto",
+            nombre_remitente: data.id_remitente === parseInt(usuarioId) ? "Tú" : "",
+          }];
+        });
+      }
+    });
+
+    return unsub;
   }, [chat, usuarioId]);
 
   useEffect(() => {
@@ -124,12 +150,21 @@ export default function ChatWindow({ chat, usuarioId, usuariosOnline }) {
         <div className="chat-window-user">
           <div className="chat-window-avatar">
             {chat.avatar_otro ? (
-              <img src={chat.avatar_otro} alt={chat.nombre_otro} />
-            ) : (
-              <div className="avatar-placeholder-sm">
-                {chat.nombre_otro.charAt(0).toUpperCase()}
-              </div>
-            )}
+              <img
+                src={chat.avatar_otro}
+                alt={chat.nombre_otro}
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                  e.currentTarget.parentElement.querySelector(".avatar-placeholder-sm-fallback").style.display = "flex";
+                }}
+              />
+            ) : null}
+            <div
+              className="avatar-placeholder-sm-fallback"
+              style={{ display: chat.avatar_otro ? "none" : "flex" }}
+            >
+              {chat.nombre_otro.charAt(0).toUpperCase()}
+            </div>
             {estaOnline() && <span className="online-dot"></span>}
           </div>
           <div className="chat-window-info">

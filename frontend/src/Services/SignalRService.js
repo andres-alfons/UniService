@@ -6,6 +6,11 @@ let connection = null;
 let callbacks = {};
 
 export function iniciarSignalR(usuarioId) {
+  if (connection && connection.state === signalR.HubConnectionState.Connected) {
+    console.log("[SignalR] Ya conectado");
+    return connection;
+  }
+
   if (connection) {
     connection.stop();
   }
@@ -19,33 +24,36 @@ export function iniciarSignalR(usuarioId) {
     .build();
 
   connection.on("RecibirMensaje", (data) => {
-    if (callbacks.onMensaje) callbacks.onMensaje(data);
+    console.log("[SignalR] Mensaje recibido:", data);
+    (callbacks.onMensaje || []).forEach((cb) => cb(data));
   });
 
   connection.on("MensajeEnviado", (data) => {
-    if (callbacks.onMensajeEnviado) callbacks.onMensajeEnviado(data);
+    (callbacks.onMensajeEnviado || []).forEach((cb) => cb(data));
   });
 
   connection.on("UsuarioConectado", (id) => {
-    if (callbacks.onUsuarioConectado) callbacks.onUsuarioConectado(id);
+    console.log("[SignalR] Usuario conectado:", id);
+    (callbacks.onUsuarioConectado || []).forEach((cb) => cb(id));
   });
 
   connection.on("UsuarioDesconectado", (id) => {
-    if (callbacks.onUsuarioDesconectado) callbacks.onUsuarioDesconectado(id);
+    console.log("[SignalR] Usuario desconectado:", id);
+    (callbacks.onUsuarioDesconectado || []).forEach((cb) => cb(id));
   });
 
   connection.on("NuevoChatNotification", (data) => {
-    if (callbacks.onNuevoChat) callbacks.onNuevoChat(data);
+    (callbacks.onNuevoChat || []).forEach((cb) => cb(data));
   });
 
   connection.on("MensajesLeidos", (data) => {
-    if (callbacks.onMensajesLeidos) callbacks.onMensajesLeidos(data);
+    (callbacks.onMensajesLeidos || []).forEach((cb) => cb(data));
   });
 
   connection
     .start()
     .then(() => {
-      console.log("[SignalR] Conectado");
+      console.log("[SignalR] Conectado como usuario:", usuarioId);
       connection.invoke("ConectarUsuario", usuarioId);
     })
     .catch((err) => console.error("[SignalR] Error:", err));
@@ -54,7 +62,11 @@ export function iniciarSignalR(usuarioId) {
 }
 
 export function on(evento, callback) {
-  callbacks[evento] = callback;
+  if (!callbacks[evento]) callbacks[evento] = [];
+  callbacks[evento].push(callback);
+  return () => {
+    callbacks[evento] = (callbacks[evento] || []).filter((cb) => cb !== callback);
+  };
 }
 
 export function enviarMensaje(idChat, remitenteId, destinatarioId, mensaje, tipo = "texto") {

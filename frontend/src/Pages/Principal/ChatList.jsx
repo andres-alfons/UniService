@@ -56,12 +56,21 @@ export default function ChatList({ chats, chatSeleccionado, onSelectChat, usuari
             >
               <div className="chat-item-avatar">
                 {chat.avatar_otro ? (
-                  <img src={chat.avatar_otro} alt={chat.nombre_otro} />
-                ) : (
-                  <div className="avatar-placeholder">
-                    {chat.nombre_otro.charAt(0).toUpperCase()}
-                  </div>
-                )}
+                  <img
+                    src={chat.avatar_otro}
+                    alt={chat.nombre_otro}
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                      e.currentTarget.parentElement.querySelector(".avatar-placeholder-fallback").style.display = "flex";
+                    }}
+                  />
+                ) : null}
+                <div
+                  className="avatar-placeholder-fallback"
+                  style={{ display: chat.avatar_otro ? "none" : "flex" }}
+                >
+                  {chat.nombre_otro.charAt(0).toUpperCase()}
+                </div>
                 {estaOnline(chat.id_otro_usuario) && (
                   <span className="online-indicator"></span>
                 )}

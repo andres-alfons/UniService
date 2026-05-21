@@ -409,7 +409,15 @@ export default function Servicio() {
 
       <BotonTema />
 
-      <ChatPanel abierto={chatPanelAbierto} onCerrar={() => setChatPanelAbierto(false)} />
+      <ChatPanel
+        abierto={chatPanelAbierto}
+        onCerrar={() => setChatPanelAbierto(false)}
+        targetUsuario={{
+          id: servicio.id_proveedor,
+          nombre: servicio.proveedor,
+          avatar: "",
+        }}
+      />
 
       <footer id="soporte">
         <div className="container">

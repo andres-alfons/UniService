@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import ChatList from "./ChatList";
 import ChatWindow from "./ChatWindow";
 import { API_CHAT } from "../shared/constantes";
@@ -8,44 +8,42 @@ import {
   detenerSignalR,
 } from "../../Services/SignalRService";
 
-export default function ChatPanel({ abierto, onCerrar }) {
+export default function ChatPanel({ abierto, onCerrar, targetUsuario = null }) {
   const [chats, setChats] = useState([]);
   const [chatSeleccionado, setChatSeleccionado] = useState(null);
   const [usuariosOnline, setUsuariosOnline] = useState(new Set());
+  const [cargando, setCargando] = useState(false);
   const usuarioId = localStorage.getItem("usuarioId");
+  const targetProcessed = useRef(false);
 
   const cargarChats = useCallback(() => {
     if (!usuarioId) return;
-    fetch(`${API_CHAT}/mis-chats/${usuarioId}`)
+    return fetch(`${API_CHAT}/mis-chats/${usuarioId}`)
       .then((r) => r.json())
       .then((data) => {
-        setChats(Array.isArray(data) ? data : []);
+        const chatsData = Array.isArray(data) ? data : [];
+        setChats(chatsData);
+        return chatsData;
       })
-      .catch(console.error);
+      .catch((err) => {
+        console.error("Error cargando chats:", err);
+        return [];
+      });
   }, [usuarioId]);
 
   useEffect(() => {
     if (abierto && usuarioId) {
       iniciarSignalR(parseInt(usuarioId));
 
-      on("onMensaje", (data) => {
+      const unsubMensaje = on("onMensaje", (data) => {
         cargarChats();
-        if (chatSeleccionado && data.id_chat === chatSeleccionado.id_chat) {
-          setChats((prev) =>
-            prev.map((c) =>
-              c.id_chat === data.id_chat
-                ? { ...c, ultimo_mensaje_texto: data.mensaje, no_leidos: 0 }
-                : c
-            )
-          );
-        }
       });
 
-      on("onUsuarioConectado", (id) => {
+      const unsubConectado = on("onUsuarioConectado", (id) => {
         setUsuariosOnline((prev) => new Set(prev).add(id));
       });
 
-      on("onUsuarioDesconectado", (id) => {
+      const unsubDesconectado = on("onUsuarioDesconectado", (id) => {
         setUsuariosOnline((prev) => {
           const next = new Set(prev);
           next.delete(id);
@@ -58,10 +56,66 @@ export default function ChatPanel({ abierto, onCerrar }) {
 
       return () => {
         clearInterval(interval);
-        detenerSignalR();
+        unsubMensaje();
+        unsubConectado();
+        unsubDesconectado();
       };
     }
-  }, [abierto, usuarioId, cargarChats, chatSeleccionado]);
+  }, [abierto, usuarioId, cargarChats]);
+
+  useEffect(() => {
+    if (abierto && targetUsuario && usuarioId && !targetProcessed.current) {
+      targetProcessed.current = true;
+      const targetId = targetUsuario.id;
+      console.log("[ChatPanel] Iniciando chat con:", targetUsuario);
+
+      cargarChats().then((chatsData) => {
+        console.log("[ChatPanel] Chats cargados:", chatsData);
+        const chatExistente = chatsData.find(
+          (c) => c.id_otro_usuario === targetId
+        );
+        if (chatExistente) {
+          console.log("[ChatPanel] Chat existente encontrado:", chatExistente);
+          setChatSeleccionado(chatExistente);
+        } else {
+          console.log("[ChatPanel] Creando nuevo chat...");
+          setCargando(true);
+          fetch(`${API_CHAT}/iniciar`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id_usuario1: parseInt(usuarioId),
+              id_usuario2: targetId,
+            }),
+          })
+            .then((r) => r.json())
+            .then((data) => {
+              console.log("[ChatPanel] Respuesta del servidor:", data);
+              if (data.id_chat) {
+                const nuevoChat = {
+                  id_chat: data.id_chat,
+                  id_otro_usuario: targetId,
+                  nombre_otro: targetUsuario.nombre,
+                  avatar_otro: targetUsuario.avatar || "",
+                  no_leidos: 0,
+                  ultimo_mensaje_texto: null,
+                  ultimo_mensaje_fecha: null,
+                };
+                setChatSeleccionado(nuevoChat);
+                cargarChats();
+              }
+            })
+            .catch((err) => console.error("[ChatPanel] Error creando chat:", err))
+            .finally(() => setCargando(false));
+        }
+      });
+    }
+
+    if (!abierto) {
+      targetProcessed.current = false;
+      setChatSeleccionado(null);
+    }
+  }, [abierto, targetUsuario, usuarioId, cargarChats]);
 
   if (!abierto) return null;
 
