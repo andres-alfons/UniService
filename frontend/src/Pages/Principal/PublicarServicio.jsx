@@ -174,7 +174,11 @@ export default function SeccionPublicar({ onPublicado }) {
         setUbicacion(null);
         onPublicado();
       } else {
-        setModalError("Error: " + (data.error || "No se pudo publicar el servicio."));
+        let mensajeError = data.error || "No se pudo publicar el servicio.";
+        if (data.detalles && Array.isArray(data.detalles)) {
+          mensajeError += "\n\n" + data.detalles.map(d => `• ${d.campo}: ${d.error}`).join("\n");
+        }
+        setModalError(mensajeError);
       }
     } catch {
       setModalError("Error de conexion con el servidor. Verifica tu internet e intenta de nuevo.");
@@ -421,7 +425,7 @@ export default function SeccionPublicar({ onPublicado }) {
           <div className="modal-content modal-error" onClick={(e) => e.stopPropagation()}>
             <div className="modal-icon error-icon"><i className="bi bi-x-circle-fill" style={{fontSize:"2.5rem",color:"#ef4444"}}></i></div>
             <h3>Error al publicar</h3>
-            <p>{modalError}</p>
+            <p style={{ whiteSpace: "pre-line", textAlign: "left", maxWidth: "400px" }}>{modalError}</p>
             <button className="btn btn-borde" onClick={() => setModalError(null)}>Cerrar</button>
           </div>
         </div>
