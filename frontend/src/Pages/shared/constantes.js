@@ -63,6 +63,7 @@ export const mapaCategoriaId = {
 export const API_HOME = "/api/services";
 export const API_USUARIO = "/api/users";
 export const API_SOLICITUD = "/api/solicitudes";
+export const API_CHAT = "/api/chat";
 
 export const MAPA_ICONOS_MODALIDAD = {
   Presencial: "bi-building",
