@@ -10,6 +10,7 @@ export default function SeccionUsuarios({ onRefresh }) {
   const [editandoId, setEditandoId] = useState(null);
   const [editNombre, setEditNombre] = useState("");
   const [accionandoId, setAccionandoId] = useState(null);
+  const [modal, setModal] = useState(null);
 
   const cargarUsuarios = async () => {
     setCargando(true);
@@ -37,69 +38,90 @@ export default function SeccionUsuarios({ onRefresh }) {
 
   const suspender = async (id) => {
     const usuario = usuarios.find((u) => u.id_usuario === id);
-    if (!confirm(`¿Suspender a "${usuario?.nombre}"?`)) return;
-    setAccionandoId(id);
-    try {
-      await fetch(`${API}/users/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ estado: false }),
-      });
-      setUsuarios((prev) =>
-        prev.map((u) =>
-          u.id_usuario === id ? { ...u, estado: "inactivo" } : u
-        )
-      );
-      if (window.registrarLogAdmin) {
-        window.registrarLogAdmin("Suspendió usuario", `${usuario?.nombre} (ID: ${id})`);
-      }
-    } catch (err) {
-      alert("Error al suspender: " + err.message);
-    } finally {
-      setAccionandoId(null);
-    }
+    setModal({
+      tipo: "confirm",
+      titulo: "Suspender usuario",
+      mensaje: `¿Estás seguro de que deseas suspender a "${usuario?.nombre}"?`,
+      onConfirm: async () => {
+        setAccionandoId(id);
+        try {
+          await fetch(`${API}/users/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ estado: false }),
+          });
+          setUsuarios((prev) =>
+            prev.map((u) =>
+              u.id_usuario === id ? { ...u, estado: "inactivo" } : u
+            )
+          );
+          if (window.registrarLogAdmin) {
+            window.registrarLogAdmin("Suspendió usuario", `${usuario?.nombre} (ID: ${id})`);
+          }
+          setModal({ tipo: "success", titulo: "Usuario suspendido", mensaje: `"${usuario?.nombre}" ha sido suspendido correctamente.` });
+        } catch (err) {
+          setModal({ tipo: "error", titulo: "Error", mensaje: err.message });
+        } finally {
+          setAccionandoId(null);
+        }
+      },
+    });
   };
 
   const activar = async (id) => {
     const usuario = usuarios.find((u) => u.id_usuario === id);
-    if (!confirm(`¿Activar a "${usuario?.nombre}"?`)) return;
-    setAccionandoId(id);
-    try {
-      await fetch(`${API}/users/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ estado: true }),
-      });
-      setUsuarios((prev) =>
-        prev.map((u) =>
-          u.id_usuario === id ? { ...u, estado: "activo" } : u
-        )
-      );
-      if (window.registrarLogAdmin) {
-        window.registrarLogAdmin("Activó usuario", `${usuario?.nombre} (ID: ${id})`);
-      }
-    } catch (err) {
-      alert("Error al activar: " + err.message);
-    } finally {
-      setAccionandoId(null);
-    }
+    setModal({
+      tipo: "confirm",
+      titulo: "Activar usuario",
+      mensaje: `¿Estás seguro de que deseas activar a "${usuario?.nombre}"?`,
+      onConfirm: async () => {
+        setAccionandoId(id);
+        try {
+          await fetch(`${API}/users/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ estado: true }),
+          });
+          setUsuarios((prev) =>
+            prev.map((u) =>
+              u.id_usuario === id ? { ...u, estado: "activo" } : u
+            )
+          );
+          if (window.registrarLogAdmin) {
+            window.registrarLogAdmin("Activó usuario", `${usuario?.nombre} (ID: ${id})`);
+          }
+          setModal({ tipo: "success", titulo: "Usuario activado", mensaje: `"${usuario?.nombre}" ha sido activado correctamente.` });
+        } catch (err) {
+          setModal({ tipo: "error", titulo: "Error", mensaje: err.message });
+        } finally {
+          setAccionandoId(null);
+        }
+      },
+    });
   };
 
   const eliminar = async (id) => {
     const usuario = usuarios.find((u) => u.id_usuario === id);
-    if (!confirm(`¿Eliminar a "${usuario?.nombre}"? Esta acción no se puede deshacer.`)) return;
-    setAccionandoId(id);
-    try {
-      await fetch(`${API}/users/${id}`, { method: "DELETE" });
-      setUsuarios((prev) => prev.filter((u) => u.id_usuario !== id));
-      if (window.registrarLogAdmin) {
-        window.registrarLogAdmin("Eliminó usuario", `${usuario?.nombre} (ID: ${id})`);
-      }
-    } catch (err) {
-      alert("Error al eliminar: " + err.message);
-    } finally {
-      setAccionandoId(null);
-    }
+    setModal({
+      tipo: "confirm",
+      titulo: "Eliminar usuario",
+      mensaje: `¿Estás seguro de que deseas eliminar a "${usuario?.nombre}"? Esta acción no se puede deshacer.`,
+      onConfirm: async () => {
+        setAccionandoId(id);
+        try {
+          await fetch(`${API}/users/${id}`, { method: "DELETE" });
+          setUsuarios((prev) => prev.filter((u) => u.id_usuario !== id));
+          if (window.registrarLogAdmin) {
+            window.registrarLogAdmin("Eliminó usuario", `${usuario?.nombre} (ID: ${id})`);
+          }
+          setModal({ tipo: "success", titulo: "Usuario eliminado", mensaje: `"${usuario?.nombre}" ha sido eliminado.` });
+        } catch (err) {
+          setModal({ tipo: "error", titulo: "Error", mensaje: err.message });
+        } finally {
+          setAccionandoId(null);
+        }
+      },
+    });
   };
 
   const iniciarEdicion = (u) => {
@@ -127,8 +149,9 @@ export default function SeccionUsuarios({ onRefresh }) {
       if (window.registrarLogAdmin) {
         window.registrarLogAdmin("Editó nombre usuario", `"${nombreAnterior}" → "${editNombre}"`);
       }
+      setModal({ tipo: "success", titulo: "Nombre actualizado", mensaje: `El nombre ha sido cambiado correctamente.` });
     } catch (err) {
-      alert("Error al actualizar: " + err.message);
+      setModal({ tipo: "error", titulo: "Error", mensaje: err.message });
     } finally {
       setAccionandoId(null);
     }
@@ -284,6 +307,48 @@ export default function SeccionUsuarios({ onRefresh }) {
           </tbody>
         </table>
       </div>
+
+      {modal && (
+        <AdminModal modal={modal} onClose={() => setModal(null)} />
+      )}
     </section>
+  );
+}
+
+function AdminModal({ modal, onClose }) {
+  const isConfirm = modal.tipo === "confirm";
+  const isSuccess = modal.tipo === "success";
+  const isError = modal.tipo === "error";
+
+  const icon = isConfirm
+    ? <i className="bi bi-question-circle-fill" style={{ fontSize: "2.5rem", color: "#f59e0b" }}></i>
+    : isSuccess
+    ? <i className="bi bi-check-circle-fill" style={{ fontSize: "2.5rem", color: "#10b981" }}></i>
+    : <i className="bi bi-x-circle-fill" style={{ fontSize: "2.5rem", color: "#ef4444" }}></i>;
+
+  return (
+    <div className="admin-modal-overlay" onClick={onClose}>
+      <div className="admin-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="admin-modal-icon">{icon}</div>
+        <h3 className="admin-modal-title">{modal.titulo}</h3>
+        <p className="admin-modal-message">{modal.mensaje}</p>
+        <div className="admin-modal-actions">
+          {isConfirm ? (
+            <>
+              <button className="admin-btn-action admin-btn-action--ghost" onClick={onClose}>
+                Cancelar
+              </button>
+              <button className="admin-btn-action admin-btn-action--danger" onClick={() => { onClose(); modal.onConfirm(); }}>
+                Confirmar
+              </button>
+            </>
+          ) : (
+            <button className="admin-btn-action admin-btn-action--success" onClick={onClose}>
+              Entendido
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

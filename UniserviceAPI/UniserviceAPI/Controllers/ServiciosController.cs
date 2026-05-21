@@ -493,7 +493,7 @@ public class ServicesController : ControllerBase
                 INSERT INTO servicios
                 (id_proveedor, titulo, descripcion, id_categoria, precio_hora, contacto, modalidad, icono, disponibilidad, fecha_publicacion, ubicacion_lat, ubicacion_lng, direccion)
                 VALUES
-                (@id_proveedor, @titulo, @descripcion, @id_categoria, @precio_hora, @contacto, @modalidad, @icono, @disponibilidad, NOW(), @ubicacion_lat, @ubicacion_lng, @direccion)
+                (@id_proveedor, @titulo, @descripcion, @id_categoria, @precio_hora, @contacto, @modalidad, @icono, -1, NOW(), @ubicacion_lat, @ubicacion_lng, @direccion)
                 RETURNING id_servicio
             ", conn);
 
@@ -505,7 +505,6 @@ public class ServicesController : ControllerBase
             cmd.Parameters.AddWithValue("@contacto", dto.contacto ?? "");
             cmd.Parameters.AddWithValue("@modalidad", dto.modalidad);
             cmd.Parameters.AddWithValue("@icono", dto.icono ?? "📌");
-            cmd.Parameters.AddWithValue("@disponibilidad", dto.disponibilidad);
             cmd.Parameters.AddWithValue("@ubicacion_lat", dto.ubicacion_lat.HasValue ? (object)dto.ubicacion_lat.Value : DBNull.Value);
             cmd.Parameters.AddWithValue("@ubicacion_lng", dto.ubicacion_lng.HasValue ? (object)dto.ubicacion_lng.Value : DBNull.Value);
             cmd.Parameters.AddWithValue("@direccion", (object)dto.direccion ?? DBNull.Value);
@@ -735,50 +734,6 @@ public class ServicesController : ControllerBase
         };
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] EditarServicioDTO dto)
-    {
-        try
-        {
-            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
-            await conn.OpenAsync();
-
-            using var cmd = new NpgsqlCommand(@"
-            UPDATE servicios
-            SET titulo = @titulo,
-                descripcion = @descripcion,
-                precio_hora = @precio_hora,
-                contacto = @contacto,
-                icono = @icono,
-                ubicacion_lat = @ubicacion_lat,
-                ubicacion_lng = @ubicacion_lng,
-                direccion = @direccion
-            WHERE id_servicio = @id AND id_proveedor = @id_proveedor
-        ", conn);
-
-            cmd.Parameters.AddWithValue("@id", id);
-            cmd.Parameters.AddWithValue("@id_proveedor", dto.id_proveedor);
-            cmd.Parameters.AddWithValue("@titulo", dto.titulo ?? "");
-            cmd.Parameters.AddWithValue("@descripcion", dto.descripcion ?? "");
-            cmd.Parameters.AddWithValue("@precio_hora", dto.precio_hora);
-            cmd.Parameters.AddWithValue("@contacto", dto.contacto ?? "");
-            cmd.Parameters.AddWithValue("@icono", dto.icono ?? "");
-            cmd.Parameters.AddWithValue("@ubicacion_lat", dto.ubicacion_lat.HasValue ? (object)dto.ubicacion_lat.Value : DBNull.Value);
-            cmd.Parameters.AddWithValue("@ubicacion_lng", dto.ubicacion_lng.HasValue ? (object)dto.ubicacion_lng.Value : DBNull.Value);
-            cmd.Parameters.AddWithValue("@direccion", (object)dto.direccion ?? DBNull.Value);
-
-            int filas = await cmd.ExecuteNonQueryAsync();
-            if (filas == 0)
-                return NotFound(new { error = "Servicio no encontrado o no tienes permiso" });
-
-            return Ok(new { ok = true });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
-    }
-
     // ── PUT /api/services/{id}/pausar (Admin) - Toggle disponibilidad
     [HttpPut("{id}/pausar")]
     public async Task<IActionResult> Pausar(int id)
@@ -795,6 +750,51 @@ public class ServicesController : ControllerBase
             int filas = await cmd.ExecuteNonQueryAsync();
             if (filas == 0)
                 return NotFound(new { error = "Servicio no encontrado" });
+
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    // ── PUT /api/services/{id} (Update by owner)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, [FromBody] EditarServicioDTO dto)
+    {
+        try
+        {
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            using var cmd = new NpgsqlCommand(@"
+                UPDATE servicios
+                SET titulo = @titulo,
+                    descripcion = @descripcion,
+                    precio_hora = @precio_hora,
+                    contacto = @contacto,
+                    icono = @icono,
+                    ubicacion_lat = @ubicacion_lat,
+                    ubicacion_lng = @ubicacion_lng,
+                    direccion = @direccion
+                WHERE id_servicio = @id AND id_proveedor = @id_proveedor
+            ", conn);
+
+            cmd.Parameters.AddWithValue("@id", id);
+            cmd.Parameters.AddWithValue("@id_proveedor", dto.id_proveedor);
+            cmd.Parameters.AddWithValue("@titulo", dto.titulo ?? "");
+            cmd.Parameters.AddWithValue("@descripcion", dto.descripcion ?? "");
+            cmd.Parameters.AddWithValue("@precio_hora", dto.precio_hora);
+            cmd.Parameters.AddWithValue("@contacto", dto.contacto ?? "");
+            cmd.Parameters.AddWithValue("@icono", dto.icono ?? "");
+            cmd.Parameters.AddWithValue("@ubicacion_lat", dto.ubicacion_lat.HasValue ? (object)dto.ubicacion_lat.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@ubicacion_lng", dto.ubicacion_lng.HasValue ? (object)dto.ubicacion_lng.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@direccion", (object)dto.direccion ?? DBNull.Value);
+
+            int filas = await cmd.ExecuteNonQueryAsync();
+            if (filas == 0)
+                return NotFound(new { error = "Servicio no encontrado o no tienes permiso" });
 
             return Ok(new { ok = true });
         }
@@ -886,7 +886,7 @@ public class ServicesController : ControllerBase
             await conn.OpenAsync();
 
             using var cmd = new NpgsqlCommand(
-                "UPDATE servicios SET disponibilidad = -1 WHERE id_servicio = @id", conn);
+                "DELETE FROM servicios WHERE id_servicio = @id", conn);
             cmd.Parameters.AddWithValue("@id", id);
 
             int filas = await cmd.ExecuteNonQueryAsync();

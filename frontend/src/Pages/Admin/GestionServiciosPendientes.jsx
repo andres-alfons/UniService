@@ -7,6 +7,7 @@ export default function SeccionServiciosPendientes({ onRefresh }) {
   const [pendientes, setPendientes] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [accionandoId, setAccionandoId] = useState(null);
+  const [modal, setModal] = useState(null);
 
   const cargarPendientes = async () => {
     setCargando(true);
@@ -34,37 +35,51 @@ export default function SeccionServiciosPendientes({ onRefresh }) {
 
   const aprobar = async (id) => {
     const servicio = pendientes.find((s) => s.id_servicio === id);
-    if (!confirm(`¿Aprobar "${servicio?.titulo}" y publicarlo?`)) return;
-    setAccionandoId(id);
-    try {
-      await fetch(`${API}/services/${id}/aprobar`, { method: "PUT" });
-      setPendientes((prev) => prev.filter((s) => s.id_servicio !== id));
-      if (window.registrarLogAdmin) {
-        window.registrarLogAdmin("Aprobó servicio", `${servicio?.titulo} (ID: ${id})`);
-      }
-      if (onRefresh) onRefresh();
-    } catch (err) {
-      alert("Error al aprobar: " + err.message);
-    } finally {
-      setAccionandoId(null);
-    }
+    setModal({
+      tipo: "confirm",
+      titulo: "Aprobar servicio",
+      mensaje: `¿Aprobar "${servicio?.titulo}" y publicarlo?`,
+      onConfirm: async () => {
+        setAccionandoId(id);
+        try {
+          await fetch(`${API}/services/${id}/aprobar`, { method: "PUT" });
+          setPendientes((prev) => prev.filter((s) => s.id_servicio !== id));
+          if (window.registrarLogAdmin) {
+            window.registrarLogAdmin("Aprobó servicio", `${servicio?.titulo} (ID: ${id})`);
+          }
+          if (onRefresh) onRefresh();
+          setModal({ tipo: "success", titulo: "Servicio aprobado", mensaje: `"${servicio?.titulo}" ha sido publicado correctamente.` });
+        } catch (err) {
+          setModal({ tipo: "error", titulo: "Error", mensaje: err.message });
+        } finally {
+          setAccionandoId(null);
+        }
+      },
+    });
   };
 
   const rechazar = async (id) => {
     const servicio = pendientes.find((s) => s.id_servicio === id);
-    if (!confirm(`¿Rechazar "${servicio?.titulo}"?`)) return;
-    setAccionandoId(id);
-    try {
-      await fetch(`${API}/services/${id}/rechazar`, { method: "PUT" });
-      setPendientes((prev) => prev.filter((s) => s.id_servicio !== id));
-      if (window.registrarLogAdmin) {
-        window.registrarLogAdmin("Rechazó servicio", `${servicio?.titulo} (ID: ${id})`);
-      }
-    } catch (err) {
-      alert("Error al rechazar: " + err.message);
-    } finally {
-      setAccionandoId(null);
-    }
+    setModal({
+      tipo: "confirm",
+      titulo: "Rechazar servicio",
+      mensaje: `¿Rechazar "${servicio?.titulo}"? Esta acción eliminará el servicio.`,
+      onConfirm: async () => {
+        setAccionandoId(id);
+        try {
+          await fetch(`${API}/services/${id}/rechazar`, { method: "PUT" });
+          setPendientes((prev) => prev.filter((s) => s.id_servicio !== id));
+          if (window.registrarLogAdmin) {
+            window.registrarLogAdmin("Rechazó servicio", `${servicio?.titulo} (ID: ${id})`);
+          }
+          setModal({ tipo: "success", titulo: "Servicio rechazado", mensaje: `"${servicio?.titulo}" ha sido rechazado.` });
+        } catch (err) {
+          setModal({ tipo: "error", titulo: "Error", mensaje: err.message });
+        } finally {
+          setAccionandoId(null);
+        }
+      },
+    });
   };
 
   return (
@@ -166,6 +181,48 @@ export default function SeccionServiciosPendientes({ onRefresh }) {
           </table>
         </div>
       )}
+
+      {modal && (
+        <AdminModal modal={modal} onClose={() => setModal(null)} />
+      )}
     </section>
+  );
+}
+
+function AdminModal({ modal, onClose }) {
+  const isConfirm = modal.tipo === "confirm";
+  const isSuccess = modal.tipo === "success";
+  const isError = modal.tipo === "error";
+
+  const icon = isConfirm
+    ? <i className="bi bi-question-circle-fill" style={{ fontSize: "2.5rem", color: "#f59e0b" }}></i>
+    : isSuccess
+    ? <i className="bi bi-check-circle-fill" style={{ fontSize: "2.5rem", color: "#10b981" }}></i>
+    : <i className="bi bi-x-circle-fill" style={{ fontSize: "2.5rem", color: "#ef4444" }}></i>;
+
+  return (
+    <div className="admin-modal-overlay" onClick={onClose}>
+      <div className="admin-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="admin-modal-icon">{icon}</div>
+        <h3 className="admin-modal-title">{modal.titulo}</h3>
+        <p className="admin-modal-message">{modal.mensaje}</p>
+        <div className="admin-modal-actions">
+          {isConfirm ? (
+            <>
+              <button className="admin-btn-action admin-btn-action--ghost" onClick={onClose}>
+                Cancelar
+              </button>
+              <button className="admin-btn-action admin-btn-action--danger" onClick={() => { onClose(); modal.onConfirm(); }}>
+                Confirmar
+              </button>
+            </>
+          ) : (
+            <button className="admin-btn-action admin-btn-action--success" onClick={onClose}>
+              Entendido
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

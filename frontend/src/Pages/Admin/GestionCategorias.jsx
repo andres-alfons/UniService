@@ -7,6 +7,7 @@ export default function SeccionCategorias({ onRefresh }) {
   const [cargando, setCargando] = useState(true);
   const [nueva, setNueva] = useState("");
   const [agregando, setAgregando] = useState(false);
+  const [modal, setModal] = useState(null);
 
   const cargarCategorias = async () => {
     setCargando(true);
@@ -44,13 +45,25 @@ export default function SeccionCategorias({ onRefresh }) {
   const eliminar = async (nombre) => {
     const cat = categorias.find((c) => c.nombre === nombre);
     if (cat && cat.servicios > 0) {
-      alert(
-        `No se puede eliminar "${nombre}" porque tiene ${cat.servicios} servicios asociados.`
-      );
+      setModal({
+        tipo: "error",
+        titulo: "No se puede eliminar",
+        mensaje: `No se puede eliminar "${nombre}" porque tiene ${cat.servicios} servicios asociados.`,
+      });
       return;
     }
-    if (!confirm(`¿Eliminar la categoría "${nombre}"?`)) return;
-    setCategorias((prev) => prev.filter((c) => c.nombre !== nombre));
+    setModal({
+      tipo: "confirm",
+      titulo: "Eliminar categoría",
+      mensaje: `¿Eliminar la categoría "${nombre}"?`,
+      onConfirm: () => {
+        setCategorias((prev) => prev.filter((c) => c.nombre !== nombre));
+        if (window.registrarLogAdmin) {
+          window.registrarLogAdmin("Eliminó categoría", nombre);
+        }
+        setModal({ tipo: "success", titulo: "Categoría eliminada", mensaje: `"${nombre}" ha sido eliminada.` });
+      },
+    });
   };
 
   return (
@@ -97,6 +110,48 @@ export default function SeccionCategorias({ onRefresh }) {
           ))}
         </div>
       )}
+
+      {modal && (
+        <AdminModal modal={modal} onClose={() => setModal(null)} />
+      )}
     </section>
+  );
+}
+
+function AdminModal({ modal, onClose }) {
+  const isConfirm = modal.tipo === "confirm";
+  const isSuccess = modal.tipo === "success";
+  const isError = modal.tipo === "error";
+
+  const icon = isConfirm
+    ? <i className="bi bi-question-circle-fill" style={{ fontSize: "2.5rem", color: "#f59e0b" }}></i>
+    : isSuccess
+    ? <i className="bi bi-check-circle-fill" style={{ fontSize: "2.5rem", color: "#10b981" }}></i>
+    : <i className="bi bi-x-circle-fill" style={{ fontSize: "2.5rem", color: "#ef4444" }}></i>;
+
+  return (
+    <div className="admin-modal-overlay" onClick={onClose}>
+      <div className="admin-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="admin-modal-icon">{icon}</div>
+        <h3 className="admin-modal-title">{modal.titulo}</h3>
+        <p className="admin-modal-message">{modal.mensaje}</p>
+        <div className="admin-modal-actions">
+          {isConfirm ? (
+            <>
+              <button className="admin-btn-action admin-btn-action--ghost" onClick={onClose}>
+                Cancelar
+              </button>
+              <button className="admin-btn-action admin-btn-action--danger" onClick={() => { onClose(); modal.onConfirm(); }}>
+                Confirmar
+              </button>
+            </>
+          ) : (
+            <button className="admin-btn-action admin-btn-action--success" onClick={onClose}>
+              Entendido
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
