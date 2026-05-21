@@ -255,12 +255,12 @@ BEGIN
         SELECT *, (SELECT cnt FROM total) AS total_results
         FROM stats
         ORDER BY 
-            CASE WHEN p_orden = 'recientes' THEN fecha_publicacion END DESC,
-            CASE WHEN p_orden = 'antiguos' THEN fecha_publicacion END ASC,
-            CASE WHEN p_orden = 'precio-menor' THEN precio_hora END ASC,
-            CASE WHEN p_orden = 'precio-mayor' THEN precio_hora END DESC,
-            CASE WHEN p_orden = 'rating-mayor' THEN promedio_estrellas END DESC,
-            CASE WHEN p_orden = 'rating-menor' THEN promedio_estrellas END ASC
+            CASE WHEN p_orden = 'recientes' THEN stats.fecha_publicacion END DESC,
+            CASE WHEN p_orden = 'antiguos' THEN stats.fecha_publicacion END ASC,
+            CASE WHEN p_orden = 'precio-menor' THEN stats.precio_hora END ASC,
+            CASE WHEN p_orden = 'precio-mayor' THEN stats.precio_hora END DESC,
+            CASE WHEN p_orden = 'rating-mayor' THEN stats.promedio_estrellas END DESC,
+            CASE WHEN p_orden = 'rating-menor' THEN stats.promedio_estrellas END ASC
         LIMIT p_page_size
         OFFSET v_offset
     )

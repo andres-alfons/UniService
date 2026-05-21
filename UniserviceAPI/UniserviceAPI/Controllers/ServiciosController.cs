@@ -32,7 +32,7 @@ public class ServicesController : ControllerBase
     public async Task<IActionResult> GetAll(
         [FromQuery] int page = 0,
         [FromQuery] int pageSize = 0,
-        [FromQuery] int? categoria = null,
+        [FromQuery] string? categoria = null,
         [FromQuery] string? busqueda = null,
         [FromQuery] string? orden = null)
     {
@@ -40,6 +40,31 @@ public class ServicesController : ControllerBase
         {
             using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
+
+            // Convertir categoría: acepta ID numérico o nombre (tutorias, arriendo, etc.)
+            int? catId = null;
+            if (!string.IsNullOrEmpty(categoria))
+            {
+                if (int.TryParse(categoria, out int parsedId))
+                {
+                    catId = parsedId;
+                }
+                else
+                {
+                    // Mapeo de nombre a ID
+                    catId = categoria.ToLower() switch
+                    {
+                        "tutorias" or "tutorías" => 1,
+                        "ensayos" or "ensayos y redacción" => 2,
+                        "proyectos" => 3,
+                        "programacion" or "programación" => 4,
+                        "diseno" or "diseño" => 5,
+                        "arriendo" or "arriendo de habitaciones" => 6,
+                        "otros" or "otros servicios" => 7,
+                        _ => null
+                    };
+                }
+            }
 
             // Si no se envían parámetros de paginación, usar comportamiento legacy (todos los datos)
             bool usarPaginacion = page > 0 && pageSize > 0;
@@ -55,7 +80,7 @@ public class ServicesController : ControllerBase
 
                 cmd.Parameters.AddWithValue("@page", page);
                 cmd.Parameters.AddWithValue("@pageSize", pageSize);
-                cmd.Parameters.AddWithValue("@categoria", categoria.HasValue ? (object)categoria.Value : DBNull.Value);
+                cmd.Parameters.AddWithValue("@categoria", catId.HasValue ? (object)catId.Value : DBNull.Value);
                 cmd.Parameters.AddWithValue("@busqueda", string.IsNullOrEmpty(busqueda) ? DBNull.Value : busqueda.ToLower());
                 cmd.Parameters.AddWithValue("@orden", string.IsNullOrEmpty(orden) ? "recientes" : orden);
 
