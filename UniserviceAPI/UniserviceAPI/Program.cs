@@ -35,11 +35,13 @@ if (File.Exists(envPath))
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
 {
-    var key = builder.Configuration["Jwt:Key"] 
-              ?? Environment.GetEnvironmentVariable("Jwt__Key")
-              ?? "uniservice_super_secret_key_2026_segura_12345";
+    var key = builder.Configuration["Jwt:Key"];
+    if (string.IsNullOrEmpty(key))
+        key = Environment.GetEnvironmentVariable("Jwt__Key");
+    if (string.IsNullOrEmpty(key))
+        key = "uniservice_super_secret_key_2026_segura_12345";
     
-    Console.WriteLine($"[CONFIG] JWT Key configurada: {(string.IsNullOrEmpty(key) ? "ERROR - sin clave" : "OK")}");
+    Console.WriteLine($"[CONFIG] JWT Key: {(key.Length >= 16 ? "OK" : "ERROR - clave muy corta")}");
     
     options.TokenValidationParameters = new TokenValidationParameters
     {
