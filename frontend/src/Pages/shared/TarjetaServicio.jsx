@@ -7,9 +7,11 @@ import { COLORES_CATEGORIA, ICONOS_POR_NOMBRE_CATEGORIA } from "./constantes";
 export default function TarjetaServicio({ servicio, linkBase = "/servicio?id=" }) {
   const [imagenError, setImagenError] = useState(false);
   const estrellas = calcularEstrellas(servicio.estrellas);
-  const numReseñas = Array.isArray(servicio.estrellas)
-    ? servicio.estrellas.length
-    : 0;
+  const numReseñas = servicio.num_resenas !== undefined
+    ? servicio.num_resenas
+    : Array.isArray(servicio.estrellas)
+      ? servicio.estrellas.length
+      : 0;
 
   const colorCat = COLORES_CATEGORIA[servicio.nombre_categoria] || (servicio.nombre_categoria ? { bg: "rgba(148, 163, 184, 0.1)", color: "#94a3b8" } : null);
 
