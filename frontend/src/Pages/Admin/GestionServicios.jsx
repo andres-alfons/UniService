@@ -18,7 +18,21 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
     try {
       const res = await fetch(`${API}/services`);
       const data = await res.json();
-      setServicios(Array.isArray(data) ? data : []);
+      const normalizados = (Array.isArray(data) ? data : []).map((s) => ({
+        id_servicio: s.id_servicio,
+        id_proveedor: s.id_proveedor,
+        titulo: s.titulo,
+        descripcion: s.descripcion,
+        precio_hora: s.precio_hora,
+        icono: s.icono,
+        fecha_publicacion: s.fecha_publicacion,
+        modalidad: s.modalidad,
+        disponibilidad: s.disponibilidad,
+        nombre_categoria: s.nombre_categoria,
+        proveedor: s.proveedor,
+        universidad: s.universidad,
+      }));
+      setServicios(normalizados);
     } catch {
       setServicios([]);
     } finally {
@@ -52,7 +66,7 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
 
   const pausar = async (id) => {
     const servicio = servicios.find((s) => s.id_servicio === id);
-    const estaPausado = servicio?.disponibilidad === "Pausado" || servicio?.disponibilidad === 0;
+    const estaPausado = servicio?.disponibilidad === "Pausado";
     setAccionandoId(id);
     try {
       await fetch(`${API}/services/${id}/pausar`, { method: "PUT" });
@@ -122,9 +136,12 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
     setImagenesServicio(id);
     setImagenesCargando(true);
     try {
-      await fetch(`${API}/services/${id}`);
+      const res = await fetch(`${API}/services/${id}`);
+      const data = await res.json();
+      console.log("Imagenes del servicio:", data.imagenes);
       setImagenesCargando(false);
-    } catch {
+    } catch (err) {
+      console.error("Error cargando imagenes:", err);
       setImagenesCargando(false);
     }
   };
@@ -195,7 +212,7 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
               </tr>
             ) : (
               filtrados.map((s) => {
-                const estaPausado = s.disponibilidad === "Pausado" || s.disponibilidad === 0;
+                const estaPausado = s.disponibilidad === "Pausado";
                 return (
                   <tr key={s.id_servicio}>
                     <td>

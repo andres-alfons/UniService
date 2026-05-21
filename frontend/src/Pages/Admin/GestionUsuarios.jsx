@@ -17,7 +17,9 @@ export default function SeccionUsuarios({ onRefresh }) {
       const res = await fetch(`${API}/users`);
       const data = await res.json();
       const normalizados = (Array.isArray(data) ? data : []).map((u) => ({
-        ...u,
+        id_usuario: u.id,
+        nombre: u.nombre,
+        correo: u.correo,
         estado: u.estado === false || u.estado === 0 ? "inactivo" : "activo",
         rol: u.id_rol === 1 ? "admin" : "usuario",
       }));

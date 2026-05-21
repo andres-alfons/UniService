@@ -393,12 +393,23 @@ public class ServicesController : ControllerBase
             using var rImagenes = await cmdImagenes.ExecuteReaderAsync();
             while (await rImagenes.ReadAsync())
             {
+                var esPrincipalVal = rImagenes["es_principal"];
+                bool esPrincipal = esPrincipalVal switch
+                {
+                    bool b => b,
+                    int i => i != 0,
+                    long l => l != 0,
+                    byte b => b != 0,
+                    short s => s != 0,
+                    _ => false
+                };
+
                 imagenes.Add(new
                 {
-                    id_imagen = rImagenes["id_imagen"],
-                    url_imagen = rImagenes["url_imagen"],
-                    es_principal = Convert.ToBoolean(rImagenes["es_principal"]),
-                    fecha_subida = rImagenes["fecha_subida"]
+                    id_imagen = rImagenes["id_imagen"] != DBNull.Value ? Convert.ToInt32(rImagenes["id_imagen"]) : 0,
+                    url_imagen = rImagenes["url_imagen"]?.ToString() ?? "",
+                    es_principal = esPrincipal,
+                    fecha_subida = rImagenes["fecha_subida"]?.ToString() ?? ""
                 });
             }
             rImagenes.Close();
@@ -712,9 +723,11 @@ public class ServicesController : ControllerBase
         string str = value.ToString();
         return str switch
         {
+            "-1" => "Pausado",
             "0" => "📆 Entre semana",
             "1" => "🎉 Fines de semana",
             "2" => "⏰ Siempre disponible",
+            "Pausado" => "Pausado",
             "Entre semana" => "📆 Entre semana",
             "Fines de semana" => "🎉 Fines de semana",
             "Siempre disponible" => "⏰ Siempre disponible",
@@ -776,7 +789,7 @@ public class ServicesController : ControllerBase
             await conn.OpenAsync();
 
             using var cmd = new NpgsqlCommand(
-                "UPDATE servicios SET disponibilidad = CASE WHEN disponibilidad = 0 THEN 2 ELSE 0 END WHERE id_servicio = @id", conn);
+                "UPDATE servicios SET disponibilidad = CASE WHEN disponibilidad = -1 THEN 2 ELSE -1 END WHERE id_servicio = @id", conn);
             cmd.Parameters.AddWithValue("@id", id);
 
             int filas = await cmd.ExecuteNonQueryAsync();
