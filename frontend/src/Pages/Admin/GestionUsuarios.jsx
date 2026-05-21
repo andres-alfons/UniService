@@ -1,61 +1,126 @@
-// Gestión de usuarios — CRUD de usuarios del sistema
-// Permite buscar, suspender y eliminar usuarios desde el panel de administración
 import { useState, useEffect } from "react";
 import { Badge, formatFecha } from "./UtilidadesAdmin";
 
 const API = "/api";
 
-export default function SeccionUsuarios() {
+export default function SeccionUsuarios({ onRefresh }) {
   const [usuarios, setUsuarios] = useState([]);
   const [busqueda, setBusqueda] = useState("");
   const [cargando, setCargando] = useState(true);
+  const [editandoId, setEditandoId] = useState(null);
+  const [editNombre, setEditNombre] = useState("");
 
-  // Obtiene la lista de usuarios desde la API al montar el componente
-  useEffect(() => {
-    fetch(`${API}/users`)
-      .then((r) => r.json())
-      .then((data) => {
-        const normalizados = (Array.isArray(data) ? data : []).map(u => ({
+  const cargarUsuarios = async () => {
+    setCargando(true);
+    try {
+      const res = await fetch(`${API}/users`);
+      const data = await res.json();
+      const normalizados = (Array.isArray(data) ? data : []).map((u) => ({
         ...u,
-        // Convertimos el booleano de la API a string
-        estado: u.estado === true ? "activo" : "inactivo" 
+        estado: u.estado === true || u.estado === 1 ? "activo" : "inactivo",
+        rol: u.id_rol === 1 ? "admin" : "usuario",
       }));
       setUsuarios(normalizados);
-      })
-      .catch(() => setUsuarios([]))
-      .finally(() => setCargando(false));
-  }, []);
-
-  // Suspende un usuario cambiando su estado a "Suspendido"
-  const suspender = async (id) => {
-    if (!confirm("¿Suspender este usuario?")) return;
-    await fetch(`${API}/users/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ estado: 0 }),
-    });
-    setUsuarios((prev) =>
-      prev.map((u) =>
-        u.id_usuario === id ? { ...u, estado: "inactivo" } : u,
-      ),
-    );
+    } catch {
+      setUsuarios([]);
+    } finally {
+      setCargando(false);
+    }
   };
 
-  // Elimina un usuario de forma permanente previa confirmación
+  useEffect(() => {
+    cargarUsuarios();
+  }, []);
+
+  const suspender = async (id) => {
+    const u = usuarios.find((x) => x.id_usuario === id);
+    if (!confirm("¿Suspender este usuario?")) return;
+    try {
+      await fetch(`${API}/users/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ estado: 0 }),
+      });
+      setUsuarios((prev) =>
+        prev.map((x) =>
+          x.id_usuario === id ? { ...x, estado: "inactivo" } : x
+        )
+      );
+      if (window.registrarLogAdmin) {
+        window.registrarLogAdmin("Suspendió usuario", `${u?.nombre || u?.correo} (ID: ${id})`);
+      }
+    } catch (err) {
+      alert("Error al suspender: " + err.message);
+    }
+  };
+
+  const activar = async (id) => {
+    const u = usuarios.find((x) => x.id_usuario === id);
+    if (!confirm("¿Activar este usuario?")) return;
+    try {
+      await fetch(`${API}/users/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ estado: 1 }),
+      });
+      setUsuarios((prev) =>
+        prev.map((x) =>
+          x.id_usuario === id ? { ...x, estado: "activo" } : x
+        )
+      );
+      if (window.registrarLogAdmin) {
+        window.registrarLogAdmin("Activó usuario", `${u?.nombre || u?.correo} (ID: ${id})`);
+      }
+    } catch (err) {
+      alert("Error al activar: " + err.message);
+    }
+  };
+
   const eliminar = async (id) => {
+    const u = usuarios.find((x) => x.id_usuario === id);
     if (
       !confirm("¿Eliminar este usuario? Esta acción no se puede deshacer.")
     )
       return;
-    await fetch(`${API}/users/${id}`, { method: "DELETE" });
-    setUsuarios((prev) => prev.filter((u) => u.id_usuario !== id));
+    try {
+      await fetch(`${API}/users/${id}`, { method: "DELETE" });
+      setUsuarios((prev) => prev.filter((x) => x.id_usuario !== id));
+      if (window.registrarLogAdmin) {
+        window.registrarLogAdmin("Eliminó usuario", `${u?.nombre || u?.correo} (ID: ${id})`);
+      }
+    } catch (err) {
+      alert("Error al eliminar: " + err.message);
+    }
   };
 
-  // Filtra usuarios por nombre, correo o rol según el texto de búsqueda
+  const iniciarEdicion = (u) => {
+    setEditandoId(u.id_usuario);
+    setEditNombre(u.nombre);
+  };
+
+  const guardarNombre = async (id) => {
+    if (!editNombre.trim()) return;
+    try {
+      await fetch(`${API}/users/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre: editNombre }),
+      });
+      setUsuarios((prev) =>
+        prev.map((u) =>
+          u.id_usuario === id ? { ...u, nombre: editNombre } : u
+        )
+      );
+      setEditandoId(null);
+    } catch (err) {
+      alert("Error al actualizar: " + err.message);
+    }
+  };
+
   const filtrados = usuarios.filter((u) =>
     [u.nombre, u.correo, u.rol].some((v) =>
-      (v || "").toLowerCase().includes(busqueda.toLowerCase()),
-    ),
+      (v || "").toLowerCase().includes(busqueda.toLowerCase())
+    )
   );
 
   return (
@@ -78,17 +143,11 @@ export default function SeccionUsuarios() {
         <table className="admin-table">
           <thead>
             <tr>
-              {[
-                "ID",
-                "Nombre",
-                "Correo",
-                "Rol",
-                "Estado",
-                "Fecha registro",
-                "Acciones",
-              ].map((h) => (
-                <th key={h}>{h}</th>
-              ))}
+              {["ID", "Nombre", "Correo", "Rol", "Estado", "Fecha registro", "Acciones"].map(
+                (h) => (
+                  <th key={h}>{h}</th>
+                )
+              )}
             </tr>
           </thead>
           <tbody>
@@ -113,31 +172,82 @@ export default function SeccionUsuarios() {
                       <div className="admin-table__avatar">
                         {(u.nombre || "?").charAt(0).toUpperCase()}
                       </div>
-                      {u.nombre}
+                      {editandoId === u.id_usuario ? (
+                        <input
+                          type="text"
+                          value={editNombre}
+                          onChange={(e) => setEditNombre(e.target.value)}
+                          onKeyDown={(e) =>
+                            e.key === "Enter" && guardarNombre(u.id_usuario)
+                          }
+                          style={{
+                            background: "var(--bg2)",
+                            border: "1px solid var(--teal)",
+                            color: "var(--texto)",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            fontSize: "0.85rem",
+                            width: "140px",
+                          }}
+                          autoFocus
+                        />
+                      ) : (
+                        <span
+                          onDoubleClick={() => iniciarEdicion(u)}
+                          style={{ cursor: "pointer" }}
+                          title="Doble clic para editar"
+                        >
+                          {u.nombre}
+                        </span>
+                      )}
                     </div>
                   </td>
                   <td className="admin-table__email">{u.correo}</td>
                   <td>
                     <span
-                      className={`admin-role-badge admin-role-badge--${u.rol || "usuario"}`}
+                      className={`admin-role-badge admin-role-badge--${u.rol}`}
                     >
-                      {u.rol || "usuario"}
+                      {u.rol}
                     </span>
                   </td>
                   <td>
-                    <Badge estado={u.estado || "activo"} />
+                    <Badge estado={u.estado} />
                   </td>
                   <td className="admin-table__date">
                     {formatFecha(u.fecha_registro)}
                   </td>
                   <td>
                     <div className="admin-table__actions">
-                      <button
-                        className="admin-btn-action admin-btn-action--warning"
-                        onClick={() => suspender(u.id_usuario)}
-                      >
-                        Suspender
-                      </button>
+                      {editandoId === u.id_usuario ? (
+                        <>
+                          <button
+                            className="admin-btn-action admin-btn-action--success"
+                            onClick={() => guardarNombre(u.id_usuario)}
+                          >
+                            Guardar
+                          </button>
+                          <button
+                            className="admin-btn-action admin-btn-action--ghost"
+                            onClick={() => setEditandoId(null)}
+                          >
+                            ✕
+                          </button>
+                        </>
+                      ) : u.estado === "activo" ? (
+                        <button
+                          className="admin-btn-action admin-btn-action--warning"
+                          onClick={() => suspender(u.id_usuario)}
+                        >
+                          Suspender
+                        </button>
+                      ) : (
+                        <button
+                          className="admin-btn-action admin-btn-action--success"
+                          onClick={() => activar(u.id_usuario)}
+                        >
+                          Activar
+                        </button>
+                      )}
                       <button
                         className="admin-btn-action admin-btn-action--danger"
                         onClick={() => eliminar(u.id_usuario)}

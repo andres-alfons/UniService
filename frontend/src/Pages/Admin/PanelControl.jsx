@@ -1,111 +1,157 @@
 // Panel de control — Dashboard principal del panel de administración
-// Muestra tarjetas con estadísticas generales y la actividad reciente de la plataforma
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import StatCard from "./TarjetaEstadistica";
 
-export default function SeccionDashboard() {
-  // Estadísticas generales del sistema (simuladas)
-  const [stats] = useState({
-    totalUsuarios: 142,
-    totalServicios: 87,
-    totalSolicitudes: 234,
-    reportesPendientes: 5,
-  });
+const API = "/api";
 
-  // Historial de actividad reciente para mostrar en el dashboard
-  const actividad = [
-    {
-      accion: "Usuario registrado",
-      detalle: "carlos.m@upc.edu.co",
-      hora: "hace 3 min",
-      tipo: "usuario",
-    },
-    {
-      accion: "Servicio publicado",
-      detalle: "Tutoría de Cálculo",
-      hora: "hace 8 min",
-      tipo: "servicio",
-    },
-    {
-      accion: "Reporte recibido",
-      detalle: "Servicio ID #45",
-      hora: "hace 15 min",
-      tipo: "reporte",
-    },
-    {
-      accion: "Usuario suspendido",
-      detalle: "user@ejemplo.com",
-      hora: "hace 22 min",
-      tipo: "alerta",
-    },
-    {
-      accion: "Categoría creada",
-      detalle: "Ciencias exactas",
-      hora: "hace 1 hora",
-      tipo: "categoria",
-    },
-    {
-      accion: "Solicitud respondida",
-      detalle: "ID #112 → Aceptada",
-      hora: "hace 2 horas",
-      tipo: "servicio",
-    },
-  ];
+export default function SeccionDashboard({ refreshKey }) {
+  const [stats, setStats] = useState({
+    totalUsuarios: 0,
+    totalServicios: 0,
+    totalSolicitudes: 0,
+    reportesPendientes: 0,
+  });
+  const [actividad, setActividad] = useState([]);
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    const cargar = async () => {
+      try {
+        const [usersRes, servicesRes, solicitudesRes] = await Promise.all([
+          fetch(`${API}/users`).catch(() => ({ json: () => [] })),
+          fetch(`${API}/services`).catch(() => ({ json: () => [] })),
+          fetch(`${API}/solicitudes/enviadas/0`).catch(() => ({ json: () => [] })),
+        ]);
+
+        const users = await usersRes.json();
+        const services = await servicesRes.json();
+        const solicitudes = await solicitudesRes.json();
+
+        const usersArr = Array.isArray(users) ? users : [];
+        const servicesArr = Array.isArray(services) ? services : [];
+        const solicitudesArr = Array.isArray(solicitudes) ? solicitudes : [];
+
+        setStats({
+          totalUsuarios: usersArr.length,
+          totalServicios: servicesArr.length,
+          totalSolicitudes: solicitudesArr.length,
+          reportesPendientes: solicitudesArr.filter(
+            (s) => s.estado === "Pendiente"
+          ).length,
+        });
+
+        const actividadReciente = [];
+
+        usersArr
+          .slice(-5)
+          .reverse()
+          .forEach((u) =>
+            actividadReciente.push({
+              accion: "Usuario registrado",
+              detalle: u.correo || u.nombre,
+              hora: u.fecha_registro
+                ? new Date(u.fecha_registro).toLocaleString("es-CO")
+                : "Reciente",
+              tipo: "usuario",
+            })
+          );
+
+        servicesArr
+          .slice(-5)
+          .reverse()
+          .forEach((s) =>
+            actividadReciente.push({
+              accion: "Servicio publicado",
+              detalle: s.titulo,
+              hora: s.fecha_publicacion || "Reciente",
+              tipo: "servicio",
+            })
+          );
+
+        solicitudesArr
+          .slice(-3)
+          .reverse()
+          .forEach((s) =>
+            actividadReciente.push({
+              accion: `Solicitud ${s.estado || "Pendiente"}`,
+              detalle: `#${s.id_solicitud || "?"} → ${s.tipo_servicio || "Servicio"}`,
+              hora: "Reciente",
+              tipo: "servicio",
+            })
+          );
+
+        actividadReciente.sort(
+          (a, b) => new Date(b.hora) - new Date(a.hora)
+        );
+        setActividad(actividadReciente.slice(0, 10));
+      } catch {
+        setStats({ totalUsuarios: 0, totalServicios: 0, totalSolicitudes: 0, reportesPendientes: 0 });
+      } finally {
+        setCargando(false);
+      }
+    };
+    cargar();
+  }, [refreshKey]);
 
   return (
-    /* ════ Sección: Dashboard ════ */
     <section className="admin-dashboard">
       <div className="admin-header">
         <p className="admin-header__pre">Panel de control</p>
         <h1 className="admin-header__title">Dashboard</h1>
       </div>
 
-      {/* Tarjetas de resumen con indicadores clave */}
       <div className="admin-stats-grid">
         <StatCard
           icon={<i className="bi bi-people-fill"></i>}
           label="Usuarios registrados"
-          value={stats.totalUsuarios}
-          sub="↑ 12 esta semana"
+          value={cargando ? "..." : stats.totalUsuarios}
+          sub={`${stats.totalUsuarios > 0 ? "↑ Activos" : "Sin registros"}`}
           type="primary"
         />
         <StatCard
           icon={<i className="bi bi-card-checklist"></i>}
           label="Servicios activos"
-          value={stats.totalServicios}
-          sub="↑ 7 nuevos hoy"
+          value={cargando ? "..." : stats.totalServicios}
+          sub={`${stats.totalServicios > 0 ? "Publicados" : "Sin servicios"}`}
           type="success"
         />
         <StatCard
           icon={<i className="bi bi-arrow-repeat"></i>}
           label="Solicitudes totales"
-          value={stats.totalSolicitudes}
-          sub="↑ 23 esta semana"
+          value={cargando ? "..." : stats.totalSolicitudes}
+          sub={`${stats.reportesPendientes} pendientes`}
           type="info"
         />
         <StatCard
           icon={<i className="bi bi-flag-fill"></i>}
           label="Reportes pendientes"
-          value={stats.reportesPendientes}
-          sub="Requieren revisión"
+          value={cargando ? "..." : stats.reportesPendientes}
+          sub={stats.reportesPendientes > 0 ? "Requieren revisión" : "Al día"}
           type="danger"
         />
       </div>
 
-      {/* Lista de actividad reciente del sistema */}
       <div className="admin-activity-card">
-        <p className="admin-activity-card__title"><i className="bi bi-journal-text"></i> Actividad reciente</p>
+        <p className="admin-activity-card__title">
+          <i className="bi bi-journal-text"></i> Actividad reciente
+        </p>
         <div className="admin-activity-list">
-          {actividad.map((a, i) => (
-            <div key={i} className="admin-activity-item">
-              <div
-                className={`admin-activity-item__dot admin-activity-item__dot--${a.tipo}`}
-              />
-              <span className="admin-activity-item__action">{a.accion}</span>
-              <span className="admin-activity-item__detail">{a.detalle}</span>
-              <span className="admin-activity-item__time">{a.hora}</span>
-            </div>
-          ))}
+          {actividad.length === 0 ? (
+            <p style={{ color: "var(--texto2)", textAlign: "center", padding: "20px" }}>
+              No hay actividad reciente
+            </p>
+          ) : (
+            actividad.map((a, i) => (
+              <div key={i} className="admin-activity-item">
+                <div
+                  className={`admin-activity-item__dot admin-activity-item__dot--${a.tipo}`}
+                />
+                <span className="admin-activity-item__action">{a.accion}</span>
+                <span className="admin-activity-item__detail">{a.detalle}</span>
+                <span className="admin-activity-item__time">{a.hora}</span>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </section>

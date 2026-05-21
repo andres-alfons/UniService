@@ -1,25 +1,39 @@
-// Registro de actividades — Auditoría de acciones realizadas por administradores
-// Muestra una tabla con el historial de operaciones (eliminar, suspender, etc.)
+import { useState, useEffect } from "react";
+
 export default function SeccionLogs() {
-  // Datos mock del registro de actividad administrativa
-  const logs = [
-    {
-      id: 1,
-      admin: "admin@uniservice.co",
-      accion: "Eliminó usuario",
-      detalle: "user_id: 34",
-      ip: "192.168.1.1",
-      fecha: "2026-04-29 14:32",
-    },
-    {
-      id: 2,
-      admin: "admin@uniservice.co",
-      accion: "Suspendió servicio",
-      detalle: "service_id: 88",
-      ip: "192.168.1.1",
-      fecha: "2026-04-29 13:10",
-    },
-  ];
+  const [logs, setLogs] = useState([]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("admin_logs");
+    if (stored) {
+      try {
+        setLogs(JSON.parse(stored));
+      } catch {
+        setLogs([]);
+      }
+    }
+  }, []);
+
+  const logActividad = (accion, detalle) => {
+    const nuevoLog = {
+      id: Date.now(),
+      admin: localStorage.getItem("usuario") || "admin",
+      accion,
+      detalle,
+      ip: "local",
+      fecha: new Date().toLocaleString("es-CO"),
+    };
+    const actualizados = [nuevoLog, ...logs].slice(0, 100);
+    setLogs(actualizados);
+    localStorage.setItem("admin_logs", JSON.stringify(actualizados));
+  };
+
+  useEffect(() => {
+    window.registrarLogAdmin = logActividad;
+    return () => {
+      delete window.registrarLogAdmin;
+    };
+  }, [logs]);
 
   return (
     <section className="admin-section">
@@ -37,18 +51,26 @@ export default function SeccionLogs() {
             </tr>
           </thead>
           <tbody>
-            {logs.map((l) => (
-              <tr key={l.id}>
-                <td className="admin-table__id">{l.id}</td>
-                <td className="admin-table__admin">{l.admin}</td>
-                <td>
-                  <span className="admin-log-action">{l.accion}</span>
+            {logs.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="admin-table__status">
+                  No hay registros de actividad aún.
                 </td>
-                <td className="admin-table__detail">{l.detalle}</td>
-                <td className="admin-table__ip">{l.ip}</td>
-                <td className="admin-table__date">{l.fecha}</td>
               </tr>
-            ))}
+            ) : (
+              logs.map((l) => (
+                <tr key={l.id}>
+                  <td className="admin-table__id">{l.id}</td>
+                  <td className="admin-table__admin">{l.admin}</td>
+                  <td>
+                    <span className="admin-log-action">{l.accion}</span>
+                  </td>
+                  <td className="admin-table__detail">{l.detalle}</td>
+                  <td className="admin-table__ip">{l.ip}</td>
+                  <td className="admin-table__date">{l.fecha}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

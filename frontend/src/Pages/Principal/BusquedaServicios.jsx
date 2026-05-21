@@ -1,97 +1,107 @@
 // ─── BusquedaServicios.jsx ───────────────────────────────────────────────────
 // Sección de búsqueda y exploración de servicios para usuarios autenticados.
-// Permite filtrar por texto, categoría, ordenar por precio/rating/fecha,
-// invertir el orden y paginar resultados con "Mostrar más".
+// AHORA usa paginación y filtrado del BACKEND para mejor rendimiento.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState, useEffect, useCallback } from "react";
-import { CANTIDAD_POR_PAGINA, CHIPS_CATEGORIA } from "../shared/constantes";
-import { normalizar, promedioEstrellas } from "../shared/utilidades";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { CANTIDAD_POR_PAGINA, CHIPS_CATEGORIA, API_HOME } from "../shared/constantes";
+import { normalizar, promedioEstrellas, debounce } from "../shared/utilidades";
 import TarjetaServicio from "../shared/TarjetaServicio";
 
-// Componente principal: recibe todos los servicios y los filtra localmente
-export default function SeccionBuscar({ serviciosTotales }) {
+export default function SeccionBuscar() {
   // Estado del buscador, categoría activa, orden y paginación
   const [busqueda, setBusqueda] = useState("");
   const [categoriaActual, setCategoriaActual] = useState("todos");
   const [orden, setOrden] = useState("recientes");
-  const [mostrados, setMostrados] = useState(CANTIDAD_POR_PAGINA);
+  const [pagina, setPagina] = useState(1);
+  
+  // Datos del backend
   const [resultados, setResultados] = useState([]);
+  const [totalResultados, setTotalResultados] = useState(0);
+  const [totalPaginas, setTotalPaginas] = useState(0);
+  const [cargando, setCargando] = useState(false);
 
-  // Al cambiar la lista de servicios, re-aplica los filtros desde cero
-  useEffect(() => {
-    aplicarFiltros(busqueda, categoriaActual, orden, CANTIDAD_POR_PAGINA);
-    setMostrados(CANTIDAD_POR_PAGINA);
-  }, [serviciosTotales]);
+  // Ref para debounce
+  const busquedaRef = useRef("");
 
-  // Filtra por texto y categoría, luego ordena y recorta según el límite
-  const aplicarFiltros = useCallback(
-    (texto, cat, ord, limite) => {
-      let filtrados = [...serviciosTotales].filter((s) => {
-        const q = normalizar(texto);
-        const coincideTexto =
-          !q ||
-          normalizar(s.titulo).includes(q) ||
-          normalizar(s.descripcion).includes(q) ||
-          normalizar(s.nombre_categoria).includes(q) ||
-          normalizar(s.proveedor).includes(q);
-
-        const coincideCat =
-          cat === "todos" ||
-          normalizar(s.nombre_categoria).includes(normalizar(cat));
-
-        return coincideTexto && coincideCat;
+  // Función para cargar servicios desde el backend con paginación
+  const cargarServicios = useCallback(async (page, texto, cat, ord) => {
+    setCargando(true);
+    try {
+      const params = new URLSearchParams({
+        page: page,
+        pageSize: CANTIDAD_POR_PAGINA,
+        orden: ord,
       });
 
-      // Aplica el criterio de ordenamiento según la opción seleccionada
-      switch (ord) {
-        case "precio-menor":
-          filtrados.sort((a, b) => Number(a.precio_hora || 0) - Number(b.precio_hora || 0));
-          break;
-        case "precio-mayor":
-          filtrados.sort((a, b) => Number(b.precio_hora || 0) - Number(a.precio_hora || 0));
-          break;
-        case "rating-mayor":
-          filtrados.sort((a, b) => promedioEstrellas(b.estrellas) - promedioEstrellas(a.estrellas));
-          break;
-        case "rating-menor":
-          filtrados.sort((a, b) => promedioEstrellas(a.estrellas) - promedioEstrellas(b.estrellas));
-          break;
-        case "antiguos":
-          filtrados.sort((a, b) => new Date(a.fecha_publicacion || 0) - new Date(b.fecha_publicacion || 0));
-          break;
-        default: // "recientes"
-          filtrados.sort((a, b) => new Date(b.fecha_publicacion || 0) - new Date(a.fecha_publicacion || 0));
-      }
+      if (cat !== "todos") params.append("categoria", cat);
+      if (texto.trim()) params.append("busqueda", texto.trim());
 
-      setResultados(filtrados.slice(0, limite));
-    },
-    [serviciosTotales],
-  );
+      const res = await fetch(`${API_HOME}?${params.toString()}`);
+      const data = await res.json();
+
+      if (data.servicios) {
+        // Respuesta paginada (nuevo)
+        setResultados(data.servicios);
+        setTotalResultados(data.paginacion.total);
+        setTotalPaginas(data.paginacion.totalPaginas);
+      } else if (Array.isArray(data)) {
+        // Respuesta legacy (todos los servicios)
+        setResultados(data);
+        setTotalResultados(data.length);
+        setTotalPaginas(Math.ceil(data.length / CANTIDAD_POR_PAGINA));
+      }
+    } catch (err) {
+      console.error("Error cargando servicios:", err);
+    } finally {
+      setCargando(false);
+    }
+  }, []);
+
+  // Carga inicial
+  useEffect(() => {
+    cargarServicios(1, "", "todos", "recientes");
+  }, [cargarServicios]);
+
+  // Función debounce para búsqueda por texto
+  const cargarConDebounce = useRef(
+    debounce((texto, cat, ord) => {
+      setPagina(1);
+      cargarServicios(1, texto, cat, ord);
+    }, 400)
+  ).current;
 
   // Maneja cambios en el campo de búsqueda por texto
   const handleBusqueda = (e) => {
     const val = e.target.value;
     setBusqueda(val);
-    aplicarFiltros(val, categoriaActual, orden, mostrados);
+    busquedaRef.current = val;
+    cargarConDebounce(val, categoriaActual, orden);
   };
 
-  // Maneja clics en los chips de categoría: resalta el activo y filtra
-  const handleCategoria = (cat, e) => {
-    document.querySelectorAll("#filtros-categorias .chip-enhanced").forEach((b) => b.classList.remove("activo"));
-    e.target.classList.add("activo");
+  // Maneja clics en los chips de categoría
+  const handleCategoria = (cat) => {
     setCategoriaActual(cat);
-    aplicarFiltros(busqueda, cat, orden, mostrados);
+    setPagina(1);
+    cargarServicios(1, busquedaRef.current, cat, orden);
   };
 
   // Maneja cambios en el selector de ordenamiento
   const handleOrden = (e) => {
     const val = e.target.value;
     setOrden(val);
-    aplicarFiltros(busqueda, categoriaActual, val, mostrados);
+    setPagina(1);
+    cargarServicios(1, busquedaRef.current, categoriaActual, val);
   };
 
-  // Invierte el orden actual (ej: recientes ↔ antiguos, menor precio ↔ mayor precio)
+  // Cargar más (siguiente página)
+  const handleMostrarMas = () => {
+    const nuevaPagina = pagina + 1;
+    setPagina(nuevaPagina);
+    cargarServicios(nuevaPagina, busquedaRef.current, categoriaActual, orden);
+  };
+
+  // Invertir el orden actual
   const handleToggleOrden = () => {
     const pares = {
       recientes: "antiguos",
@@ -103,15 +113,12 @@ export default function SeccionBuscar({ serviciosTotales }) {
     };
     const nuevo = pares[orden] || "recientes";
     setOrden(nuevo);
-    aplicarFiltros(busqueda, categoriaActual, nuevo, mostrados);
+    setPagina(1);
+    cargarServicios(1, busquedaRef.current, categoriaActual, nuevo);
   };
 
-  // Incrementa la cantidad de servicios visibles (paginación)
-  const handleMostrarMas = () => {
-    const nuevo = mostrados + CANTIDAD_POR_PAGINA;
-    setMostrados(nuevo);
-    aplicarFiltros(busqueda, categoriaActual, orden, nuevo);
-  };
+  const resultadosMostrados = resultados.length;
+  const hayMasResultados = pagina < totalPaginas;
 
   return (
     <section className="seccion seccion-oscura" id="buscar">
@@ -143,7 +150,7 @@ export default function SeccionBuscar({ serviciosTotales }) {
           <button
             key={chip.valor}
             className={`chip-enhanced${categoriaActual === chip.valor ? " activo" : ""}`}
-            onClick={(e) => handleCategoria(chip.valor, e)}
+            onClick={() => handleCategoria(chip.valor)}
             type="button"
           >
             <i className={`bi ${chip.icono}`}></i> {chip.label}
@@ -155,7 +162,8 @@ export default function SeccionBuscar({ serviciosTotales }) {
         {/* Barra de ordenamiento con selector y botón para invertir */}
         <div className="sort-bar reveal">
           <p className="texto-muted">
-            Resultados: <strong className="texto-claro">{resultados.length}</strong>
+            Resultados: <strong className="texto-claro">{totalResultados}</strong>
+            {cargando && " (cargando...)"}
           </p>
           <div className="sort-group">
             <select
@@ -176,9 +184,13 @@ export default function SeccionBuscar({ serviciosTotales }) {
           </div>
         </div>
 
-        {/* Cuadrícula de resultados; si no hay, muestra mensaje */}
+        {/* Cuadrícula de resultados */}
         <div className="cards-grid" id="contenedor-explorar">
-          {resultados.length === 0 ? (
+          {cargando && resultados.length === 0 ? (
+            <p className="texto-muted" style={{ gridColumn: "1 / -1", textAlign: "center", padding: "32px 0" }}>
+              Cargando servicios...
+            </p>
+          ) : resultados.length === 0 ? (
             <p className="texto-muted" style={{ gridColumn: "1 / -1", textAlign: "center", padding: "32px 0" }}>
               No se encontraron servicios.
             </p>
@@ -189,11 +201,16 @@ export default function SeccionBuscar({ serviciosTotales }) {
           )}
         </div>
 
-        {/* Botón "Mostrar más" visible solo si hay más resultados sin mostrar */}
+        {/* Botón "Mostrar más" */}
         <div id="contenedor-boton" style={{ textAlign: "center", marginTop: "32px" }}>
-          {resultados.length >= mostrados && (
-            <button type="button" className="btn btn-verde" onClick={handleMostrarMas}>
-              Mostrar más servicios
+          {hayMasResultados && (
+            <button 
+              type="button" 
+              className="btn btn-verde" 
+              onClick={handleMostrarMas}
+              disabled={cargando}
+            >
+              {cargando ? "Cargando..." : `Mostrar más (${totalResultados - resultadosMostrados} restantes)`}
             </button>
           )}
         </div>

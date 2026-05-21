@@ -33,7 +33,12 @@ export default function TarjetaServicio({ servicio, linkBase = "/servicio?id=" }
       {/* Imagen de portada o icono de categoría */}
       {portada ? (
         <div className="card-icono card-icono-imagen">
-          <img src={portada} alt={servicio.titulo} onError={() => setImagenError(true)} />
+          <img 
+            src={portada} 
+            alt={servicio.titulo} 
+            loading="lazy"
+            onError={() => setImagenError(true)} 
+          />
         </div>
       ) : (
         <div className="card-icono card-icono-azul">

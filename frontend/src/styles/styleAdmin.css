@@ -788,3 +788,84 @@ body {
   border-color: var(--rojo);
   box-shadow: 0 0 0 3px var(--rojo-dim);
 }
+
+/* ═══════════════════════════════════════════
+   FORZAR MODO OSCURO EN ADMIN
+   Elimina cualquier tema claro que cause distorsión
+   ═══════════════════════════════════════════ */
+body.admin-page {
+  background-color: var(--bg) !important;
+  color: var(--texto) !important;
+}
+
+body.admin-page::before,
+body.admin-page::after {
+  display: none !important;
+}
+
+body.admin-page .light-mode,
+body.admin-page .tema-claro {
+  display: none !important;
+}
+
+body.admin-page .admin-layout {
+  background: var(--bg) !important;
+}
+
+body.admin-page .admin-nav {
+  background: var(--card) !important;
+  border-color: var(--borde) !important;
+}
+
+body.admin-page .admin-main {
+  background: var(--bg) !important;
+}
+
+body.admin-page .admin-container {
+  background: transparent !important;
+}
+
+body.admin-page .admin-section,
+body.admin-page .admin-dashboard,
+body.admin-page .admin-stat-card,
+body.admin-page .admin-activity-card,
+body.admin-page .admin-table-container,
+body.admin-page .admin-table,
+body.admin-page .admin-report-card,
+body.admin-page .admin-category-card {
+  background: var(--card) !important;
+  color: var(--texto) !important;
+}
+
+body.admin-page input,
+body.admin-page select,
+body.admin-page textarea {
+  background: var(--bg2) !important;
+  color: var(--texto) !important;
+  border-color: var(--borde) !important;
+}
+
+body.admin-page .admin-input-search {
+  background: var(--bg2) !important;
+  color: var(--texto) !important;
+  border-color: var(--borde) !important;
+}
+
+body.admin-page .admin-input-search::placeholder {
+  color: var(--texto3) !important;
+}
+
+body.admin-page .admin-tabs {
+  background: var(--bg2) !important;
+}
+
+body.admin-page .admin-tab {
+  color: var(--texto2) !important;
+}
+
+body.admin-page .admin-tab.is-active {
+  background: var(--rojo-dim) !important;
+  color: var(--rojo) !important;
+}
+ 
+ 

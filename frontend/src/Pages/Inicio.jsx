@@ -41,22 +41,27 @@ export default function HomePrincipal() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [navigate]);
 
-  // ── Carga todos los servicios desde la API ──
+  // ── Carga todos los servicios desde la API con paginación optimizada ──
   const cargarServicios = useCallback(() => {
     setCargando(true);
-    fetch(API_HOME)
+    // Pedir una página grande para el home (recientes + top)
+    fetch(`${API_HOME}?page=1&pageSize=50&orden=recientes`)
       .then((res) => res.json())
       .then((data) => {
-        setServiciosTotales([...data].reverse()); // Invertidos: más recientes primero
-        setRecientes(data.slice(0, 4)); // Últimos 4 para la sección "Recientes"
-        const top = [...data]
+        const lista = data.servicios || data;
+        if (!Array.isArray(lista)) return;
+        
+        setServiciosTotales([...lista].reverse());
+        setRecientes(lista.slice(0, 4));
+        const top = [...lista]
           .sort(
             (a, b) =>
               promedioEstrellas(b.estrellas) - promedioEstrellas(a.estrellas),
           )
-          .slice(0, 3); // Top 3 mejor calificados
+          .slice(0, 3);
         setTop3(top);
       })
+      .catch(err => console.error("Error cargando servicios:", err))
       .finally(() => setCargando(false));
   }, []);
 

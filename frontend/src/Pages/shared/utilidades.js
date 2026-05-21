@@ -30,3 +30,13 @@ export function normalizar(texto) {
     .replace(/[\u0300-\u036f]/g, "")
     .trim();
 }
+
+// Debounce: retrasa la ejecución de una función hasta que pase el tiempo especificado
+// Útil para búsquedas: evita hacer peticiones en cada tecla pulsada
+export function debounce(func, delay = 300) {
+  let timeoutId;
+  return function (...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func.apply(this, args), delay);
+  };
+}

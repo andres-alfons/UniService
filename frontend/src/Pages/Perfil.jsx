@@ -207,14 +207,16 @@ const getAvatarUrl = (avatar) => {
     if (esPerfilExterno || !id_a_consultar || id_a_consultar === "undefined")
       return;
 
-    // Traemos todos los servicios y filtramos los que le pertenecen al usuario
-    fetch(`/api/services`)
+    // Traemos servicios del usuario con paginación (pedimos más para asegurar)
+    fetch(`/api/services?page=1&pageSize=50&orden=recientes`)
       .then((r) => r.json())
-      .then((data) =>
+      .then((data) => {
+        const lista = data.servicios || data;
+        if (!Array.isArray(lista)) return;
         setMisServicios(
-          data.filter((s) => s.id_proveedor === parseInt(id_a_consultar)),
-        ),
-      )
+          lista.filter((s) => s.id_proveedor === parseInt(id_a_consultar)),
+        );
+      })
       .catch(console.error);
   }, [id_a_consultar, esPerfilExterno]);
 

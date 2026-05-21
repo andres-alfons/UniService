@@ -17,11 +17,7 @@ import BotonTema from "../Components/B_StyleHome";
 // Formato: { correo: "...", password: "..." }
 // ══════════════════════════════════════════════════════════════════
 const ADMIN_CREDENTIALS = [
-  { correo: "admin@uniservice.co", password: "admin123" },
-  { correo: "frank@uniservice.co", password: "frank2026" },
-  { correo: "lenin@uniservice.co", password: "lenin2026" },
-  { correo: "sayd@uniservice.co", password: "sayd2026" },
-  { correo: "andres@uniservice.co", password: "andres2026" },
+  { correo: "uniservice.soporte@gmail.com", password: "123456789" },
 ];
 
 // Contraseña maestra adicional que se pide en el modal de confirmación de admin.
