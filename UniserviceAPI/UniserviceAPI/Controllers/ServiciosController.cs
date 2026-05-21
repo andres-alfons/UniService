@@ -213,6 +213,7 @@ public class ServicesController : ControllerBase
                 LEFT JOIN usuarios u ON s.id_proveedor = u.id_usuario
                 LEFT JOIN categorias c ON s.id_categoria = c.id_categoria
                 LEFT JOIN calificaciones cal ON cal.id_servicio = s.id_servicio
+                WHERE s.disponibilidad >= 0
                 GROUP BY
                     s.id_servicio, s.id_proveedor, s.titulo, s.descripcion,
                     s.precio_hora, s.icono, s.fecha_publicacion, s.modalidad,

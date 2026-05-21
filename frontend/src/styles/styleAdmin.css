@@ -69,7 +69,7 @@ body {
 
 .admin-main {
   flex: 1;
-  padding-top: 80px;
+  padding-top: 70px;
   position: relative;
 }
 
@@ -106,7 +106,7 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  height: 70px;
+  height: 60px;
   background-color: rgba(7, 13, 22, 0.95);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -114,33 +114,35 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 16px;
   z-index: 1000;
+  gap: 12px;
 }
 
 .admin-nav__logo-container {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .admin-nav__logo-icon {
   background: linear-gradient(135deg, var(--rojo), var(--rojo2));
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
   color: #070d16;
-  font-size: 1rem;
+  font-size: 0.85rem;
   box-shadow: 0 4px 12px var(--rojo-glow);
 }
 
 .admin-nav__logo-text {
   font-family: "DM Serif Display", serif;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   color: var(--texto);
   letter-spacing: 0.5px;
   transition: var(--trans);
@@ -153,27 +155,37 @@ body {
 
 .admin-nav__links {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   background: var(--bg3);
-  padding: 6px;
-  border-radius: 12px;
+  padding: 4px;
+  border-radius: 8px;
   border: 1px solid var(--borde);
+  flex-shrink: 1;
+  min-width: 0;
+  overflow-x: auto;
+  max-width: 55%;
+}
+
+.admin-nav__links::-webkit-scrollbar {
+  display: none;
 }
 
 .admin-nav__btn {
   background: transparent;
   border: none;
   color: var(--texto2);
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 0.85rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
   font-weight: 600;
   font-family: "Poppins", sans-serif;
   cursor: pointer;
   transition: var(--trans);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .admin-nav__btn:hover {
@@ -210,7 +222,44 @@ body {
 .admin-nav__user {
   display: flex;
   align-items: center;
-  gap: 40px; /* Espacio entre el nombre y el botÃ³n */
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.admin-nav__user-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--texto);
+  font-weight: 600;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.admin-nav__user-info i {
+  font-size: 0.9rem;
+  color: var(--rojo);
+}
+
+.admin-nav__logout {
+  color: var(--rojo);
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: var(--trans);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.admin-nav__logout:hover {
+  background: var(--rojo);
+  color: #ffffff;
+  border-color: var(--rojo);
 }
 
 .admin-nav__user-info {

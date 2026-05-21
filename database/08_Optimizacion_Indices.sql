@@ -228,6 +228,7 @@ BEGIN
         LEFT JOIN usuarios u ON s.id_proveedor = u.id_usuario
         LEFT JOIN categorias c ON s.id_categoria = c.id_categoria
         WHERE (p_categoria IS NULL OR s.id_categoria = p_categoria)
+          AND s.disponibilidad >= 0
           AND (
               v_busqueda = ''
               OR LOWER(s.titulo) LIKE '%' || v_busqueda || '%'
