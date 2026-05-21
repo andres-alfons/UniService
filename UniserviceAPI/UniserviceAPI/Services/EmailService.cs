@@ -38,7 +38,7 @@ namespace UniserviceAPI.Services
 
                 await EnviarEmailChativo(emailDestino, nombreDestinatario, nombreRemitente, previewMensaje);
 
-                _spamControl.TryRemove(key, out _);
+                _spamControl.TryRemove(key, out var _);
             });
         }
 

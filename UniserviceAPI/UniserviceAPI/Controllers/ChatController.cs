@@ -157,7 +157,7 @@ public class ChatController : ControllerBase
     }
 
     // Marcar mensajes como leídos
-    [PUT("mensajes/{idChat}/leido")]
+    [HttpPut("mensajes/{idChat}/leido")]
     public async Task<IActionResult> MarcarLeido(int idChat, [FromBody] MarcarLeidoDTO dto)
     {
         using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
@@ -169,7 +169,7 @@ public class ChatController : ControllerBase
         cmd.Parameters.AddWithValue("@dest", dto.id_destinatario);
 
         var afectados = await cmd.ExecuteNonQueryAsync();
-        return Ok(new { marcados: afectados });
+        return Ok(new { marcados = afectados });
     }
 
     // Cantidad de mensajes no leídos de un usuario
@@ -188,7 +188,7 @@ public class ChatController : ControllerBase
     }
 
     // Actualizar ultima_actividad del usuario
-    [PUT("actividad/{idUsuario}")]
+    [HttpPut("actividad/{idUsuario}")]
     public async Task<IActionResult> ActualizarActividad(int idUsuario)
     {
         using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
