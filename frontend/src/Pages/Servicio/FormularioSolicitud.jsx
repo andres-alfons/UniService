@@ -156,6 +156,7 @@ function FormSolicitud({
 
     if (!validarFormulario()) return;
 
+    setEstado("enviando");
     const payload = construirPayload();
 
     try {
@@ -181,6 +182,8 @@ function FormSolicitud({
       }
     } catch (error) {
       showModal("error", "Error al enviar solicitud");
+    } finally {
+      setEstado("idle");
     }
   };
 
@@ -322,8 +325,13 @@ function FormSolicitud({
           className="btn-primary"
           onClick={handleAccionSolicitud}
           disabled={estado === "enviando"}
+          style={{ opacity: estado === "enviando" ? 0.6 : 1, cursor: estado === "enviando" ? "not-allowed" : "pointer" }}
         >
-          {solicitudExiste ? (
+          {estado === "enviando" ? (
+            <>
+              <span className="spinner-mini"></span> Enviando...
+            </>
+          ) : solicitudExiste ? (
             <><i className="bi bi-trash"></i> Eliminar solicitud</>
           ) : (
             <><i className="bi bi-envelope"></i> Enviar solicitud</>

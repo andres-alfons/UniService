@@ -11,6 +11,7 @@ import QuickStatCard from "./Perfil/TarjetaRapida";
 import ProgressBar from "./Perfil/BarraProgreso";
 import ActivityItem from "./Perfil/ElementoActividad";
 import BotonTema from "../Components/B_StyleHome";
+import ChatPanel from "./Principal/ChatPanel";
 
 // ════════════════════════════════════════════════════════════════
 // PÁGINA DE PERFIL DE USUARIO
@@ -91,6 +92,7 @@ const [modalSiguiendo, setModalSiguiendo] = useState(false);
 
   // Modal de alertas (reemplaza alert())
   const [modalAlerta, setModalAlerta] = useState({ show: false, type: "info", title: "", message: "" });
+  const [chatPanelAbierto, setChatPanelAbierto] = useState(false);
 
   const mostrarAlerta = (type, title, message) => {
     setModalAlerta({ show: true, type, title, message });
@@ -655,18 +657,27 @@ const getAvatarUrl = (avatar) => {
 
                 <div className="action-buttons">
                   {esPerfilExterno ? (
-                    // Perfil ajeno: se muestran Seguir y Compartir
+                    // Perfil ajeno: se muestran Seguir, Chatear y Compartir
                     <>
                       <button
                         className={`btn-seguir ${siguiendo ? "btn-siguiendo" : ""}`}
                         onClick={toggleSeguir}
                         disabled={enviandoSeguimiento}
+                        style={{ flex: 1 }}
                       >
                         {siguiendo ? <><i className="bi bi-check-lg"></i> Siguiendo</> : <><i className="bi bi-plus-lg"></i> Seguir</>}
                       </button>
                       <button
+                        className="btn btn-primary btn-chat-perfil"
+                        onClick={() => setChatPanelAbierto(true)}
+                        style={{ flex: 1 }}
+                      >
+                        <i className="bi bi-chat-dots-fill"></i> Chatear
+                      </button>
+                      <button
                         className="btn btn-secondary"
                         onClick={handleShare}
+                        style={{ flex: 1 }}
                       >
                         <i className="bi bi-link-45deg"></i> Compartir
                       </button>
@@ -676,12 +687,14 @@ const getAvatarUrl = (avatar) => {
                       <button
                         className="btn btn-primary"
                         onClick={() => setActiveModal("info")}
+                        style={{ flex: 1 }}
                       >
                         <><i className="bi bi-pencil"></i> Editar Perfil</>
                       </button>
                       <button
                         className="btn btn-secondary"
                         onClick={handleShare}
+                        style={{ flex: 1 }}
                       >
                         <i className="bi bi-link-45deg"></i> Compartir
                       </button>
@@ -1732,6 +1745,16 @@ const getAvatarUrl = (avatar) => {
         type={modalAlerta.type}
         title={modalAlerta.title}
         message={modalAlerta.message}
+      />
+
+      <ChatPanel
+        abierto={chatPanelAbierto}
+        onCerrar={() => setChatPanelAbierto(false)}
+        targetUsuario={{
+          id: parseInt(id_a_consultar),
+          nombre: userData.nombre,
+          avatar: userData.avatar || "",
+        }}
       />
     </>
   );

@@ -20,3 +20,139 @@
   --texto3: #64748b;
   --trans: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* Chat en tema claro */
+[data-theme="claro"] .chat-panel {
+  background: #f0f2f5;
+  color: #1a1a1a;
+}
+
+[data-theme="claro"] .chat-list-container {
+  background: #ffffff;
+  border-right-color: #e5e7eb;
+}
+
+[data-theme="claro"] .chat-list-header {
+  border-bottom-color: #e5e7eb;
+}
+
+[data-theme="claro"] .chat-list-header h3 {
+  color: #1a1a1a;
+}
+
+[data-theme="claro"] .chat-search-input {
+  background: #f9fafb;
+  border-color: #e5e7eb;
+  color: #1a1a1a;
+}
+
+[data-theme="claro"] .chat-search-input::placeholder {
+  color: #999;
+}
+
+[data-theme="claro"] .chat-item {
+  border-bottom-color: #f0f0f0;
+}
+
+[data-theme="claro"] .chat-item:hover {
+  background: #f5f5f5;
+}
+
+[data-theme="claro"] .chat-item.active {
+  background: #e8f5e9;
+}
+
+[data-theme="claro"] .chat-item-name {
+  color: #1a1a1a;
+}
+
+[data-theme="claro"] .chat-item-time {
+  color: #999;
+}
+
+[data-theme="claro"] .chat-item-preview {
+  color: #666;
+}
+
+[data-theme="claro"] .chat-window-container {
+  background: #f0f2f5;
+}
+
+[data-theme="claro"] .chat-window-header {
+  background: #ffffff;
+  border-bottom-color: #e5e7eb;
+}
+
+[data-theme="claro"] .chat-window-name {
+  color: #1a1a1a;
+}
+
+[data-theme="claro"] .chat-window-status.offline {
+  color: #999;
+}
+
+[data-theme="claro"] .chat-messages-container {
+  background: #f5f6f8;
+}
+
+[data-theme="claro"] .mensaje-burbuja.ajeno .mensaje-content {
+  background: #ffffff;
+  color: #1a1a1a;
+  border-color: #e5e7eb;
+}
+
+[data-theme="claro"] .chat-input-container {
+  background: #ffffff;
+  border-top-color: #e5e7eb;
+}
+
+[data-theme="claro"] .chat-input {
+  background: #f9fafb;
+  border-color: #e5e7eb;
+  color: #1a1a1a;
+}
+
+[data-theme="claro"] .chat-input::placeholder {
+  color: #999;
+}
+
+[data-theme="claro"] .chat-panel-close {
+  background: #e5e7eb;
+  color: #666;
+}
+
+[data-theme="claro"] .chat-panel-close:hover {
+  background: #d1d5db;
+  color: #333;
+}
+
+[data-theme="claro"] .mensaje-sistema-content {
+  background: #fff3cd;
+  color: #856404;
+  border-color: #ffeaa7;
+}
+
+[data-theme="claro"] .mensaje-sistema-content a {
+  color: #004085;
+}
+
+[data-theme="claro"] .chat-empty {
+  color: #999;
+}
+
+[data-theme="claro"] .chat-empty-sub {
+  color: #bbb !important;
+}
+
+[data-theme="claro"] .chat-window-empty {
+  color: #ccc;
+}
+
+[data-theme="claro"] .chat-window-empty p {
+  color: #999;
+}
+
+[data-theme="claro"] .chat-loading {
+  color: #999;
+}
+

@@ -9,6 +9,7 @@ import Skeleton from "./Servicio/Cargando";
 import FormSolicitud from "./Servicio/FormularioSolicitud";
 import FormCalificacion from "./Servicio/FormularioCalificacion";
 import MapaModal from "../Components/MapaModal";
+import ChatPanel from "./Principal/ChatPanel";
 import { mostrarModalidad, mostrarDisponibilidad, colorAvatar } from "./Servicio/utilidades";
 import BotonTema from "../Components/B_StyleHome";
 
@@ -28,6 +29,7 @@ export default function Servicio() {
   const [imagenesError, setImagenesError] = useState({});
   const [modalMapa, setModalMapa] = useState(false);
   const [modal, setModal] = useState({ show: false, type: "", message: "" });
+  const [chatPanelAbierto, setChatPanelAbierto] = useState(false);
 
   const showModal = (type, message) => {
     setModal({ show: true, type, message });
@@ -349,6 +351,12 @@ export default function Servicio() {
                       <i className="bi bi-whatsapp"></i> Contactar por WhatsApp
                     </a>
                   )}
+                  <button
+                    className="btn-primary btn-contacto btn-chat-detalle"
+                    onClick={() => setChatPanelAbierto(true)}
+                  >
+                    <i className="bi bi-chat-dots-fill"></i> Enviar mensaje
+                  </button>
                 </div>
               )}
             </div>
@@ -400,6 +408,16 @@ export default function Servicio() {
       )}
 
       <BotonTema />
+
+      <ChatPanel
+        abierto={chatPanelAbierto}
+        onCerrar={() => setChatPanelAbierto(false)}
+        targetUsuario={{
+          id: servicio.id_proveedor,
+          nombre: servicio.proveedor,
+          avatar: "",
+        }}
+      />
 
       <footer id="soporte">
         <div className="container">

@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Text.Json;
 using UniserviceAPI.Services;
+using UniserviceAPI.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -13,11 +15,13 @@ public class SolicitudesController : ControllerBase
 {
     private readonly IConfiguration _config;
     private readonly EmailService _emailService;
+    private readonly IHubContext<ChatHub> _chatHub;
 
-    public SolicitudesController(IConfiguration config, EmailService emailService)
+    public SolicitudesController(IConfiguration config, EmailService emailService, IHubContext<ChatHub> chatHub)
     {
         _config = config;
         _emailService = emailService;
+        _chatHub = chatHub;
     }
 
     // 🔹 CREAR SOLICITUD
@@ -117,52 +121,111 @@ public class SolicitudesController : ControllerBase
 
             var idSolicitud = await insertCmd.ExecuteScalarAsync();
 
+            // Obtener datos para el mensaje del chat
+            string nombreCliente = null, tituloServicio = null, emailProveedor = null, nombreProveedor = null;
+            using (var dataCmd = new NpgsqlCommand(@"
+                SELECT c.nombre AS nombre_cliente, se.titulo AS titulo_servicio,
+                       u.correo AS email_proveedor, u.nombre AS nombre_proveedor
+                FROM usuarios c
+                INNER JOIN servicios se ON se.id_servicio = @id_servicio
+                INNER JOIN usuarios u ON u.id_usuario = @id_proveedor
+                WHERE c.id_usuario = @id_cliente
+            ", conn))
+            {
+                dataCmd.Parameters.AddWithValue("@id_cliente", dto.id_cliente);
+                dataCmd.Parameters.AddWithValue("@id_proveedor", dto.id_proveedor);
+                dataCmd.Parameters.AddWithValue("@id_servicio", dto.id_servicio);
+                using var dataReader = await dataCmd.ExecuteReaderAsync();
+                if (await dataReader.ReadAsync())
+                {
+                    nombreCliente = dataReader["nombre_cliente"]?.ToString();
+                    tituloServicio = dataReader["titulo_servicio"]?.ToString();
+                    emailProveedor = dataReader["email_proveedor"]?.ToString();
+                    nombreProveedor = dataReader["nombre_proveedor"]?.ToString();
+                }
+                dataReader.Close();
+            }
+
+            // Crear chat automático entre cliente y proveedor si no existe
+            int u1 = Math.Min(dto.id_cliente, dto.id_proveedor);
+            int u2 = Math.Max(dto.id_cliente, dto.id_proveedor);
+            int idChat = 0;
+
+            using var chatCheckCmd = new NpgsqlCommand("SELECT id_chat FROM chats WHERE id_usuario1 = @u1 AND id_usuario2 = @u2", conn);
+            chatCheckCmd.Parameters.AddWithValue("@u1", u1);
+            chatCheckCmd.Parameters.AddWithValue("@u2", u2);
+            var chatResult = await chatCheckCmd.ExecuteScalarAsync();
+
+            if (chatResult != null)
+            {
+                idChat = Convert.ToInt32(chatResult);
+            }
+            else
+            {
+                using var chatInsertCmd = new NpgsqlCommand("INSERT INTO chats (id_usuario1, id_usuario2) VALUES (@u1, @u2) RETURNING id_chat", conn);
+                chatInsertCmd.Parameters.AddWithValue("@u1", u1);
+                chatInsertCmd.Parameters.AddWithValue("@u2", u2);
+                idChat = Convert.ToInt32(await chatInsertCmd.ExecuteScalarAsync());
+            }
+
+            // Enviar mensaje automático al chat con detalles de la solicitud
+            string mensajeSolicitud = $@"<b>📨 Nueva solicitud de servicio</b><br>
+<b>Cliente:</b> {nombreCliente ?? "Un estudiante"}<br>
+<b>Servicio:</b> {tituloServicio ?? "Servicio"}<br>
+<b>Tipo:</b> {dto.tipo_servicio ?? "No especificado"}<br>
+<b>Descripción:</b> {dto.descripcion ?? "Sin descripción"}<br>
+<b>Presupuesto:</b> ${dto.presupuesto:N0}<br>
+{(dto.fecha_deseada.HasValue ? $"<b>Fecha deseada:</b> {dto.fecha_deseada.Value:dd/MM/yyyy}<br>" : "")}
+{(dto.urgencia != null ? $"<b>Urgencia:</b> {dto.urgencia}<br>" : "")}
+<i>Revisa la solicitud para aceptar o responder.</i>";
+
+            using var msgCmd = new NpgsqlCommand(@"
+                INSERT INTO mensajes (id_chat, id_remitente, id_destinatario, mensaje, tipo)
+                VALUES (@chat, @rem, @dest, @msg, 'sistema')
+                RETURNING id_mensaje", conn);
+            msgCmd.Parameters.AddWithValue("@chat", idChat);
+            msgCmd.Parameters.AddWithValue("@rem", dto.id_cliente);
+            msgCmd.Parameters.AddWithValue("@dest", dto.id_proveedor);
+            msgCmd.Parameters.AddWithValue("@msg", mensajeSolicitud);
+            await msgCmd.ExecuteScalarAsync();
+
+            using var updateChatCmd = new NpgsqlCommand("UPDATE chats SET ultimo_mensaje = NOW() WHERE id_chat = @chat", conn);
+            updateChatCmd.Parameters.AddWithValue("@chat", idChat);
+            await updateChatCmd.ExecuteNonQueryAsync();
+
+            // Notificar via SignalR
+            await _chatHub.Clients.Group($"chat_{idChat}").SendAsync("RecibirMensaje", new
+            {
+                id_chat = idChat,
+                id_remitente = dto.id_cliente,
+                id_destinatario = dto.id_proveedor,
+                mensaje = mensajeSolicitud,
+                tipo = "sistema",
+                fecha_envio = DateTime.UtcNow.ToString("o")
+            });
+
             // Email notification
             try
             {
-                using var connEmail = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
-                await connEmail.OpenAsync();
-
-                var cmdEmail = new NpgsqlCommand(@"
-                    SELECT u.correo AS email_proveedor, u.nombre AS nombre_proveedor,
-                           c.nombre AS nombre_cliente, se.titulo AS titulo_servicio
-                    FROM usuarios u
-                    INNER JOIN servicios se ON se.id_servicio = @id_servicio
-                    INNER JOIN usuarios c ON c.id_usuario = @id_cliente
-                    WHERE u.id_usuario = @id_proveedor AND se.id_servicio = @id_servicio
-                ", connEmail);
-                cmdEmail.Parameters.AddWithValue("@id_proveedor", dto.id_proveedor);
-                cmdEmail.Parameters.AddWithValue("@id_cliente", dto.id_cliente);
-                cmdEmail.Parameters.AddWithValue("@id_servicio", dto.id_servicio);
-
-                using var readerEmail = await cmdEmail.ExecuteReaderAsync();
-                if (await readerEmail.ReadAsync())
+                if (!string.IsNullOrEmpty(emailProveedor))
                 {
-                    var emailProveedor = readerEmail["email_proveedor"]?.ToString();
-                    var nombreProveedor = readerEmail["nombre_proveedor"]?.ToString();
-                    var nombreCliente = readerEmail["nombre_cliente"]?.ToString();
-                    var tituloServicio = readerEmail["titulo_servicio"]?.ToString();
-
-                    if (!string.IsNullOrEmpty(emailProveedor))
+                    try
                     {
-                        try
-                        {
-                            Console.WriteLine($"📧 Intentando enviar correo a: {emailProveedor}");
-                            await _emailService.EnviarNotificacionSolicitud(
-                                emailProveedor,
-                                nombreProveedor ?? "Proveedor",
-                                nombreCliente ?? "Un estudiante",
-                                tituloServicio ?? "Tu servicio",
-                                dto.tipo_servicio ?? "No especificado",
-                                dto.descripcion ?? "",
-                                dto.presupuesto.ToString(),
-                                dto.urgencia ?? ""
-                            );
-                        }
-                        catch (Exception emailEx)
-                        {
-                            Console.WriteLine($"❌ Error enviando correo: {emailEx.Message}");
-                        }
+                        Console.WriteLine($"📧 Intentando enviar correo a: {emailProveedor}");
+                        await _emailService.EnviarNotificacionSolicitud(
+                            emailProveedor,
+                            nombreProveedor ?? "Proveedor",
+                            nombreCliente ?? "Un estudiante",
+                            tituloServicio ?? "Tu servicio",
+                            dto.tipo_servicio ?? "No especificado",
+                            dto.descripcion ?? "",
+                            dto.presupuesto.ToString(),
+                            dto.urgencia ?? ""
+                        );
+                    }
+                    catch (Exception emailEx)
+                    {
+                        Console.WriteLine($"❌ Error enviando correo: {emailEx.Message}");
                     }
                 }
             }

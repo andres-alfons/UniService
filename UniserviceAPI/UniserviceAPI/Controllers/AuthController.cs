@@ -176,6 +176,23 @@ public class AuthController : ControllerBase
     }
 
     // =========================
+    // LOGOUT (actualizar ultima_actividad)
+    // =========================
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout([FromBody] LogoutDTO dto)
+    {
+        using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+        await conn.OpenAsync();
+
+        var cmd = new NpgsqlCommand(
+            "UPDATE usuarios SET ultima_actividad = NOW() WHERE id_usuario = @id", conn);
+        cmd.Parameters.AddWithValue("@id", dto.id_usuario);
+        await cmd.ExecuteNonQueryAsync();
+
+        return Ok(new { ok = true });
+    }
+
+    // =========================
     // GOOGLE LOGIN
     // =========================
     [HttpPost("google-login")]

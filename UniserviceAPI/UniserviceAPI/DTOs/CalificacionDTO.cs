@@ -2,6 +2,8 @@
 
 public class CalificacionDTO
 {
+    public int id_calificacion { get; set; }
+
     [Required]
     [Range(1, int.MaxValue)]
     public int id_solicitud { get; set; }

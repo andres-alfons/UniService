@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using System.IO;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace UniserviceAPI.Services
 {
@@ -11,11 +12,89 @@ namespace UniserviceAPI.Services
     {
         private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _config;
+        private static readonly ConcurrentDictionary<string, (DateTime ultimoEnvio, CancellationTokenSource cts)> _spamControl = new();
 
         public EmailService(IWebHostEnvironment env, IConfiguration config)
         {
             _env = env;
             _config = config;
+        }
+
+        public async Task EnviarNotificacionChat(string emailDestino, string nombreDestinatario, string nombreRemitente, string previewMensaje)
+        {
+            string key = $"chat_{emailDestino}";
+
+            if (_spamControl.TryGetValue(key, out var existing))
+            {
+                existing.cts.Cancel();
+            }
+
+            var cts = new CancellationTokenSource();
+            _spamControl[key] = (DateTime.UtcNow, cts);
+
+            await Task.Delay(45000, cts.Token).ContinueWith(async _ =>
+            {
+                if (cts.Token.IsCancellationRequested) return;
+
+                await EnviarEmailChativo(emailDestino, nombreDestinatario, nombreRemitente, previewMensaje);
+
+                _spamControl.TryRemove(key, out var _);
+            });
+        }
+
+        private async Task EnviarEmailChativo(string emailDestino, string nombreDestinatario, string nombreRemitente, string previewMensaje)
+        {
+            var mensaje = new MimeMessage();
+            mensaje.From.Add(new MailboxAddress("UniService", _config["EmailSettings:Email"]));
+            mensaje.To.Add(new MailboxAddress(nombreDestinatario, emailDestino));
+            mensaje.Subject = $"Nuevo mensaje de {nombreRemitente} - UniService";
+
+            var builder = new BodyBuilder();
+
+            string htmlBody = $@"
+            <html>
+            <body style='font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px;'>
+                <div style='max-width: 500px; margin: 0 auto; background: white; border-radius: 12px; padding: 24px;'>
+                    <h2 style='color: #2ecc71;'>Tienes un nuevo mensaje</h2>
+                    <p><strong>{nombreRemitente}</strong> te ha enviado un mensaje:</p>
+                    <div style='background: #f0f0f0; padding: 12px; border-radius: 8px; margin: 16px 0;'>
+                        <p style='margin: 0; color: #333;'>{previewMensaje}</p>
+                    </div>
+                    <p style='color: #666; font-size: 14px;'>Inicia sesión en UniService para responder.</p>
+                    <hr style='border: none; border-top: 1px solid #ddd; margin: 20px 0;'>
+                    <p style='color: #999; font-size: 12px;'>UniService &copy; {DateTime.Now.Year}</p>
+                </div>
+            </body>
+            </html>";
+
+            builder.HtmlBody = htmlBody;
+            mensaje.Body = builder.ToMessageBody();
+
+            using var client = new SmtpClient();
+            try
+            {
+                await client.ConnectAsync(
+                    _config["EmailSettings:Host"],
+                    int.Parse(_config["EmailSettings:Port"]),
+                    MailKit.Security.SecureSocketOptions.StartTls
+                );
+
+                await client.AuthenticateAsync(
+                    _config["EmailSettings:Email"],
+                    _config["EmailSettings:Password"]
+                );
+
+                await client.SendAsync(mensaje);
+                Console.WriteLine($"[EMAIL CHAT] Correo enviado a {emailDestino}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[EMAIL CHAT] ERROR SMTP: {ex.Message}");
+            }
+            finally
+            {
+                await client.DisconnectAsync(true);
+            }
         }
 
         public async Task EnviarNotificacionSolicitud(

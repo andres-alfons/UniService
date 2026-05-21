@@ -8,11 +8,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/styleHome.css";
+import "../styles/styleChat.css";
 import Navbar from "./Principal/BarraNavegacion";
 import SeccionBuscar from "./Principal/BusquedaServicios";
 import SeccionPublicar from "./Principal/PublicarServicio";
 import SeccionSolicitudes from "./Principal/SeccionSolicitudes";
 import NotificacionesFlotantes from "./Principal/Notificaciones";
+import ChatPanel from "./Principal/ChatPanel";
 import BotonTema from "../Components/B_StyleHome";
 import Footer from "./Principal/PiePagina";
 import SeccionRecientes from "./shared/SeccionRecientes";
@@ -26,6 +28,8 @@ export default function HomePrincipal() {
   const navigate = useNavigate();
   // Estado del scroll para cambiar estilo del navbar al hacer scroll
   const [scrolled, setScrolled] = useState(false);
+  // Estado del panel de chat
+  const [chatAbierto, setChatAbierto] = useState(false);
   // Lista completa de servicios, recientes y top 3 mejor calificados
   const [serviciosTotales, setServiciosTotales] = useState([]);
   const [recientes, setRecientes] = useState([]);
@@ -89,7 +93,20 @@ export default function HomePrincipal() {
   }, []);
 
   // ── Cierra sesión: limpia localStorage (excepto notifs leídas) ──
-  const handleCerrarSesion = () => {
+  const handleCerrarSesion = async () => {
+    const usuarioId = localStorage.getItem("usuarioId");
+    if (usuarioId) {
+      try {
+        await fetch("/api/auth/logout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id_usuario: parseInt(usuarioId) }),
+        });
+      } catch (err) {
+        console.error("Error en logout:", err);
+      }
+    }
+
     const keysToPreserve = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -114,7 +131,8 @@ export default function HomePrincipal() {
       <SeccionPublicar onPublicado={cargarServicios} />
       <SeccionSolicitudes />
       <BotonTema />
-      <NotificacionesFlotantes />
+      <ChatPanel abierto={chatAbierto} onCerrar={() => setChatAbierto(false)} />
+      <NotificacionesFlotantes onToggleChat={() => setChatAbierto((v) => !v)} />
       <Footer />
     </>
   );

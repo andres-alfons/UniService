@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import { API_SOLICITUD } from "../shared/constantes";
 
 // Componente que renderiza el botón de campana y el panel desplegable
-export default function NotificacionesFlotantes() {
+export default function NotificacionesFlotantes({ onToggleChat }) {
   const [abierto, setAbierto] = useState(false);
   const [notificaciones, setNotificaciones] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -152,6 +152,15 @@ export default function NotificacionesFlotantes() {
 
   return (
     <div className="contenedor-notificaciones">
+      {/* Botón de chat (encima de notificaciones) */}
+      <button
+        className="boton-chat-flotante"
+        onClick={onToggleChat}
+        title="Chats"
+      >
+        <i className="bi bi-chat-dots-fill"></i>
+      </button>
+
       {/* Botón de la campana con badge de no leídas */}
       <button
         className="boton-notificaciones"

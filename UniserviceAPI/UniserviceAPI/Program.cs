@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using UniserviceAPI.Services;
+using UniserviceAPI.Hubs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
@@ -94,7 +95,8 @@ builder.Services.AddCors(options =>
         {
             policy.WithOrigins(allowedOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries))
                   .AllowAnyHeader()
-                  .AllowAnyMethod();
+                  .AllowAnyMethod()
+                  .AllowCredentials();
         });
 });
 
@@ -115,6 +117,8 @@ builder.Services.AddControllers()
             });
         };
     });
+
+builder.Services.AddSignalR();
 builder.Services.AddResponseCompression(options =>
 {
     options.EnableForHttps = true;
@@ -208,6 +212,8 @@ app.UseAuthorization();
 // app.UseHttpsRedirection();
 
 app.MapControllers();
+
+app.MapHub<ChatHub>("/chathub");
 
 app.Run();
 
