@@ -18,7 +18,7 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
   const cargarServicios = async () => {
     setCargando(true);
     try {
-      const res = await fetch(`${API}/services`);
+      const res = await fetch(`${API}/services/admin/all`);
       const data = await res.json();
       const normalizados = (Array.isArray(data) ? data : []).map((s) => ({
         id_servicio: s.id_servicio,

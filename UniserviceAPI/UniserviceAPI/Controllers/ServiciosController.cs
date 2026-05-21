@@ -23,6 +23,59 @@ public class ServicesController : ControllerBase
     }
 
     // =========================
+    // GET TODOS LOS SERVICIOS (ADMIN - INCLUYE PENDIENTES)
+    // =========================
+    [HttpGet("admin/all")]
+    public async Task<IActionResult> GetAllAdmin()
+    {
+        try
+        {
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            var servicios = new List<object>();
+
+            using var cmd = new NpgsqlCommand(@"
+                SELECT 
+                    s.id_servicio, s.id_proveedor, s.titulo, s.descripcion,
+                    s.precio_hora, s.icono, s.fecha_publicacion, s.modalidad,
+                    s.disponibilidad, c.nombre_categoria, u.nombre AS proveedor, u.universidad
+                FROM servicios s
+                LEFT JOIN usuarios u ON s.id_proveedor = u.id_usuario
+                LEFT JOIN categorias c ON s.id_categoria = c.id_categoria
+                ORDER BY s.fecha_publicacion DESC
+            ", conn);
+
+            using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                servicios.Add(new
+                {
+                    id_servicio = Convert.ToInt32(reader["id_servicio"]),
+                    id_proveedor = reader["id_proveedor"] != DBNull.Value ? Convert.ToInt32(reader["id_proveedor"]) : 0,
+                    titulo = reader["titulo"]?.ToString(),
+                    descripcion = reader["descripcion"]?.ToString(),
+                    precio_hora = reader["precio_hora"],
+                    icono = reader["icono"]?.ToString() ?? "bi-pin",
+                    fecha_publicacion = reader["fecha_publicacion"] != DBNull.Value ? Convert.ToDateTime(reader["fecha_publicacion"]).ToString("yyyy-MM-dd") : "",
+                    modalidad = MapModalidad(reader["modalidad"]),
+                    disponibilidad = MapDisponibilidad(reader["disponibilidad"]),
+                    nombre_categoria = reader["nombre_categoria"]?.ToString(),
+                    proveedor = reader["proveedor"]?.ToString(),
+                    universidad = reader["universidad"]?.ToString()
+                });
+            }
+            reader.Close();
+
+            return Ok(servicios);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    // =========================
     // GET TODOS LOS SERVICIOS (CON PAGINACIÓN Y FILTROS)
     // =========================
     // Soporta: ?page=1&pageSize=8&categoria=1&busqueda=texto&orden=recientes

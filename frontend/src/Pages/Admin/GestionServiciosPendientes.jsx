@@ -12,14 +12,12 @@ export default function SeccionServiciosPendientes({ onRefresh }) {
   const cargarPendientes = async () => {
     setCargando(true);
     try {
-      const res = await fetch(`${API}/services`);
+      const res = await fetch(`${API}/services/admin/all`);
       const data = await res.json();
       const servicios = Array.isArray(data) ? data : [];
       const filtrados = servicios.filter(
         (s) =>
-          s.estado_servicio === "pendiente" ||
-          s.estado === "pendiente" ||
-          s.disponibilidad === "pendiente"
+          s.disponibilidad === "Pausado"
       );
       setPendientes(filtrados);
     } catch {
