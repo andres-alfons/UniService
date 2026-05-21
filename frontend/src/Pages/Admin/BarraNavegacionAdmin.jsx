@@ -8,6 +8,7 @@ export default function NavbarAdmin({ seccionActual, setSeccion, onCerrarSesion 
     { id: "dashboard", icon: "bi-grid-1x2-fill", label: "Dashboard" },
     { id: "usuarios", icon: "bi-people-fill", label: "Usuarios" },
     { id: "servicios", icon: "bi-card-checklist", label: "Servicios" },
+    { id: "pendientes", icon: "bi-hourglass-split", label: "Pendientes" },
     { id: "reportes", icon: "bi-flag-fill", label: "Reportes" },
     { id: "categorias", icon: "bi-tags-fill", label: "Categorías" },
     { id: "logs", icon: "bi-journal-text", label: "Actividad" },

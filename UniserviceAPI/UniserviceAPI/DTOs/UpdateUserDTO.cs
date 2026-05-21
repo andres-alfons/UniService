@@ -5,5 +5,5 @@ public class UpdateUserDTO
     public string? telefono { get; set; }
     public string? universidad { get; set; }
     public string? avatar { get; set; }
-    public int? estado { get; set; }
+    public object? estado { get; set; }
 }

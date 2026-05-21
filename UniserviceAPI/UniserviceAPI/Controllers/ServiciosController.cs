@@ -766,7 +766,7 @@ public class ServicesController : ControllerBase
         }
     }
 
-    // ── PUT /api/services/{id}/pausar (Admin)
+    // ── PUT /api/services/{id}/pausar (Admin) - Toggle disponibilidad
     [HttpPut("{id}/pausar")]
     public async Task<IActionResult> Pausar(int id)
     {
@@ -776,7 +776,7 @@ public class ServicesController : ControllerBase
             await conn.OpenAsync();
 
             using var cmd = new NpgsqlCommand(
-                "UPDATE servicios SET disponibilidad = 0 WHERE id_servicio = @id", conn);
+                "UPDATE servicios SET disponibilidad = CASE WHEN disponibilidad = 0 THEN 2 ELSE 0 END WHERE id_servicio = @id", conn);
             cmd.Parameters.AddWithValue("@id", id);
 
             int filas = await cmd.ExecuteNonQueryAsync();
@@ -829,6 +829,56 @@ public class ServicesController : ControllerBase
             cmd.Parameters.AddWithValue("@id", id);
             cmd.Parameters.AddWithValue("@id_proveedor", id_proveedor);
             await cmd.ExecuteNonQueryAsync();
+
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    // ── PUT /api/services/{id}/aprobar (Admin)
+    [HttpPut("{id}/aprobar")]
+    public async Task<IActionResult> Aprobar(int id)
+    {
+        try
+        {
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            using var cmd = new NpgsqlCommand(
+                "UPDATE servicios SET disponibilidad = 2 WHERE id_servicio = @id", conn);
+            cmd.Parameters.AddWithValue("@id", id);
+
+            int filas = await cmd.ExecuteNonQueryAsync();
+            if (filas == 0)
+                return NotFound(new { error = "Servicio no encontrado" });
+
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    // ── PUT /api/services/{id}/rechazar (Admin)
+    [HttpPut("{id}/rechazar")]
+    public async Task<IActionResult> Rechazar(int id)
+    {
+        try
+        {
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            using var cmd = new NpgsqlCommand(
+                "UPDATE servicios SET disponibilidad = -1 WHERE id_servicio = @id", conn);
+            cmd.Parameters.AddWithValue("@id", id);
+
+            int filas = await cmd.ExecuteNonQueryAsync();
+            if (filas == 0)
+                return NotFound(new { error = "Servicio no encontrado" });
 
             return Ok(new { ok = true });
         }

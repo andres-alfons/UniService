@@ -179,7 +179,15 @@ public class UsersController : ControllerBase
             if (dto.estado != null)
             {
                 fields.Add("estado = @estado");
-                cmd.Parameters.AddWithValue("@estado", dto.estado);
+                bool estadoBool = dto.estado switch
+                {
+                    bool b => b,
+                    int i => i != 0,
+                    long l => l != 0,
+                    string s => s == "1" || s.ToLower() == "true" || s.ToLower() == "activo",
+                    _ => true
+                };
+                cmd.Parameters.AddWithValue("@estado", NpgsqlTypes.NpgsqlDbType.Boolean, estadoBool);
             }
 
             if (fields.Count == 0)
