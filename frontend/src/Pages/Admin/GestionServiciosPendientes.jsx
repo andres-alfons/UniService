@@ -8,6 +8,9 @@ export default function SeccionServiciosPendientes({ onRefresh }) {
   const [cargando, setCargando] = useState(true);
   const [accionandoId, setAccionandoId] = useState(null);
   const [modal, setModal] = useState(null);
+  const [verDetalle, setVerDetalle] = useState(null);
+  const [imagenesDetalle, setImagenesDetalle] = useState([]);
+  const [cargandoImagenes, setCargandoImagenes] = useState(false);
 
   const cargarPendientes = async () => {
     setCargando(true);
@@ -16,8 +19,7 @@ export default function SeccionServiciosPendientes({ onRefresh }) {
       const data = await res.json();
       const servicios = Array.isArray(data) ? data : [];
       const filtrados = servicios.filter(
-        (s) =>
-          s.disponibilidad === "Pausado"
+        (s) => s.disponibilidad === "Pausado"
       );
       setPendientes(filtrados);
     } catch {
@@ -30,6 +32,26 @@ export default function SeccionServiciosPendientes({ onRefresh }) {
   useEffect(() => {
     cargarPendientes();
   }, []);
+
+  const verImagenes = async (id) => {
+    if (verDetalle === id) {
+      setVerDetalle(null);
+      setImagenesDetalle([]);
+      return;
+    }
+    setVerDetalle(id);
+    setCargandoImagenes(true);
+    setImagenesDetalle([]);
+    try {
+      const res = await fetch(`${API}/services/${id}`);
+      const data = await res.json();
+      setImagenesDetalle(data.imagenes || []);
+    } catch {
+      setImagenesDetalle([]);
+    } finally {
+      setCargandoImagenes(false);
+    }
+  };
 
   const aprobar = async (id) => {
     const servicio = pendientes.find((s) => s.id_servicio === id);
@@ -154,6 +176,13 @@ export default function SeccionServiciosPendientes({ onRefresh }) {
                   <td>
                     <div className="admin-table__actions">
                       <button
+                        className="admin-btn-action admin-btn-action--info"
+                        onClick={() => verImagenes(s.id_servicio)}
+                        title="Ver imágenes y detalles"
+                      >
+                        <i className="bi bi-eye"></i>
+                      </button>
+                      <button
                         className="admin-btn-action admin-btn-action--approve"
                         onClick={() => aprobar(s.id_servicio)}
                         disabled={accionandoId === s.id_servicio}
@@ -180,6 +209,115 @@ export default function SeccionServiciosPendientes({ onRefresh }) {
         </div>
       )}
 
+      {verDetalle && (
+        <div className="admin-modal-overlay" onClick={() => { setVerDetalle(null); setImagenesDetalle([]); }}>
+          <div className="admin-modal-content admin-modal-pending-detail" onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
+              <div>
+                <h3 className="admin-modal-title" style={{ margin: 0 }}>
+                  {pendientes.find((s) => s.id_servicio === verDetalle)?.titulo || "Servicio"}
+                </h3>
+                <p style={{ color: "var(--texto2)", fontSize: "0.8rem", marginTop: "4px" }}>
+                  {pendientes.find((s) => s.id_servicio === verDetalle)?.descripcion || ""}
+                </p>
+              </div>
+              <button
+                onClick={() => { setVerDetalle(null); setImagenesDetalle([]); }}
+                className="admin-btn-action admin-btn-action--ghost"
+                style={{ padding: "4px 10px", minWidth: "auto" }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "16px" }}>
+              <div style={{ background: "var(--bg2)", padding: "8px 12px", borderRadius: "6px" }}>
+                <span style={{ color: "var(--texto2)", fontSize: "0.7rem", textTransform: "uppercase" }}>Proveedor</span>
+                <p style={{ color: "var(--texto)", fontSize: "0.85rem", margin: "2px 0 0" }}>
+                  {pendientes.find((s) => s.id_servicio === verDetalle)?.proveedor || "—"}
+                </p>
+              </div>
+              <div style={{ background: "var(--bg2)", padding: "8px 12px", borderRadius: "6px" }}>
+                <span style={{ color: "var(--texto2)", fontSize: "0.7rem", textTransform: "uppercase" }}>Categoría</span>
+                <p style={{ color: "var(--texto)", fontSize: "0.85rem", margin: "2px 0 0" }}>
+                  {pendientes.find((s) => s.id_servicio === verDetalle)?.nombre_categoria || "—"}
+                </p>
+              </div>
+              <div style={{ background: "var(--bg2)", padding: "8px 12px", borderRadius: "6px" }}>
+                <span style={{ color: "var(--texto2)", fontSize: "0.7rem", textTransform: "uppercase" }}>Precio/hr</span>
+                <p style={{ color: "var(--texto)", fontSize: "0.85rem", margin: "2px 0 0" }}>
+                  ${(pendientes.find((s) => s.id_servicio === verDetalle)?.precio_hora || 0).toLocaleString("es-CO")}
+                </p>
+              </div>
+              <div style={{ background: "var(--bg2)", padding: "8px 12px", borderRadius: "6px" }}>
+                <span style={{ color: "var(--texto2)", fontSize: "0.7rem", textTransform: "uppercase" }}>Modalidad</span>
+                <p style={{ color: "var(--texto)", fontSize: "0.85rem", margin: "2px 0 0" }}>
+                  {pendientes.find((s) => s.id_servicio === verDetalle)?.modalidad || "—"}
+                </p>
+              </div>
+            </div>
+
+            <h4 style={{ color: "var(--texto)", fontSize: "0.9rem", marginBottom: "10px" }}>
+              <i className="bi bi-images" style={{ marginRight: "6px" }}></i>
+              Imágenes del servicio
+            </h4>
+
+            {cargandoImagenes ? (
+              <p style={{ color: "var(--texto2)", textAlign: "center", padding: "20px" }}>Cargando imágenes...</p>
+            ) : imagenesDetalle.length === 0 ? (
+              <p style={{ color: "var(--texto2)", textAlign: "center", padding: "20px", fontSize: "0.85rem" }}>
+                Este servicio no tiene imágenes subidas.
+              </p>
+            ) : (
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", justifyContent: "center", maxHeight: "35vh", overflowY: "auto", padding: "8px 0" }}>
+                {imagenesDetalle.map((img) => (
+                  <div
+                    key={img.id_imagen}
+                    style={{
+                      position: "relative",
+                      width: "140px",
+                      borderRadius: "8px",
+                      overflow: "hidden",
+                      border: img.es_principal ? "2px solid var(--color-success)" : "1px solid var(--borde)",
+                      background: "var(--bg2)",
+                    }}
+                  >
+                    <img
+                      src={img.url_imagen}
+                      alt="Servicio"
+                      style={{ width: "100%", height: "100px", objectFit: "cover", display: "block" }}
+                      onError={(e) => { e.target.style.display = "none"; e.target.parentElement.innerHTML += '<p style="color:var(--texto2);font-size:0.7rem;padding:10px;text-align:center;">Error al cargar</p>'; }}
+                    />
+                    {img.es_principal && (
+                      <span style={{ position: "absolute", top: "4px", left: "4px", background: "var(--color-success)", color: "#fff", fontSize: "0.55rem", padding: "1px 5px", borderRadius: "3px", fontWeight: 700 }}>
+                        Principal
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "16px", paddingTop: "16px", borderTop: "1px solid var(--borde)" }}>
+              <button
+                className="admin-btn-action admin-btn-action--approve"
+                onClick={() => { setVerDetalle(null); setImagenesDetalle([]); aprobar(verDetalle); }}
+                disabled={accionandoId === verDetalle}
+              >
+                ✓ Aprobar
+              </button>
+              <button
+                className="admin-btn-action admin-btn-action--danger"
+                onClick={() => { setVerDetalle(null); setImagenesDetalle([]); rechazar(verDetalle); }}
+                disabled={accionandoId === verDetalle}
+              >
+                ✕ Rechazar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {modal && (
         <AdminModal modal={modal} onClose={() => setModal(null)} />
       )}
@@ -190,7 +328,6 @@ export default function SeccionServiciosPendientes({ onRefresh }) {
 function AdminModal({ modal, onClose }) {
   const isConfirm = modal.tipo === "confirm";
   const isSuccess = modal.tipo === "success";
-  const isError = modal.tipo === "error";
 
   const icon = isConfirm
     ? <i className="bi bi-question-circle-fill" style={{ fontSize: "2.5rem", color: "#f59e0b" }}></i>
