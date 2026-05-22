@@ -5,13 +5,14 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useEffect } from "react";
-import { API_SOLICITUD } from "../shared/constantes";
+import { API_SOLICITUD, API_CHAT } from "../shared/constantes";
 
 // Componente que renderiza el botón de campana y el panel desplegable
 export default function NotificacionesFlotantes({ onToggleChat }) {
   const [abierto, setAbierto] = useState(false);
   const [notificaciones, setNotificaciones] = useState([]);
   const [cargando, setCargando] = useState(true);
+  const [mensajesNoLeidos, setMensajesNoLeidos] = useState(0);
 
   const usuarioId = localStorage.getItem("usuarioId");
 
@@ -124,7 +125,39 @@ export default function NotificacionesFlotantes({ onToggleChat }) {
     const handler = () => cargarNotificaciones();
     window.addEventListener("solicitud-actualizada", handler);
 
-    return () => window.removeEventListener("solicitud-actualizada", handler);
+  // Cargar mensajes no leídos
+  const cargarNoLeidos = () => {
+    if (!usuarioId) return;
+    fetch(`${API_CHAT}/no-leidos/${usuarioId}`)
+      .then((r) => r.json())
+      .then((data) => {
+        console.log("[Notificaciones] Mensajes no leídos:", data.no_leidos);
+        setMensajesNoLeidos(data.no_leidos || 0);
+      })
+      .catch(() => setMensajesNoLeidos(0));
+  };
+    cargarNoLeidos();
+    const intervalChat = setInterval(cargarNoLeidos, 15000);
+
+    // Escuchar evento de chat leído para refrescar badge
+    const chatLeidoHandler = () => cargarNoLeidos();
+    window.addEventListener("chat-leido", chatLeidoHandler);
+
+    // Escuchar nuevo mensaje para refrescar badge
+    const nuevoMsgHandler = () => cargarNoLeidos();
+    window.addEventListener("nuevo-mensaje-chat", nuevoMsgHandler);
+
+    // Escuchar chat cerrado para refrescar badge
+    const chatCerradoHandler = () => cargarNoLeidos();
+    window.addEventListener("chat-cerrado", chatCerradoHandler);
+
+    return () => {
+      window.removeEventListener("solicitud-actualizada", handler);
+      window.removeEventListener("chat-leido", chatLeidoHandler);
+      window.removeEventListener("nuevo-mensaje-chat", nuevoMsgHandler);
+      window.removeEventListener("chat-cerrado", chatCerradoHandler);
+      clearInterval(intervalChat);
+    };
   }, [usuarioId]);
 
   // Marca una notificación como leída en estado y localStorage
@@ -159,6 +192,7 @@ export default function NotificacionesFlotantes({ onToggleChat }) {
         title="Chats"
       >
         <i className="bi bi-chat-dots-fill"></i>
+        {mensajesNoLeidos > 0 && <span className="badge-notificaciones">{mensajesNoLeidos}</span>}
       </button>
 
       {/* Botón de la campana con badge de no leídas */}

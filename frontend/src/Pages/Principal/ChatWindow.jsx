@@ -26,10 +26,14 @@ export default function ChatWindow({ chat, usuarioId, usuariosOnline }) {
       })
       .catch(() => setCargando(false));
 
+    // Marcar mensajes como leídos y refrescar contador global
     fetch(`${API_CHAT}/mensajes/${chat.id_chat}/leido`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id_destinatario: usuarioId }),
+      body: JSON.stringify({ id_destinatario: parseInt(usuarioId) }),
+    }).then(() => {
+      // Disparar evento para que Notificaciones actualice el badge
+      window.dispatchEvent(new CustomEvent("chat-leido"));
     });
 
     unirseChat(chat.id_chat);

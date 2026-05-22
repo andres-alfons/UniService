@@ -37,6 +37,8 @@ export default function ChatPanel({ abierto, onCerrar, targetUsuario = null }) {
 
       const unsubMensaje = on("onMensaje", (data) => {
         cargarChats();
+        // Notificar a Notificaciones para actualizar el badge
+        window.dispatchEvent(new CustomEvent("nuevo-mensaje-chat"));
       });
 
       const unsubConectado = on("onUsuarioConectado", (id) => {
@@ -117,7 +119,10 @@ export default function ChatPanel({ abierto, onCerrar, targetUsuario = null }) {
     }
   }, [abierto, targetUsuario, usuarioId, cargarChats]);
 
-  if (!abierto) return null;
+  if (!abierto) {
+    window.dispatchEvent(new CustomEvent("chat-cerrado"));
+    return null;
+  }
 
   return (
     <div className="chat-panel-overlay" onClick={onCerrar}>

@@ -157,6 +157,7 @@ public class ChatController : ControllerBase
         updateChat.Parameters.AddWithValue("@chat", dto.id_chat);
         await updateChat.ExecuteNonQueryAsync();
 
+        Console.WriteLine($"[Chat] Mensaje insertado: chat={dto.id_chat}, remitente={dto.id_remitente}, destinatario={dto.id_destinatario}");
         return Ok(new { id_mensaje = Convert.ToInt32(idMensaje), fecha_envio = DateTime.UtcNow });
     }
 
@@ -173,6 +174,7 @@ public class ChatController : ControllerBase
         cmd.Parameters.AddWithValue("@dest", dto.id_destinatario);
 
         var afectados = await cmd.ExecuteNonQueryAsync();
+        Console.WriteLine($"[Chat] Marcados como leídos: {afectados} mensajes en chat {idChat} para usuario {dto.id_destinatario}");
         return Ok(new { marcados = afectados });
     }
 
@@ -188,6 +190,7 @@ public class ChatController : ControllerBase
         cmd.Parameters.AddWithValue("@id", idUsuario);
 
         var count = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+        Console.WriteLine($"[Chat] No leídos para usuario {idUsuario}: {count}");
         return Ok(new { no_leidos = count });
     }
 
