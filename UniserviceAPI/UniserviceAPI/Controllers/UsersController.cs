@@ -44,6 +44,11 @@ public class UsersController : ControllerBase
             // Capturamos el id_rol (1 o 2)
             int idRol = reader["id_rol"] != DBNull.Value ? Convert.ToInt32(reader["id_rol"]) : 2;
 
+            // Actualizar ultima_actividad al hacer login
+            var updateAct = new NpgsqlCommand("UPDATE usuarios SET ultima_actividad = NOW() WHERE id_usuario = @id", conn);
+            updateAct.Parameters.AddWithValue("@id", id);
+            await updateAct.ExecuteNonQueryAsync();
+
             // 🔐 GENERAR TOKEN
             var jwtKey = _config["Jwt:Key"] ?? "ClaveSuperSecretaDeRespaldo_UniServices_2026";
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
@@ -93,7 +98,7 @@ public class UsersController : ControllerBase
 
             string sql = @"
             SELECT 
-                u.id_usuario, u.nombre, u.correo, u.estado, u.id_rol,
+                u.id_usuario, u.nombre, u.correo, u.estado, u.id_rol, u.ultima_actividad,
                 COALESCE(u.avatar, '../src/img/default-avatar.png') as avatar, 
                 COALESCE(u.descripcion, 'Sin descripción') as descripcion, 
                 COALESCE(u.telefono, 'No disponible') as telefono, 
@@ -125,6 +130,7 @@ public class UsersController : ControllerBase
                     telefono = reader["telefono"]?.ToString(),
                     fecha_registro = (DateTime)reader["fecha_registro"],
                     universidad = reader["universidad"]?.ToString(),
+                    ultima_actividad = reader["ultima_actividad"] != DBNull.Value ? (DateTime?)reader["ultima_actividad"] : null,
                     total_seguidores = reader["total_seguidores"] == DBNull.Value ? 0 : Convert.ToInt32(reader["total_seguidores"]),
                     total_siguiendo = reader["total_siguiendo"] == DBNull.Value ? 0 : Convert.ToInt32(reader["total_siguiendo"]),
                     total_publicaciones = reader["total_publicaciones"] == DBNull.Value ? 0 : Convert.ToInt32(reader["total_publicaciones"]),

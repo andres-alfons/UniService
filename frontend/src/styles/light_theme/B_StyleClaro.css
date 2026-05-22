@@ -156,3 +156,17 @@
   color: #999;
 }
 
+/* Botón de chat en tema claro - mismo tamaño que notificaciones */
+[data-theme="claro"] .boton-chat-flotante {
+  width: 60px;
+  height: 60px;
+  font-size: 24px;
+  background: var(--teal);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="claro"] .boton-chat-flotante:hover {
+  background: var(--teal2);
+  transform: scale(1.1);
+}
+

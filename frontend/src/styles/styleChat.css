@@ -2,27 +2,28 @@
    SISTEMA DE CHAT EN TIEMPO REAL - ESTILOS
    ════════════════════════════════════════════════════════════════ */
 
-/* Botón flotante de chat - MISMO TAMAÑO QUE NOTIFICACIONES */
+/* Botón flotante de chat - MISMO TAMAÑO QUE NOTIFICACIONES (60x60) */
 .boton-chat-flotante {
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  background: #2ecc71;
+  background: rgb(9, 97, 94);
   color: white;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  transition: all 0.2s ease;
-  margin-bottom: 8px;
+  font-size: 24px;
+  transition: all 0.3s ease;
+  margin-bottom: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
 }
 
 .boton-chat-flotante:hover {
-  background: #27ae60;
-  transform: scale(1.05);
+  background: rgb(14, 165, 160);
+  transform: scale(1.1);
 }
 
 /* Botón de chat en perfil */
@@ -397,6 +398,32 @@
 
 .chat-window-status.offline {
   color: #666;
+}
+
+.typing-indicator {
+  color: #2ecc71;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.typing-dots span {
+  animation: typingBlink 1.4s infinite;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.typing-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typingBlink {
+  0%, 60%, 100% { opacity: 0.3; }
+  30% { opacity: 1; }
 }
 
 /* Mensajes */

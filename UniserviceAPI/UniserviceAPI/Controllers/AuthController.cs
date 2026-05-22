@@ -148,6 +148,11 @@ public class AuthController : ControllerBase
             int id = (int)reader["id_usuario"];
             int idRol = reader["id_rol"] != DBNull.Value ? Convert.ToInt32(reader["id_rol"]) : 2;
 
+            // Actualizar ultima_actividad al hacer login
+            var updateAct = new NpgsqlCommand("UPDATE usuarios SET ultima_actividad = NOW() WHERE id_usuario = @id", conn);
+            updateAct.Parameters.AddWithValue("@id", id);
+            await updateAct.ExecuteNonQueryAsync();
+
             // JWT
             var jwtKey = _config["Jwt:Key"] ?? "uniservice_super_secret_key_2026_segura_12345";
             var key = Encoding.UTF8.GetBytes(jwtKey);
@@ -254,6 +259,11 @@ public class AuthController : ControllerBase
                     id = Convert.ToInt32(result);
                     idRol = 2;
                 }
+
+                // Actualizar ultima_actividad al hacer login con Google
+                var updateActGoogle = new NpgsqlCommand("UPDATE usuarios SET ultima_actividad = NOW() WHERE id_usuario = @id", conn);
+                updateActGoogle.Parameters.AddWithValue("@id", id);
+                await updateActGoogle.ExecuteNonQueryAsync();
 
                 var jwtKey = _config["Jwt:Key"] ?? "uniservice_super_secret_key_2026_segura_12345";
                 var key = Encoding.UTF8.GetBytes(jwtKey);

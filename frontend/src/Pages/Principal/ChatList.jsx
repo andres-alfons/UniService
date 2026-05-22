@@ -24,8 +24,8 @@ export default function ChatList({ chats, chatSeleccionado, onSelectChat, usuari
     return f.toLocaleDateString();
   }
 
-  function estaOnline(usuarioId) {
-    return usuariosOnline.has(usuarioId);
+  function estaOnline(chat) {
+    return chat.en_linea || usuariosOnline.has(chat.id_otro_usuario);
   }
 
   return (
@@ -71,7 +71,7 @@ export default function ChatList({ chats, chatSeleccionado, onSelectChat, usuari
                 >
                   {chat.nombre_otro.charAt(0).toUpperCase()}
                 </div>
-                {estaOnline(chat.id_otro_usuario) && (
+                {estaOnline(chat) && (
                   <span className="online-indicator"></span>
                 )}
               </div>

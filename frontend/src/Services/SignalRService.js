@@ -50,6 +50,10 @@ export function iniciarSignalR(usuarioId) {
     (callbacks.onMensajesLeidos || []).forEach((cb) => cb(data));
   });
 
+  connection.on("UsuarioEscribiendo", (data) => {
+    (callbacks.onUsuarioEscribiendo || []).forEach((cb) => cb(data));
+  });
+
   connection
     .start()
     .then(() => {
@@ -98,6 +102,12 @@ export function salirChat(chatId) {
 export function marcarLeido(chatId, usuarioId) {
   if (connection && connection.state === signalR.HubConnectionState.Connected) {
     return connection.invoke("MarcarLeidoNotificacion", chatId, usuarioId);
+  }
+}
+
+export function enviarEscribiendo(chatId, usuarioId, escribiendo) {
+  if (connection && connection.state === signalR.HubConnectionState.Connected) {
+    return connection.invoke("EnviarEscribiendo", chatId, usuarioId, escribiendo);
   }
 }
 

@@ -76,6 +76,16 @@ public class ChatHub : Hub
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"chat_{chatId}");
     }
 
+    public async Task EnviarEscribiendo(int chatId, int usuarioId, bool escribiendo)
+    {
+        await Clients.OthersInGroup($"chat_{chatId}").SendAsync("UsuarioEscribiendo", new
+        {
+            id_chat = chatId,
+            id_usuario = usuarioId,
+            escribiendo = escribiendo
+        });
+    }
+
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         if (_userConnections.TryGetValue(Context.ConnectionId, out var usuarioId))

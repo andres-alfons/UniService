@@ -177,16 +177,18 @@ const getAvatarUrl = (avatar) => {
       .then((res) => res.json())
       .then((data) => {
         if (!data.error) {
-          // Normalizamos el estado a boolean, ya que puede llegar como 0/1, true/false o string
-          const estadoNormalizado = !!(
-            data.estado === true ||
-            data.estado === 1 ||
-            data.estado === "1"
-          );
+          // Calculamos si está en línea basado en ultima_actividad (últimos 2 minutos)
+          let enLinea = false;
+          if (data.ultima_actividad) {
+            const ultima = new Date(data.ultima_actividad);
+            const ahora = new Date();
+            const diffMinutos = (ahora - ultima) / 60000;
+            enLinea = diffMinutos < 2;
+          }
 
           setUserData({
             ...data,
-            estado: estadoNormalizado,
+            estado: enLinea,
           });
         }
       })

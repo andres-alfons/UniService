@@ -1,19 +1,22 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import ChatMessage from "./ChatMessage";
 import { API_CHAT } from "../shared/constantes";
-import { enviarMensaje, unirseChat, salirChat, on } from "../../Services/SignalRService";
+import { enviarMensaje, unirseChat, salirChat, on, enviarEscribiendo } from "../../Services/SignalRService";
 
 export default function ChatWindow({ chat, usuarioId, usuariosOnline }) {
   const [mensajes, setMensajes] = useState([]);
   const [nuevoMensaje, setNuevoMensaje] = useState("");
   const [cargando, setCargando] = useState(true);
+  const [escribiendo, setEscribiendo] = useState(false);
   const mensajesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
 
   useEffect(() => {
     if (!chat) return;
     setCargando(true);
     setMensajes([]);
+    setEscribiendo(false);
 
     fetch(`${API_CHAT}/${chat.id_chat}/mensajes`)
       .then((r) => r.json())
@@ -59,22 +62,45 @@ export default function ChatWindow({ chat, usuarioId, usuariosOnline }) {
       }
     });
 
-    return unsub;
+    const unsubTyping = on("onUsuarioEscribiendo", (data) => {
+      if (data.id_chat === chat.id_chat && data.id_usuario !== parseInt(usuarioId)) {
+        setEscribiendo(data.escribiendo);
+      }
+    });
+
+    return () => {
+      unsub();
+      unsubTyping();
+    };
   }, [chat, usuarioId]);
 
   useEffect(() => {
     mensajesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [mensajes]);
+  }, [mensajes, escribiendo]);
 
   useEffect(() => {
     if (inputRef.current) inputRef.current.focus();
   }, [chat]);
+
+  const handleInputChange = useCallback((e) => {
+    setNuevoMensaje(e.target.value);
+
+    if (chat && e.target.value.trim()) {
+      enviarEscribiendo(chat.id_chat, parseInt(usuarioId), true);
+
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => {
+        enviarEscribiendo(chat.id_chat, parseInt(usuarioId), false);
+      }, 2000);
+    }
+  }, [chat, usuarioId]);
 
   const handleEnviar = async () => {
     if (!nuevoMensaje.trim() || !chat) return;
 
     const texto = nuevoMensaje.trim();
     setNuevoMensaje("");
+    enviarEscribiendo(chat.id_chat, parseInt(usuarioId), false);
 
     const msgOptimista = {
       id_mensaje: Date.now(),
@@ -138,7 +164,7 @@ export default function ChatWindow({ chat, usuarioId, usuariosOnline }) {
   if (!chat) {
     return (
       <div className="chat-window-empty">
-        <i className="bi bi-chat-square-text" style={{ fontSize: "64px", color: "#ddd" }}></i>
+        <i className="bi bi-chat-square-text" style={{ fontSize: "64px", color: "#555" }}></i>
         <p>Selecciona una conversación</p>
       </div>
     );
@@ -170,7 +196,14 @@ export default function ChatWindow({ chat, usuarioId, usuariosOnline }) {
           <div className="chat-window-info">
             <span className="chat-window-name">{chat.nombre_otro}</span>
             <span className={`chat-window-status ${estaOnline() ? "online" : "offline"}`}>
-              {estaOnline() ? "En línea" : "Desconectado"}
+              {escribiendo ? (
+                <span className="typing-indicator">
+                  Escribiendo
+                  <span className="typing-dots">
+                    <span>.</span><span>.</span><span>.</span>
+                  </span>
+                </span>
+              ) : estaOnline() ? "En línea" : "Desconectado"}
             </span>
           </div>
         </div>
@@ -201,7 +234,7 @@ export default function ChatWindow({ chat, usuarioId, usuariosOnline }) {
         <textarea
           ref={inputRef}
           value={nuevoMensaje}
-          onChange={(e) => setNuevoMensaje(e.target.value)}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           placeholder="Escribe un mensaje..."
           rows={1}

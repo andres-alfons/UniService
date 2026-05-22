@@ -73,13 +73,17 @@ public class ChatController : ControllerBase
         using var reader = await cmd.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
+            var ultimaActividad = reader["ultima_actividad"] as DateTime?;
+            var enLinea = ultimaActividad.HasValue && (DateTime.UtcNow - ultimaActividad.Value).TotalMinutes < 2;
+
             chats.Add(new
             {
                 id_chat = reader["id_chat"],
                 id_otro_usuario = reader["id_otro_usuario"],
                 nombre_otro = reader["nombre_otro"].ToString(),
                 avatar_otro = reader["avatar_otro"].ToString(),
-                ultima_actividad = reader["ultima_actividad"] as DateTime?,
+                en_linea = enLinea,
+                ultima_actividad = ultimaActividad,
                 no_leidos = Convert.ToInt32(reader["no_leidos"]),
                 ultimo_mensaje_texto = reader["ultimo_mensaje_texto"]?.ToString(),
                 ultimo_mensaje_fecha = reader["ultimo_mensaje_fecha"] as DateTime?,
