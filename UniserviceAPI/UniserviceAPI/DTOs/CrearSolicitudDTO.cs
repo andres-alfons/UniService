@@ -24,7 +24,7 @@ public class CrearSolicitudDTO
     public string? descripcion { get; set; }
 
     public DateTime? fecha_deseada { get; set; }
-    public TimeSpan? hora_deseada { get; set; }
+    public string? hora_deseada { get; set; }
 
     public string? duracion { get; set; }
     public string? modalidad { get; set; }
