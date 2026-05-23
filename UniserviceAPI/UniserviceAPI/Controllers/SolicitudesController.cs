@@ -57,19 +57,20 @@ public class SolicitudesController : ControllerBase
             var catResult = await catCmd.ExecuteScalarAsync();
             categoria = catResult?.ToString()?.ToLower() ?? "";
 
+            
             // Validar campos obligatorios según categoría
             var camposRequeridos = GetCamposRequeridosPorCategoria(categoria);
             foreach (var campo in camposRequeridos)
             {
-                if (string.IsNullOrEmpty(campo) || campo == "descripcion")
+                if (campo == "descripcion")
                 {
                     if (string.IsNullOrEmpty(dto.descripcion))
-                        return BadRequest(new { error = $"El campo 'descripcion' es obligatorio para servicios de {categoria}" });
+                        return BadRequest(new { error = $"El campo 'descripción' es obligatorio." });
                 }
                 else if (campo == "presupuesto")
                 {
                     if (dto.presupuesto <= 0)
-                        return BadRequest(new { error = $"El campo 'presupuesto' es obligatorio para servicios de {categoria}" });
+                        return BadRequest(new { error = $"El campo 'presupuesto' es obligatorio y debe ser mayor a 0." });
                 }
             }
 
@@ -105,7 +106,9 @@ public class SolicitudesController : ControllerBase
             });
             insertCmd.Parameters.Add(new NpgsqlParameter("@hora_deseada", NpgsqlTypes.NpgsqlDbType.Time)
             {
-                Value = dto.hora_deseada.HasValue ? (object)dto.hora_deseada.Value : DBNull.Value
+                Value = !string.IsNullOrEmpty(dto.hora_deseada) && TimeSpan.TryParse(dto.hora_deseada, out var horaParseada)
+        ? (object)horaParseada
+        : DBNull.Value
             });
             insertCmd.Parameters.Add(new NpgsqlParameter("@duracion", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = (object?)dto.duracion ?? DBNull.Value });
             insertCmd.Parameters.Add(new NpgsqlParameter("@modalidad", NpgsqlTypes.NpgsqlDbType.Varchar) { Value = (object?)dto.modalidad ?? DBNull.Value });
