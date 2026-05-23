@@ -1,15 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Npgsql;
+using UniserviceAPI.Services;
 
 [ApiController]
 [Route("api/reportes")]
 public class ReportesController : ControllerBase
 {
+    // REEMPLAZA el constructor actual:
     private readonly IConfiguration _config;
+    private readonly SupabaseStorageService _storageService;
 
-    public ReportesController(IConfiguration config)
+    public ReportesController(IConfiguration config, SupabaseStorageService storageService)
     {
         _config = config;
+        _storageService = storageService;
     }
 
     // ── POST /api/reportes ── Usuario crea un reporte
@@ -203,6 +207,100 @@ public class ReportesController : ControllerBase
             Console.WriteLine($"[PATCH ERROR] Inner: {ex.InnerException?.Message}");
             Console.WriteLine($"[PATCH ERROR] Stack: {ex.StackTrace}");
             return StatusCode(500, new { ok = false, error = ex.Message, inner = ex.InnerException?.Message });
+        }
+    }
+    // ── POST /api/reportes/{id}/imagenes ── Sube imágenes de evidencia a Supabase
+    [HttpPost("{id}/imagenes")]
+    [RequestSizeLimit(52428800)]
+    [DisableRequestSizeLimit]
+    public async Task<IActionResult> SubirImagenesReporte(int id)
+    {
+        try
+        {
+            var archivos = Request.Form.Files.ToList();
+
+            if (archivos == null || archivos.Count == 0)
+                return BadRequest(new { ok = false, error = "No se recibieron imágenes." });
+
+            if (archivos.Count > 3)
+                return BadRequest(new { ok = false, error = "Máximo 3 imágenes por reporte." });
+
+            var tiposPermitidos = new[] { "image/jpeg", "image/png", "image/webp" };
+            long tamanoMaximo = 5 * 1024 * 1024; // 5MB
+
+            foreach (var archivo in archivos)
+            {
+                if (!tiposPermitidos.Contains(archivo.ContentType))
+                    return BadRequest(new { ok = false, error = "Solo se permiten imágenes JPG, PNG o WebP." });
+                if (archivo.Length > tamanoMaximo)
+                    return BadRequest(new { ok = false, error = "Cada imagen debe ser menor a 5MB." });
+            }
+
+            // Subir a Supabase usando la misma carpeta pero con prefijo "reportes/"
+            var urls = new List<string>();
+            for (int i = 0; i < archivos.Count; i++)
+            {
+                var archivo = archivos[i];
+                var extension = Path.GetExtension(archivo.FileName);
+                var nombreArchivo = $"reportes/{id}/evidencia_{i + 1}_{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}{extension}";
+
+                var supabaseUrl = _storageService.GetType()
+                    .GetField("_supabaseUrl", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.GetValue(_storageService)?.ToString() ?? "";
+                var serviceKey = _storageService.GetType()
+                    .GetField("_serviceKey", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    ?.GetValue(_storageService)?.ToString() ?? "";
+
+                // Subir directamente con HttpClient propio
+                using var http = new HttpClient();
+                using var ms = new MemoryStream();
+                await archivo.CopyToAsync(ms);
+                var bytes = ms.ToArray();
+
+                var uploadUrl = $"{supabaseUrl}/storage/v1/object/imagenes-servicios/{nombreArchivo}";
+                var req = new HttpRequestMessage(HttpMethod.Post, uploadUrl);
+                req.Headers.Add("apikey", serviceKey);
+                req.Headers.Add("Authorization", $"Bearer {serviceKey}");
+                req.Headers.Add("x-upsert", "true");
+                req.Content = new ByteArrayContent(bytes);
+                req.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(archivo.ContentType);
+
+                var resp = await http.SendAsync(req);
+                if (!resp.IsSuccessStatusCode)
+                {
+                    var err = await resp.Content.ReadAsStringAsync();
+                    return StatusCode(500, new { ok = false, error = $"Error subiendo imagen: {err}" });
+                }
+
+                urls.Add($"{supabaseUrl}/storage/v1/object/public/imagenes-servicios/{nombreArchivo}");
+            }
+
+            // Guardar URLs concatenadas en el campo evidencia del reporte
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            // Obtener evidencia actual para concatenar
+            using var getCmd = new NpgsqlCommand("SELECT evidencia FROM reportes WHERE id_reporte = @id", conn);
+            getCmd.Parameters.AddWithValue("@id", id);
+            var evidenciaActual = (await getCmd.ExecuteScalarAsync())?.ToString() ?? "";
+
+            // Combinar URLs existentes con nuevas (separadas por coma)
+            var todasUrls = string.IsNullOrEmpty(evidenciaActual)
+                ? string.Join(",", urls)
+                : evidenciaActual + "," + string.Join(",", urls);
+
+            using var updCmd = new NpgsqlCommand(
+                "UPDATE reportes SET evidencia = @evidencia WHERE id_reporte = @id", conn);
+            updCmd.Parameters.AddWithValue("@evidencia", todasUrls);
+            updCmd.Parameters.AddWithValue("@id", id);
+            await updCmd.ExecuteNonQueryAsync();
+
+            return Ok(new { ok = true, urls });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR SubirImagenesReporte] {ex.Message}");
+            return StatusCode(500, new { ok = false, error = ex.Message });
         }
     }
 }
