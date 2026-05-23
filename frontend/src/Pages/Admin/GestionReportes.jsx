@@ -12,7 +12,6 @@ const ETIQUETA_TIPO = {
   queja_general:         "💬 Queja general",
   sugerencia:            "💡 Sugerencia",
   contenido_inapropiado: "🚫 Contenido inapropiado",
-  pago_problema:         "💳 Problema de pago",
   otro:                  "📝 Otro",
 };
 

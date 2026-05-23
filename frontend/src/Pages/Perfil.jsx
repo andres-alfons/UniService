@@ -12,7 +12,7 @@ import ProgressBar from "./Perfil/BarraProgreso";
 import ActivityItem from "./Perfil/ElementoActividad";
 import BotonTema from "../Components/B_StyleHome";
 import ChatPanel from "./Principal/ChatPanel";
-
+import ModalReporte from "../Components/ModalReporte";
 // ════════════════════════════════════════════════════════════════
 // PÁGINA DE PERFIL DE USUARIO
 // Muestra la tarjeta de perfil (avatar, nombre, stats, acciones),
@@ -87,65 +87,72 @@ const Perfil = () => {
   const [listaSeguidores, setListaSeguidores] = useState([]);
   const [cargandoSeguidores, setCargandoSeguidores] = useState(false);
 
+  // Agregar junto a los otros estados
+  const [modalReporteAbierto, setModalReporteAbierto] = useState(false);
+
   // Modal de siguiendo
-const [modalSiguiendo, setModalSiguiendo] = useState(false);
+  const [modalSiguiendo, setModalSiguiendo] = useState(false);
 
   // Modal de alertas (reemplaza alert())
-  const [modalAlerta, setModalAlerta] = useState({ show: false, type: "info", title: "", message: "" });
+  const [modalAlerta, setModalAlerta] = useState({
+    show: false,
+    type: "info",
+    title: "",
+    message: "",
+  });
   const [chatPanelAbierto, setChatPanelAbierto] = useState(false);
 
   const mostrarAlerta = (type, title, message) => {
     setModalAlerta({ show: true, type, title, message });
   };
-const [listaSiguiendo, setListaSiguiendo] = useState([]);
-const [cargandoSiguiendo, setCargandoSiguiendo] = useState(false);
+  const [listaSiguiendo, setListaSiguiendo] = useState([]);
+  const [cargandoSiguiendo, setCargandoSiguiendo] = useState(false);
 
-// Modal de gestión de imágenes
-const [editandoImagenes, setEditandoImagenes] = useState(null);
-const [imagenesServicio, setImagenesServicio] = useState([]);
-const [cargandoImagenes, setCargandoImagenes] = useState(false);
-const fileInputRefImagenes = useRef(null);
-
+  // Modal de gestión de imágenes
+  const [editandoImagenes, setEditandoImagenes] = useState(null);
+  const [imagenesServicio, setImagenesServicio] = useState([]);
+  const [cargandoImagenes, setCargandoImagenes] = useState(false);
+  const fileInputRefImagenes = useRef(null);
 
   const abrirModalSeguidores = async () => {
-  setModalSeguidores(true);
-  setCargandoSeguidores(true);
-  try {
-    const res = await fetch(
-      `/api/seguidores/lista?id_usuario=${id_a_consultar}`
-    );
-    const data = await res.json();
-    setListaSeguidores(data);
-  } catch (err) {
-    console.error("Error al cargar seguidores:", err);
-  } finally {
-    setCargandoSeguidores(false);
-  }
-};
+    setModalSeguidores(true);
+    setCargandoSeguidores(true);
+    try {
+      const res = await fetch(
+        `/api/seguidores/lista?id_usuario=${id_a_consultar}`,
+      );
+      const data = await res.json();
+      setListaSeguidores(data);
+    } catch (err) {
+      console.error("Error al cargar seguidores:", err);
+    } finally {
+      setCargandoSeguidores(false);
+    }
+  };
 
-const abrirModalSiguiendo = async () => {
-  setModalSiguiendo(true);
-  setCargandoSiguiendo(true);
-  try {
-    const res = await fetch(
-      `/api/seguidores/siguiendo?id_usuario=${id_a_consultar}`
-    );
-    const data = await res.json();
-    setListaSiguiendo(data);
-  } catch (err) {
-    console.error("Error al cargar siguiendo:", err);
-  } finally {
-    setCargandoSiguiendo(false);
-  }
-};
+  const abrirModalSiguiendo = async () => {
+    setModalSiguiendo(true);
+    setCargandoSiguiendo(true);
+    try {
+      const res = await fetch(
+        `/api/seguidores/siguiendo?id_usuario=${id_a_consultar}`,
+      );
+      const data = await res.json();
+      setListaSiguiendo(data);
+    } catch (err) {
+      console.error("Error al cargar siguiendo:", err);
+    } finally {
+      setCargandoSiguiendo(false);
+    }
+  };
 
-const getAvatarUrl = (avatar) => {
-  if (!avatar) return "/img/default_avatar.png";
-  if (avatar === "img/default_avatar.png") return "/img/default_avatar.png"; // 👈 este caso
-  if (avatar.startsWith("http")) return avatar;
-  if (avatar.startsWith("/src") || avatar.startsWith("../")) return avatar;
-  return `/${avatar}`;
-};
+  const getAvatarUrl = (avatar) => {
+    if (!avatar) return "/img/default_avatar.png";
+    if (avatar === "img/default_avatar.png") return "/img/default_avatar.png"; // 👈 este caso
+    if (avatar.startsWith("http")) return avatar;
+    if (avatar.startsWith("/src") || avatar.startsWith("../")) return avatar;
+    return `/${avatar}`;
+  };
 
   // ════════════════════════════════════════════════════════════
   // SABER SI YA SEGUIMOS A ESTE USUARIO (solo en perfil externo)
@@ -153,9 +160,11 @@ const getAvatarUrl = (avatar) => {
 
   useEffect(() => {
     if (esPerfilExterno && id_usuario_logueado && id_a_consultar) {
-      fetch(`/api/seguidores/estado?seguidor=${id_usuario_logueado}&seguido=${id_a_consultar}`)
+      fetch(
+        `/api/seguidores/estado?seguidor=${id_usuario_logueado}&seguido=${id_a_consultar}`,
+      )
         .then((res) => res.json())
-        .then((data) => setSiguiendo(data.sigues))  // ← también cambia esSeguidor → sigues
+        .then((data) => setSiguiendo(data.sigues)) // ← también cambia esSeguidor → sigues
         .catch((err) => console.error("Error al verificar seguimiento:", err));
     }
   }, [id_a_consultar, esPerfilExterno, id_usuario_logueado]);
@@ -284,14 +293,11 @@ const getAvatarUrl = (avatar) => {
       icono: s.icono || "bi-pin",
     };
 
-    const res = await fetch(
-      `/api/services/${s.id_servicio}`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      },
-    );
+    const res = await fetch(`/api/services/${s.id_servicio}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
 
     if (res.ok) {
       // Actualizamos solo el servicio modificado en el estado local (sin recargar toda la lista)
@@ -337,7 +343,11 @@ const getAvatarUrl = (avatar) => {
       const res = await fetch(`/api/services/${servicio.id_servicio}`);
       const data = await res.json();
       const imgs = (data.imagenes || [])
-        .filter((img) => !img.url_imagen?.includes("default") && !img.url_imagen?.startsWith("img/"))
+        .filter(
+          (img) =>
+            !img.url_imagen?.includes("default") &&
+            !img.url_imagen?.startsWith("img/"),
+        )
         .sort((a, b) => new Date(a.fecha_subida) - new Date(b.fecha_subida));
       setImagenesServicio(imgs);
     } catch (err) {
@@ -353,12 +363,18 @@ const getAvatarUrl = (avatar) => {
     if (files.length === 0) return;
 
     // Contar solo imágenes reales (excluir default)
-    const imagenesReales = imagenesServicio.filter(img => 
-      !img.url_imagen?.includes("default") && !img.url_imagen?.startsWith("img/")
+    const imagenesReales = imagenesServicio.filter(
+      (img) =>
+        !img.url_imagen?.includes("default") &&
+        !img.url_imagen?.startsWith("img/"),
     );
 
     if (imagenesReales.length + files.length > 5) {
-      mostrarAlerta("advertencia", "Límite alcanzado", `Máximo 5 imágenes permitidas. Puedes subir ${5 - imagenesReales.length} más.`);
+      mostrarAlerta(
+        "advertencia",
+        "Límite alcanzado",
+        `Máximo 5 imágenes permitidas. Puedes subir ${5 - imagenesReales.length} más.`,
+      );
       return;
     }
 
@@ -366,25 +382,46 @@ const getAvatarUrl = (avatar) => {
     files.forEach((file) => formData.append("imagenes", file));
 
     try {
-      const res = await fetch(`/api/services/${editandoImagenes.id_servicio}/imagenes`, {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(
+        `/api/services/${editandoImagenes.id_servicio}/imagenes`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
       const data = await res.json();
       if (data.ok) {
-        const res = await fetch(`/api/services/${editandoImagenes.id_servicio}`);
+        const res = await fetch(
+          `/api/services/${editandoImagenes.id_servicio}`,
+        );
         const servicioData = await res.json();
         const imgs = (servicioData.imagenes || [])
-          .filter(img => !img.url_imagen?.includes("default") && !img.url_imagen?.startsWith("img/"))
+          .filter(
+            (img) =>
+              !img.url_imagen?.includes("default") &&
+              !img.url_imagen?.startsWith("img/"),
+          )
           .sort((a, b) => new Date(a.fecha_subida) - new Date(b.fecha_subida));
         setImagenesServicio(imgs);
-        mostrarAlerta("exito", "Imágenes subidas", "Las imágenes se subieron correctamente.");
+        mostrarAlerta(
+          "exito",
+          "Imágenes subidas",
+          "Las imágenes se subieron correctamente.",
+        );
       } else {
-        mostrarAlerta("error", "Error", data.error || "No se pudieron subir las imágenes.");
+        mostrarAlerta(
+          "error",
+          "Error",
+          data.error || "No se pudieron subir las imágenes.",
+        );
       }
     } catch (err) {
       console.error("Error subiendo imágenes:", err);
-      mostrarAlerta("error", "Error de conexión", "No se pudo conectar con el servidor para subir las imágenes.");
+      mostrarAlerta(
+        "error",
+        "Error de conexión",
+        "No se pudo conectar con el servidor para subir las imágenes.",
+      );
     }
 
     event.target.value = "";
@@ -394,18 +431,27 @@ const getAvatarUrl = (avatar) => {
     if (!confirm("¿Eliminar esta imagen?")) return;
 
     try {
-      const res = await fetch(`/api/services/${editandoImagenes.id_servicio}/imagenes/${idImagen}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `/api/services/${editandoImagenes.id_servicio}/imagenes/${idImagen}`,
+        {
+          method: "DELETE",
+        },
+      );
       const data = await res.json();
       if (data.ok) {
-        setImagenesServicio((prev) => prev.filter((img) => img.id_imagen !== idImagen));
+        setImagenesServicio((prev) =>
+          prev.filter((img) => img.id_imagen !== idImagen),
+        );
       } else {
         mostrarAlerta("error", "Error", "No se pudo eliminar la imagen.");
       }
     } catch (err) {
       console.error("Error eliminando imagen:", err);
-      mostrarAlerta("error", "Error de conexión", "No se pudo conectar con el servidor para eliminar la imagen.");
+      mostrarAlerta(
+        "error",
+        "Error de conexión",
+        "No se pudo conectar con el servidor para eliminar la imagen.",
+      );
     }
   };
 
@@ -424,17 +470,28 @@ const getAvatarUrl = (avatar) => {
     try {
       for (let i = 0; i < imagenesServicio.length; i++) {
         const img = imagenesServicio[i];
-        await fetch(`/api/services/${editandoImagenes.id_servicio}/imagenes/${img.id_imagen}/orden`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ orden: i, es_principal: i === 0 }),
-        });
+        await fetch(
+          `/api/services/${editandoImagenes.id_servicio}/imagenes/${img.id_imagen}/orden`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orden: i, es_principal: i === 0 }),
+          },
+        );
       }
-      mostrarAlerta("exito", "Orden guardado", "El orden de las imágenes se guardó correctamente.");
+      mostrarAlerta(
+        "exito",
+        "Orden guardado",
+        "El orden de las imágenes se guardó correctamente.",
+      );
       setEditandoImagenes(null);
     } catch (err) {
       console.error("Error guardando orden:", err);
-      mostrarAlerta("error", "Error", "No se pudo guardar el orden de las imágenes.");
+      mostrarAlerta(
+        "error",
+        "Error",
+        "No se pudo guardar el orden de las imágenes.",
+      );
     }
   };
 
@@ -452,7 +509,11 @@ const getAvatarUrl = (avatar) => {
       } else {
         // Fallback: copiar el enlace al portapapeles en navegadores de escritorio
         await navigator.clipboard.writeText(window.location.href);
-        mostrarAlerta("exito", "Enlace copiado", "¡El enlace de tu perfil se copió al portapapeles!");
+        mostrarAlerta(
+          "exito",
+          "Enlace copiado",
+          "¡El enlace de tu perfil se copió al portapapeles!",
+        );
       }
     } catch (err) {
       console.error("Error al compartir:", err);
@@ -472,17 +533,14 @@ const getAvatarUrl = (avatar) => {
     formData.append("id_usuario", id_usuario_logueado);
 
     try {
-      const response = await fetch(
-        "/api/usuarios/upload-avatar",
-        {
-          method: "POST",
-          headers: {
-            // No incluyas Content-Type, el navegador lo pondrá automáticamente con el boundary correcto
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: formData,
+      const response = await fetch("/api/usuarios/upload-avatar", {
+        method: "POST",
+        headers: {
+          // No incluyas Content-Type, el navegador lo pondrá automáticamente con el boundary correcto
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      );
+        body: formData,
+      });
 
       const result = await response.json();
 
@@ -491,11 +549,19 @@ const getAvatarUrl = (avatar) => {
         setUserData((prev) => ({ ...prev, avatar: result.avatarUrl }));
         setActiveModal(null);
       } else {
-        mostrarAlerta("error", "Error al subir", result.error || "Error en el servidor.");
+        mostrarAlerta(
+          "error",
+          "Error al subir",
+          result.error || "Error en el servidor.",
+        );
       }
     } catch (err) {
       console.error("Error en subida:", err);
-      mostrarAlerta("error", "Error de conexión", "No se pudo conectar con el servidor.");
+      mostrarAlerta(
+        "error",
+        "Error de conexión",
+        "No se pudo conectar con el servidor.",
+      );
     }
   };
 
@@ -505,7 +571,11 @@ const getAvatarUrl = (avatar) => {
     try {
       const partes = fecha.split("T")[0].split("-");
       if (partes.length !== 3) return "Fecha desconocida";
-      return new Date(+partes[0], +partes[1] - 1, +partes[2]).toLocaleDateString("es-ES", {
+      return new Date(
+        +partes[0],
+        +partes[1] - 1,
+        +partes[2],
+      ).toLocaleDateString("es-ES", {
         month: "long",
         year: "numeric",
       });
@@ -534,45 +604,49 @@ const getAvatarUrl = (avatar) => {
   // Maneja la lógica de seguir/dejar de seguir
   // Usa el flag enviandoSeguimiento para bloquear el botón mientras espera respuesta
   const toggleSeguir = async () => {
-  if (enviandoSeguimiento) return;
-  setEnviandoSeguimiento(true);
+    if (enviandoSeguimiento) return;
+    setEnviandoSeguimiento(true);
 
-  // Guardamos el estado ANTES de llamar al API
-  const accionActual = siguiendo;
+    // Guardamos el estado ANTES de llamar al API
+    const accionActual = siguiendo;
 
-  try {
-    const response = await fetch(`/api/seguidores/toggle`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify({
-        id_seguidor: parseInt(id_usuario_logueado),
-        id_seguido: parseInt(id_a_consultar),
-      }),
-    });
+    try {
+      const response = await fetch(`/api/seguidores/toggle`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          id_seguidor: parseInt(id_usuario_logueado),
+          id_seguido: parseInt(id_a_consultar),
+        }),
+      });
 
-    if (response.ok) {
-      // No dependemos del string del SP, usamos el estado anterior invertido
-      const ahoraSigue = !accionActual;
-      setSiguiendo(ahoraSigue);
-      setUserData((prev) => ({
-        ...prev,
-        total_seguidores: ahoraSigue
-          ? (prev.total_seguidores || 0) + 1
-          : Math.max(0, (prev.total_seguidores || 0) - 1),
-      }));
-    } else {
-      mostrarAlerta("error", "Error", "No se pudo procesar el seguimiento.");
+      if (response.ok) {
+        // No dependemos del string del SP, usamos el estado anterior invertido
+        const ahoraSigue = !accionActual;
+        setSiguiendo(ahoraSigue);
+        setUserData((prev) => ({
+          ...prev,
+          total_seguidores: ahoraSigue
+            ? (prev.total_seguidores || 0) + 1
+            : Math.max(0, (prev.total_seguidores || 0) - 1),
+        }));
+      } else {
+        mostrarAlerta("error", "Error", "No se pudo procesar el seguimiento.");
+      }
+    } catch (error) {
+      console.error("Error de conexión:", error);
+      mostrarAlerta(
+        "error",
+        "Error de conexión",
+        "No se pudo conectar con el servidor para procesar el seguimiento.",
+      );
+    } finally {
+      setEnviandoSeguimiento(false);
     }
-  } catch (error) {
-    console.error("Error de conexión:", error);
-    mostrarAlerta("error", "Error de conexión", "No se pudo conectar con el servidor para procesar el seguimiento.");
-  } finally {
-    setEnviandoSeguimiento(false);
-  }
-};
+  };
 
   // ════════════════════════════════
   // JSX
@@ -640,21 +714,21 @@ const getAvatarUrl = (avatar) => {
                     style={{ cursor: "pointer" }}
                     title="Ver seguidores"
                   >
-                <StatItem
-                    value={formatearNumero(userData.total_seguidores)}
-                    label="Seguidores"
-                />
-</div>
+                    <StatItem
+                      value={formatearNumero(userData.total_seguidores)}
+                      label="Seguidores"
+                    />
+                  </div>
                   <div
-                      onClick={abrirModalSiguiendo}
-                      style={{ cursor: "pointer" }}
-                      title="Ver siguiendo"
+                    onClick={abrirModalSiguiendo}
+                    style={{ cursor: "pointer" }}
+                    title="Ver siguiendo"
                   >
-                  <StatItem
+                    <StatItem
                       value={userData.total_siguiendo}
                       label="Siguiendo"
-                  />
-</div>
+                    />
+                  </div>
                 </div>
 
                 <div className="action-buttons">
@@ -667,7 +741,15 @@ const getAvatarUrl = (avatar) => {
                         disabled={enviandoSeguimiento}
                         style={{ flex: 1 }}
                       >
-                        {siguiendo ? <><i className="bi bi-check-lg"></i> Siguiendo</> : <><i className="bi bi-plus-lg"></i> Seguir</>}
+                        {siguiendo ? (
+                          <>
+                            <i className="bi bi-check-lg"></i> Siguiendo
+                          </>
+                        ) : (
+                          <>
+                            <i className="bi bi-plus-lg"></i> Seguir
+                          </>
+                        )}
                       </button>
                       <button
                         className="btn btn-primary btn-chat-perfil"
@@ -691,7 +773,9 @@ const getAvatarUrl = (avatar) => {
                         onClick={() => setActiveModal("info")}
                         style={{ flex: 1 }}
                       >
-                        <><i className="bi bi-pencil"></i> Editar Perfil</>
+                        <>
+                          <i className="bi bi-pencil"></i> Editar Perfil
+                        </>
                       </button>
                       <button
                         className="btn btn-secondary"
@@ -708,32 +792,32 @@ const getAvatarUrl = (avatar) => {
 
             {/* ══ PANEL DERECHO ══ */}
             <div className="right-panel">
-              
               {/* El estado verde/rojo refleja el campo "estado" real de la BD */}
               <section className="menu-section">
-                <div className="section-title"><i className="bi bi-bar-chart-fill"></i> Estado y Actividad</div>
+                <div className="section-title">
+                  <i className="bi bi-bar-chart-fill"></i> Estado y Actividad
+                </div>
                 <div className="menu-list">
                   {esPerfilExterno && (
-                 <div className="menu-item" style={{ cursor: "default" }}>
-                    
-                    <div className="menu-icon">
-                      <i className={`bi bi-circle-fill ${estaConectado ? "text-success" : "text-danger"}`}></i>
-                    </div>
-                    <div className="menu-text">
-                      <div className="menu-title">Estado actual</div>
-                      <div className="menu-desc">
-                        {estaConectado ? "Disponible" : "No disponible"}
+                    <div className="menu-item" style={{ cursor: "default" }}>
+                      <div className="menu-icon">
+                        <i
+                          className={`bi bi-circle-fill ${estaConectado ? "text-success" : "text-danger"}`}
+                        ></i>
                       </div>
+                      <div className="menu-text">
+                        <div className="menu-title">Estado actual</div>
+                        <div className="menu-desc">
+                          {estaConectado ? "Disponible" : "No disponible"}
+                        </div>
+                      </div>
+                      <span
+                        className={`status-tag ${estaConectado ? "online" : "busy"}`}
+                      >
+                        {estaConectado ? "Conectado" : "Desconectado"}
+                      </span>
                     </div>
-                    <span
-                      className={`status-tag ${estaConectado ? "online" : "busy"}`}
-                    >
-                      {estaConectado ? "Conectado" : "Desconectado"}
-                    </span>
-                    </div>
-              )}
-                 
-                  
+                  )}
 
                   {/* La sección de actividad solo es visible para el dueño del perfil */}
                   {!esPerfilExterno && (
@@ -755,7 +839,9 @@ const getAvatarUrl = (avatar) => {
 
               {/* Información del perfil */}
               <section className="menu-section">
-                <div className="section-title"><i className="bi bi-clipboard-data"></i> Información</div>
+                <div className="section-title">
+                  <i className="bi bi-clipboard-data"></i> Información
+                </div>
                 <div className="info-grid">
                   <InfoItem label="Correo" value={userData.correo} />
                   <InfoItem
@@ -780,6 +866,17 @@ const getAvatarUrl = (avatar) => {
                         title="Seguridad"
                         desc="Gestiona tu cuenta"
                         onClick={() => setActiveModal("seguridad")}
+                      />
+                      <MenuItem
+                        icon={
+                          <i
+                            className="bi bi-flag-fill"
+                            style={{ color: "#ff6b6b" }}
+                          ></i>
+                        }
+                        title="Enviar un reporte"
+                        desc="Reporta un error, fraude o problema"
+                        onClick={() => setModalReporteAbierto(true)}
                       />
                     </div>
                   )}
@@ -816,7 +913,11 @@ const getAvatarUrl = (avatar) => {
                             padding: "10px",
                           }}
                         >
-                          <div className="menu-icon"><i className={`bi ${s.icono?.startsWith("bi-") ? s.icono : "bi-pin"}`}></i></div>
+                          <div className="menu-icon">
+                            <i
+                              className={`bi ${s.icono?.startsWith("bi-") ? s.icono : "bi-pin"}`}
+                            ></i>
+                          </div>
                           <div
                             className="menu-text"
                             style={{ flex: 1, minWidth: 0, marginLeft: "10px" }}
@@ -841,37 +942,37 @@ const getAvatarUrl = (avatar) => {
                             </div>
                           </div>
 
-                           <div
-                             style={{
-                               display: "flex",
-                               gap: "8px",
-                               flexShrink: 0,
-                               alignItems: "center",
-                             }}
-                           >
-                             {/* Botón gestionar imágenes */}
-                             <button
-                               className="btn btn-primary"
-                               style={{
-                                 width: "36px",
-                                 height: "36px",
-                                 display: "flex",
-                                 alignItems: "center",
-                                 justifyContent: "center",
-                                 fontSize: "0.85rem",
-                                 padding: 0,
-                                 margin: 0,
-                                 lineHeight: 1,
-                                 background: "transparent",
-                                 borderColor: "rgba(52, 211, 153, 0.4)",
-                                 color: "#34d399",
-                               }}
-                               onClick={() => abrirEditorImagenes(s)}
-                               title="Gestionar imágenes"
-                             >
-                               <i className="bi bi-images"></i>
-                             </button>
-                             {/* Botón editar: carga el servicio en el estado "editando" */}
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: "8px",
+                              flexShrink: 0,
+                              alignItems: "center",
+                            }}
+                          >
+                            {/* Botón gestionar imágenes */}
+                            <button
+                              className="btn btn-primary"
+                              style={{
+                                width: "36px",
+                                height: "36px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "0.85rem",
+                                padding: 0,
+                                margin: 0,
+                                lineHeight: 1,
+                                background: "transparent",
+                                borderColor: "rgba(52, 211, 153, 0.4)",
+                                color: "#34d399",
+                              }}
+                              onClick={() => abrirEditorImagenes(s)}
+                              title="Gestionar imágenes"
+                            >
+                              <i className="bi bi-images"></i>
+                            </button>
+                            {/* Botón editar: carga el servicio en el estado "editando" */}
                             <button
                               className="btn btn-primary"
                               style={{
@@ -930,7 +1031,9 @@ const getAvatarUrl = (avatar) => {
                     className="image-menu"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <h3 className="image-menu-title"><i className="bi bi-trash"></i> Eliminar servicio</h3>
+                    <h3 className="image-menu-title">
+                      <i className="bi bi-trash"></i> Eliminar servicio
+                    </h3>
                     <p
                       style={{
                         opacity: 0.7,
@@ -946,7 +1049,9 @@ const getAvatarUrl = (avatar) => {
                         className="image-option"
                         onClick={() => setConfirmEliminar(null)}
                       >
-                        <span className="image-option-icon"><i className="bi bi-arrow-return-left"></i></span>
+                        <span className="image-option-icon">
+                          <i className="bi bi-arrow-return-left"></i>
+                        </span>
                         <div className="image-option-text">
                           <b>Cancelar</b>
                         </div>
@@ -956,7 +1061,9 @@ const getAvatarUrl = (avatar) => {
                         onClick={confirmarEliminar}
                         style={{ borderColor: "rgba(239,68,68,0.3)" }}
                       >
-                        <span className="image-option-icon"><i className="bi bi-trash"></i></span>
+                        <span className="image-option-icon">
+                          <i className="bi bi-trash"></i>
+                        </span>
                         <div
                           className="image-option-text"
                           style={{ color: "#f87171" }}
@@ -985,7 +1092,9 @@ const getAvatarUrl = (avatar) => {
                       overflowY: "auto",
                     }}
                   >
-                    <h3 className="image-menu-title"><i className="bi bi-pencil"></i> Editar servicio</h3>
+                    <h3 className="image-menu-title">
+                      <i className="bi bi-pencil"></i> Editar servicio
+                    </h3>
 
                     {/* Generamos los campos del formulario dinámicamente desde un array */}
                     {[
@@ -1067,7 +1176,9 @@ const getAvatarUrl = (avatar) => {
                         className="image-option"
                         onClick={() => setEditando(null)}
                       >
-                        <span className="image-option-icon"><i className="bi bi-arrow-return-left"></i></span>
+                        <span className="image-option-icon">
+                          <i className="bi bi-arrow-return-left"></i>
+                        </span>
                         <div className="image-option-text">
                           <b>Cancelar</b>
                         </div>
@@ -1076,7 +1187,9 @@ const getAvatarUrl = (avatar) => {
                         className="image-option"
                         onClick={() => guardarEdicion(editando)}
                       >
-                        <span className="image-option-icon"><i className="bi bi-save"></i></span>
+                        <span className="image-option-icon">
+                          <i className="bi bi-save"></i>
+                        </span>
                         <div className="image-option-text">
                           <b>Guardar cambios</b>
                         </div>
@@ -1102,10 +1215,18 @@ const getAvatarUrl = (avatar) => {
                     }}
                   >
                     <h3 className="image-menu-title">
-                      <i className="bi bi-images"></i> Imágenes de "{editandoImagenes.titulo}"
+                      <i className="bi bi-images"></i> Imágenes de "
+                      {editandoImagenes.titulo}"
                     </h3>
-                    <p style={{ opacity: 0.6, fontSize: "0.85rem", margin: "0 0 16px" }}>
-                      {imagenesServicio.length}/5 — Usa ↑↓ para cambiar el orden. La primera es la portada.
+                    <p
+                      style={{
+                        opacity: 0.6,
+                        fontSize: "0.85rem",
+                        margin: "0 0 16px",
+                      }}
+                    >
+                      {imagenesServicio.length}/5 — Usa ↑↓ para cambiar el
+                      orden. La primera es la portada.
                     </p>
 
                     <input
@@ -1118,20 +1239,34 @@ const getAvatarUrl = (avatar) => {
                     />
 
                     {cargandoImagenes ? (
-                      <p style={{ textAlign: "center", padding: "20px", opacity: 0.6 }}>
+                      <p
+                        style={{
+                          textAlign: "center",
+                          padding: "20px",
+                          opacity: 0.6,
+                        }}
+                      >
                         <i className="bi bi-hourglass-split"></i> Cargando...
                       </p>
                     ) : imagenesServicio.length === 0 ? (
-                      <p style={{ textAlign: "center", padding: "20px", opacity: 0.5 }}>
+                      <p
+                        style={{
+                          textAlign: "center",
+                          padding: "20px",
+                          opacity: 0.5,
+                        }}
+                      >
                         No hay imágenes. ¡Agrega una!
                       </p>
                     ) : (
-                      <div style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "8px",
-                        marginBottom: "16px",
-                      }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "8px",
+                          marginBottom: "16px",
+                        }}
+                      >
                         {imagenesServicio.map((img, index) => (
                           <div
                             key={img.id_imagen}
@@ -1141,24 +1276,35 @@ const getAvatarUrl = (avatar) => {
                               gap: "10px",
                               padding: "8px",
                               borderRadius: "8px",
-                              background: index === 0 ? "rgba(52, 211, 153, 0.08)" : "rgba(255,255,255,0.03)",
-                              border: index === 0 ? "1px solid rgba(52, 211, 153, 0.3)" : "1px solid rgba(255,255,255,0.08)",
+                              background:
+                                index === 0
+                                  ? "rgba(52, 211, 153, 0.08)"
+                                  : "rgba(255,255,255,0.03)",
+                              border:
+                                index === 0
+                                  ? "1px solid rgba(52, 211, 153, 0.3)"
+                                  : "1px solid rgba(255,255,255,0.08)",
                             }}
                           >
                             {/* Número de orden */}
-                            <span style={{
-                              minWidth: "24px",
-                              height: "24px",
-                              borderRadius: "50%",
-                              background: index === 0 ? "#34d399" : "rgba(255,255,255,0.1)",
-                              color: index === 0 ? "#000" : "inherit",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              fontSize: "0.75rem",
-                              fontWeight: "bold",
-                              flexShrink: 0,
-                            }}>
+                            <span
+                              style={{
+                                minWidth: "24px",
+                                height: "24px",
+                                borderRadius: "50%",
+                                background:
+                                  index === 0
+                                    ? "#34d399"
+                                    : "rgba(255,255,255,0.1)",
+                                color: index === 0 ? "#000" : "inherit",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "0.75rem",
+                                fontWeight: "bold",
+                                flexShrink: 0,
+                              }}
+                            >
                               {index + 1}
                             </span>
 
@@ -1180,23 +1326,27 @@ const getAvatarUrl = (avatar) => {
 
                             {/* Info */}
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{
-                                fontSize: "0.8rem",
-                                fontWeight: "bold",
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                              }}>
+                              <div
+                                style={{
+                                  fontSize: "0.8rem",
+                                  fontWeight: "bold",
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                              >
                                 {index === 0 && "⭐ Portada"}
                               </div>
-                              <div 
-                                style={{ 
-                                  fontSize: "0.7rem", 
+                              <div
+                                style={{
+                                  fontSize: "0.7rem",
                                   opacity: 0.5,
                                   cursor: "pointer",
                                   textDecoration: "underline",
                                 }}
-                                onClick={() => window.open(img.url_imagen, "_blank")}
+                                onClick={() =>
+                                  window.open(img.url_imagen, "_blank")
+                                }
                                 title="Click para ver imagen"
                               >
                                 Click para ver imagen
@@ -1204,14 +1354,24 @@ const getAvatarUrl = (avatar) => {
                             </div>
 
                             {/* Flechas de orden */}
-                            <div style={{ display: "flex", flexDirection: "column", gap: "2px", flexShrink: 0 }}>
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "2px",
+                                flexShrink: 0,
+                              }}
+                            >
                               <button
                                 onClick={() => moverImagen(index, -1)}
                                 disabled={index === 0}
                                 style={{
                                   background: "transparent",
                                   border: "1px solid rgba(255,255,255,0.15)",
-                                  color: index === 0 ? "rgba(255,255,255,0.2)" : "inherit",
+                                  color:
+                                    index === 0
+                                      ? "rgba(255,255,255,0.2)"
+                                      : "inherit",
                                   width: "28px",
                                   height: "24px",
                                   borderRadius: "4px",
@@ -1230,11 +1390,17 @@ const getAvatarUrl = (avatar) => {
                                 style={{
                                   background: "transparent",
                                   border: "1px solid rgba(255,255,255,0.15)",
-                                  color: index === imagenesServicio.length - 1 ? "rgba(255,255,255,0.2)" : "inherit",
+                                  color:
+                                    index === imagenesServicio.length - 1
+                                      ? "rgba(255,255,255,0.2)"
+                                      : "inherit",
                                   width: "28px",
                                   height: "24px",
                                   borderRadius: "4px",
-                                  cursor: index === imagenesServicio.length - 1 ? "default" : "pointer",
+                                  cursor:
+                                    index === imagenesServicio.length - 1
+                                      ? "default"
+                                      : "pointer",
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
@@ -1247,7 +1413,9 @@ const getAvatarUrl = (avatar) => {
 
                             {/* Eliminar */}
                             <button
-                              onClick={() => eliminarImagenServicio(img.id_imagen)}
+                              onClick={() =>
+                                eliminarImagenServicio(img.id_imagen)
+                              }
                               style={{
                                 background: "rgba(239,68,68,0.15)",
                                 border: "1px solid rgba(239,68,68,0.3)",
@@ -1301,7 +1469,9 @@ const getAvatarUrl = (avatar) => {
                         className="image-option"
                         onClick={() => setEditandoImagenes(null)}
                       >
-                        <span className="image-option-icon"><i className="bi bi-arrow-return-left"></i></span>
+                        <span className="image-option-icon">
+                          <i className="bi bi-arrow-return-left"></i>
+                        </span>
                         <div className="image-option-text">
                           <b>Cancelar</b>
                         </div>
@@ -1311,7 +1481,9 @@ const getAvatarUrl = (avatar) => {
                         onClick={guardarOrdenImagenes}
                         disabled={imagenesServicio.length === 0}
                       >
-                        <span className="image-option-icon"><i className="bi bi-save"></i></span>
+                        <span className="image-option-icon">
+                          <i className="bi bi-save"></i>
+                        </span>
                         <div className="image-option-text">
                           <b>Guardar orden</b>
                         </div>
@@ -1331,7 +1503,9 @@ const getAvatarUrl = (avatar) => {
             onClick={() => setActiveModal(null)}
           >
             <div className="image-menu" onClick={(e) => e.stopPropagation()}>
-              <h3 className="image-menu-title"><i className="bi bi-pencil"></i> Editar Perfil</h3>
+              <h3 className="image-menu-title">
+                <i className="bi bi-pencil"></i> Editar Perfil
+              </h3>
               <div className="image-menu-options">
                 {/* Cada botón usa prompt() para pedir el nuevo valor y llama a handleUpdate */}
 
@@ -1342,7 +1516,9 @@ const getAvatarUrl = (avatar) => {
                     if (n) handleUpdate("nombre", n);
                   }}
                 >
-                  <span className="image-option-icon"><i className="bi bi-pencil"></i></span>
+                  <span className="image-option-icon">
+                    <i className="bi bi-pencil"></i>
+                  </span>
                   <div className="image-option-text">
                     <b>Cambiar Nombre</b>
                   </div>
@@ -1358,7 +1534,9 @@ const getAvatarUrl = (avatar) => {
                     if (d) handleUpdate("descripcion", d);
                   }}
                 >
-                  <span className="image-option-icon"><i className="bi bi-book"></i></span>
+                  <span className="image-option-icon">
+                    <i className="bi bi-book"></i>
+                  </span>
                   <div className="image-option-text">
                     <b>Cambiar Descripción</b>
                   </div>
@@ -1374,7 +1552,9 @@ const getAvatarUrl = (avatar) => {
                     if (e) handleUpdate("universidad", e);
                   }}
                 >
-                  <span className="image-option-icon"><i className="bi bi-buildings"></i></span>
+                  <span className="image-option-icon">
+                    <i className="bi bi-buildings"></i>
+                  </span>
                   <div className="image-option-text">
                     <b>Cambiar Universidad</b>
                   </div>
@@ -1390,7 +1570,9 @@ const getAvatarUrl = (avatar) => {
                     if (u) handleUpdate("telefono", u);
                   }}
                 >
-                  <span className="image-option-icon"><i className="bi bi-telephone"></i></span>
+                  <span className="image-option-icon">
+                    <i className="bi bi-telephone"></i>
+                  </span>
                   <div className="image-option-text">
                     <b>Cambiar Teléfono</b>
                   </div>
@@ -1425,7 +1607,9 @@ const getAvatarUrl = (avatar) => {
                     if (url) handleUpdate("avatar", url);
                   }}
                 >
-                  <span className="image-option-icon"><i className="bi bi-globe2"></i></span>
+                  <span className="image-option-icon">
+                    <i className="bi bi-globe2"></i>
+                  </span>
                   <div className="image-option-text">
                     <b>Usar URL</b>
                   </div>
@@ -1434,7 +1618,9 @@ const getAvatarUrl = (avatar) => {
                   className="image-option"
                   onClick={() => FileInputRef.current?.click()}
                 >
-                  <span className="image-option-icon"><i className="bi bi-folder"></i></span>
+                  <span className="image-option-icon">
+                    <i className="bi bi-folder"></i>
+                  </span>
                   <div className="image-option-text">
                     <b>Subir Imagen</b>
                   </div>
@@ -1453,7 +1639,10 @@ const getAvatarUrl = (avatar) => {
             onClick={() => setActiveModal(null)}
           >
             <div className="image-menu" onClick={(e) => e.stopPropagation()}>
-                <h3 className="image-menu-title"><i className="bi bi-shield-lock-fill"></i> Opciones de Seguridad "FALTA IMPLEMENTAR FUNCIONALIDAD"</h3>
+              <h3 className="image-menu-title">
+                <i className="bi bi-shield-lock-fill"></i> Opciones de Seguridad
+                "FALTA IMPLEMENTAR FUNCIONALIDAD"
+              </h3>
               <div className="image-menu-options">
                 {/* Cada botón usa prompt() para pedir el nuevo valor y llama a handleUpdate */}
 
@@ -1464,7 +1653,9 @@ const getAvatarUrl = (avatar) => {
                     if (n) handleUpdate("nombre", n);
                   }}
                 >
-                  <span className="image-option-icon"><i className="bi bi-key-fill"></i></span>
+                  <span className="image-option-icon">
+                    <i className="bi bi-key-fill"></i>
+                  </span>
                   <div className="image-option-text">
                     <b>Cambiar Contraseña</b>
                   </div>
@@ -1502,7 +1693,9 @@ const getAvatarUrl = (avatar) => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="activity-header">
-                <h2 className="activity-title"><i className="bi bi-bar-chart-fill"></i> Mi Actividad</h2>
+                <h2 className="activity-title">
+                  <i className="bi bi-bar-chart-fill"></i> Mi Actividad
+                </h2>
                 <button
                   className="activity-close"
                   onClick={() => setActiveModal(null)}
@@ -1513,17 +1706,31 @@ const getAvatarUrl = (avatar) => {
               <div className="activity-body">
                 {/* Tarjetas de estadísticas rápidas — valores hardcodeados (demo/placeholder) */}
                 <div className="quick-stats">
-                  <QuickStatCard icon={<i className="bi bi-pencil-square"></i>} value="12" label="Este Mes" />
-                  <QuickStatCard icon={<i className="bi bi-check-circle-fill"></i>} value="45" label="Completados" />
+                  <QuickStatCard
+                    icon={<i className="bi bi-pencil-square"></i>}
+                    value="12"
+                    label="Este Mes"
+                  />
+                  <QuickStatCard
+                    icon={<i className="bi bi-check-circle-fill"></i>}
+                    value="45"
+                    label="Completados"
+                  />
                   <QuickStatCard
                     icon={<i className="bi bi-star-fill"></i>}
                     value={reputacionTexto.split("/")[0]}
                     label="Calificación"
                   />
-                  <QuickStatCard icon={<i className="bi bi-stopwatch"></i>} value="45h" label="Tiempo Activo" />
+                  <QuickStatCard
+                    icon={<i className="bi bi-stopwatch"></i>}
+                    value="45h"
+                    label="Tiempo Activo"
+                  />
                 </div>
                 <div className="progress-section">
-                  <div className="progress-title"><i className="bi bi-trophy-fill"></i> Logros y Metas</div>
+                  <div className="progress-title">
+                    <i className="bi bi-trophy-fill"></i> Logros y Metas
+                  </div>
                   <ProgressBar
                     label="Meta de publicaciones"
                     value="80%"
@@ -1541,7 +1748,9 @@ const getAvatarUrl = (avatar) => {
                   />
                 </div>
                 <div className="recent-activity">
-                  <div className="recent-title"><i className="bi bi-clock-history"></i> Actividad Reciente</div>
+                  <div className="recent-title">
+                    <i className="bi bi-clock-history"></i> Actividad Reciente
+                  </div>
                   <div className="activity-list">
                     {/* Datos de ejemplo — reemplazar con datos reales del backend cuando esté disponible */}
                     <ActivityItem
@@ -1565,180 +1774,254 @@ const getAvatarUrl = (avatar) => {
           </div>
         )}
         {/* ══ MODAL: Lista de seguidores ══ */}
-{modalSeguidores && (
-  <div
-    className="image-menu-overlay active"
-    onClick={() => setModalSeguidores(false)}
-  >
-    <div
-      className="image-menu"
-      onClick={(e) => e.stopPropagation()}
-      style={{ maxWidth: "420px", width: "90%" }}
-    >
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
-        <h3 className="image-menu-title" style={{ margin: 0 }}>
-          <i className="bi bi-people-fill"></i> Seguidores ({listaSeguidores.length})
-        </h3>
-        <button
-          onClick={() => setModalSeguidores(false)}
-          style={{
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            fontSize: "1.1rem",
-            color: "inherit",
-            opacity: 0.6,
-            padding: "4px 8px",
-            borderRadius: "6px",
-          }}
-        >
-          <i className="bi bi-x-lg"></i>
-        </button>
-      </div>
-
-      {/* Cuerpo */}
-      <div style={{ maxHeight: "380px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "4px" }}>
-        {cargandoSeguidores ? (
-          <p style={{ textAlign: "center", padding: "1.5rem", opacity: 0.6 }}>
-            <i className="bi bi-hourglass-split"></i> Cargando...
-          </p>
-        ) : listaSeguidores.length === 0 ? (
-          <p style={{ textAlign: "center", padding: "1.5rem", opacity: 0.5, fontSize: "0.9rem" }}>
-            Aún no tienes seguidores.
-          </p>
-        ) : (
-          listaSeguidores.map((seguidor) => (
+        {modalSeguidores && (
+          <div
+            className="image-menu-overlay active"
+            onClick={() => setModalSeguidores(false)}
+          >
             <div
-              key={seguidor.id_usuario}
-              className="menu-item"
-              onClick={() => {
-                setModalSeguidores(false);
-                navigate(`/perfil/${seguidor.id_usuario}`);
-              }}
-              style={{ cursor: "pointer", borderRadius: "10px", padding: "10px 12px" }}
+              className="image-menu"
+              onClick={(e) => e.stopPropagation()}
+              style={{ maxWidth: "420px", width: "90%" }}
             >
-              {/* Avatar */}
-              <img
-                src={getAvatarUrl(seguidor.avatar)}
-                alt={seguidor.nombre}
-                onError={(e) => { 
-                  e.currentTarget.onerror = null; // evita bucle infinito
-                  e.currentTarget.src = "/img/default_avatar.png"; }}
+              {/* Header */}
+              <div
                 style={{
-                  width: "44px",
-                  height: "44px",
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  border: "2px solid rgba(255,255,255,0.15)",
-                  flexShrink: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: "1rem",
                 }}
-              />
-              {/* Nombre y universidad */}
-              <div className="menu-text">
-                <div className="menu-title">{seguidor.nombre}</div>
-                <div className="menu-desc">
-                  <i className="bi bi-buildings" style={{ marginRight: "4px" }}></i>
-                  {seguidor.universidad || "Sin universidad"}
-                </div>
+              >
+                <h3 className="image-menu-title" style={{ margin: 0 }}>
+                  <i className="bi bi-people-fill"></i> Seguidores (
+                  {listaSeguidores.length})
+                </h3>
+                <button
+                  onClick={() => setModalSeguidores(false)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: "1.1rem",
+                    color: "inherit",
+                    opacity: 0.6,
+                    padding: "4px 8px",
+                    borderRadius: "6px",
+                  }}
+                >
+                  <i className="bi bi-x-lg"></i>
+                </button>
               </div>
-              {/* Flecha */}
-              <span className="menu-arrow">→</span>
+
+              {/* Cuerpo */}
+              <div
+                style={{
+                  maxHeight: "380px",
+                  overflowY: "auto",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "4px",
+                }}
+              >
+                {cargandoSeguidores ? (
+                  <p
+                    style={{
+                      textAlign: "center",
+                      padding: "1.5rem",
+                      opacity: 0.6,
+                    }}
+                  >
+                    <i className="bi bi-hourglass-split"></i> Cargando...
+                  </p>
+                ) : listaSeguidores.length === 0 ? (
+                  <p
+                    style={{
+                      textAlign: "center",
+                      padding: "1.5rem",
+                      opacity: 0.5,
+                      fontSize: "0.9rem",
+                    }}
+                  >
+                    Aún no tienes seguidores.
+                  </p>
+                ) : (
+                  listaSeguidores.map((seguidor) => (
+                    <div
+                      key={seguidor.id_usuario}
+                      className="menu-item"
+                      onClick={() => {
+                        setModalSeguidores(false);
+                        navigate(`/perfil/${seguidor.id_usuario}`);
+                      }}
+                      style={{
+                        cursor: "pointer",
+                        borderRadius: "10px",
+                        padding: "10px 12px",
+                      }}
+                    >
+                      {/* Avatar */}
+                      <img
+                        src={getAvatarUrl(seguidor.avatar)}
+                        alt={seguidor.nombre}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null; // evita bucle infinito
+                          e.currentTarget.src = "/img/default_avatar.png";
+                        }}
+                        style={{
+                          width: "44px",
+                          height: "44px",
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                          border: "2px solid rgba(255,255,255,0.15)",
+                          flexShrink: 0,
+                        }}
+                      />
+                      {/* Nombre y universidad */}
+                      <div className="menu-text">
+                        <div className="menu-title">{seguidor.nombre}</div>
+                        <div className="menu-desc">
+                          <i
+                            className="bi bi-buildings"
+                            style={{ marginRight: "4px" }}
+                          ></i>
+                          {seguidor.universidad || "Sin universidad"}
+                        </div>
+                      </div>
+                      {/* Flecha */}
+                      <span className="menu-arrow">→</span>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
-          ))
+          </div>
         )}
-      </div>
-    </div>
-  </div>
-)}
 
-{/* ══ MODAL: Lista de siguiendo ══ */}
-{modalSiguiendo && (
-  <div
-    className="image-menu-overlay active"
-    onClick={() => setModalSiguiendo(false)}
-  >
-    <div
-      className="image-menu"
-      onClick={(e) => e.stopPropagation()}
-      style={{ maxWidth: "420px", width: "90%" }}
-    >
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
-        <h3 className="image-menu-title" style={{ margin: 0 }}>
-          <i className="bi bi-person-check-fill"></i> Siguiendo ({listaSiguiendo.length})
-        </h3>
-        <button
-          onClick={() => setModalSiguiendo(false)}
-          style={{
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            fontSize: "1.1rem",
-            color: "inherit",
-            opacity: 0.6,
-            padding: "4px 8px",
-            borderRadius: "6px",
-          }}
-        >
-          <i className="bi bi-x-lg"></i>
-        </button>
-      </div>
-
-      {/* Cuerpo */}
-      <div style={{ maxHeight: "380px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "4px" }}>
-        {cargandoSiguiendo ? (
-          <p style={{ textAlign: "center", padding: "1.5rem", opacity: 0.6 }}>
-            <i className="bi bi-hourglass-split"></i> Cargando...
-          </p>
-        ) : listaSiguiendo.length === 0 ? (
-          <p style={{ textAlign: "center", padding: "1.5rem", opacity: 0.5, fontSize: "0.9rem" }}>
-            Aún no sigues a nadie.
-          </p>
-        ) : (
-          listaSiguiendo.map((usuario) => (
+        {/* ══ MODAL: Lista de siguiendo ══ */}
+        {modalSiguiendo && (
+          <div
+            className="image-menu-overlay active"
+            onClick={() => setModalSiguiendo(false)}
+          >
             <div
-              key={usuario.id_usuario}
-              className="menu-item"
-              onClick={() => {
-                setModalSiguiendo(false);
-                navigate(`/perfil/${usuario.id_usuario}`);
-              }}
-              style={{ cursor: "pointer", borderRadius: "10px", padding: "10px 12px" }}
+              className="image-menu"
+              onClick={(e) => e.stopPropagation()}
+              style={{ maxWidth: "420px", width: "90%" }}
             >
-              {/* Avatar */}
-              <img
-                src={getAvatarUrl(usuario.avatar)}
-                alt={usuario.nombre}
-                onError={(e) => { 
-                  e.currentTarget.onerror = null; // evita bucle infinito
-                  e.currentTarget.src = "/img/default_avatar.png"; }}
+              {/* Header */}
+              <div
                 style={{
-                  width: "44px",
-                  height: "44px",
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  border: "2px solid rgba(255,255,255,0.15)",
-                  flexShrink: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: "1rem",
                 }}
-              />
-              {/* Nombre y universidad */}
-              <div className="menu-text">
-                <div className="menu-title">{usuario.nombre}</div>
-                <div className="menu-desc">
-                  <i className="bi bi-buildings" style={{ marginRight: "4px" }}></i>
-                  {usuario.universidad || "Sin universidad"}
-                </div>
+              >
+                <h3 className="image-menu-title" style={{ margin: 0 }}>
+                  <i className="bi bi-person-check-fill"></i> Siguiendo (
+                  {listaSiguiendo.length})
+                </h3>
+                <button
+                  onClick={() => setModalSiguiendo(false)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: "1.1rem",
+                    color: "inherit",
+                    opacity: 0.6,
+                    padding: "4px 8px",
+                    borderRadius: "6px",
+                  }}
+                >
+                  <i className="bi bi-x-lg"></i>
+                </button>
               </div>
-              {/* Flecha */}
-              <span className="menu-arrow">→</span>
+
+              {/* Cuerpo */}
+              <div
+                style={{
+                  maxHeight: "380px",
+                  overflowY: "auto",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "4px",
+                }}
+              >
+                {cargandoSiguiendo ? (
+                  <p
+                    style={{
+                      textAlign: "center",
+                      padding: "1.5rem",
+                      opacity: 0.6,
+                    }}
+                  >
+                    <i className="bi bi-hourglass-split"></i> Cargando...
+                  </p>
+                ) : listaSiguiendo.length === 0 ? (
+                  <p
+                    style={{
+                      textAlign: "center",
+                      padding: "1.5rem",
+                      opacity: 0.5,
+                      fontSize: "0.9rem",
+                    }}
+                  >
+                    Aún no sigues a nadie.
+                  </p>
+                ) : (
+                  listaSiguiendo.map((usuario) => (
+                    <div
+                      key={usuario.id_usuario}
+                      className="menu-item"
+                      onClick={() => {
+                        setModalSiguiendo(false);
+                        navigate(`/perfil/${usuario.id_usuario}`);
+                      }}
+                      style={{
+                        cursor: "pointer",
+                        borderRadius: "10px",
+                        padding: "10px 12px",
+                      }}
+                    >
+                      {/* Avatar */}
+                      <img
+                        src={getAvatarUrl(usuario.avatar)}
+                        alt={usuario.nombre}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null; // evita bucle infinito
+                          e.currentTarget.src = "/img/default_avatar.png";
+                        }}
+                        style={{
+                          width: "44px",
+                          height: "44px",
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                          border: "2px solid rgba(255,255,255,0.15)",
+                          flexShrink: 0,
+                        }}
+                      />
+                      {/* Nombre y universidad */}
+                      <div className="menu-text">
+                        <div className="menu-title">{usuario.nombre}</div>
+                        <div className="menu-desc">
+                          <i
+                            className="bi bi-buildings"
+                            style={{ marginRight: "4px" }}
+                          ></i>
+                          {usuario.universidad || "Sin universidad"}
+                        </div>
+                      </div>
+                      {/* Flecha */}
+                      <span className="menu-arrow">→</span>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
-          ))
+          </div>
         )}
-      </div>
-    </div>
-  </div>
-)}
       </div>
 
       <Modal
@@ -1758,6 +2041,10 @@ const getAvatarUrl = (avatar) => {
           avatar: userData.avatar || "",
         }}
       />
+      {/* ══ MODAL: Enviar Reporte ══ */}
+      {modalReporteAbierto && (
+        <ModalReporte onClose={() => setModalReporteAbierto(false)} />
+      )}
     </>
   );
 };
