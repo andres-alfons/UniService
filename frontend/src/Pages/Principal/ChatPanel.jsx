@@ -37,8 +37,11 @@ export default function ChatPanel({ abierto, onCerrar, targetUsuario = null }) {
 
       const unsubMensaje = on("onMensaje", (data) => {
         cargarChats();
-        // Notificar a Notificaciones para actualizar el badge
         window.dispatchEvent(new CustomEvent("nuevo-mensaje-chat"));
+      });
+
+      const unsubEscribiendo = on("onUsuarioEscribiendo", () => {
+        cargarChats();
       });
 
       const unsubConectado = on("onUsuarioConectado", (id) => {
@@ -59,6 +62,7 @@ export default function ChatPanel({ abierto, onCerrar, targetUsuario = null }) {
       return () => {
         clearInterval(interval);
         unsubMensaje();
+        unsubEscribiendo();
         unsubConectado();
         unsubDesconectado();
       };

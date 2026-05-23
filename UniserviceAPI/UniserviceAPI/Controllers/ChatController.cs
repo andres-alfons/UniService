@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Npgsql;
 using UniserviceAPI.DTOs;
+using UniserviceAPI.Hubs;
 
 namespace UniserviceAPI.Controllers;
 
@@ -9,10 +11,12 @@ namespace UniserviceAPI.Controllers;
 public class ChatController : ControllerBase
 {
     private readonly IConfiguration _config;
+    private readonly IHubContext<ChatHub> _hubContext;
 
-    public ChatController(IConfiguration config)
+    public ChatController(IConfiguration config, IHubContext<ChatHub> hubContext)
     {
         _config = config;
+        _hubContext = hubContext;
     }
 
     // Obtener o crear un chat entre dos usuarios
@@ -156,6 +160,25 @@ public class ChatController : ControllerBase
         var updateChat = new NpgsqlCommand("UPDATE chats SET ultimo_mensaje = NOW() WHERE id_chat = @chat", conn);
         updateChat.Parameters.AddWithValue("@chat", dto.id_chat);
         await updateChat.ExecuteNonQueryAsync();
+
+        var getNombre = new NpgsqlCommand("SELECT nombre FROM usuarios WHERE id_usuario = @id", conn);
+        getNombre.Parameters.AddWithValue("@id", dto.id_remitente);
+        var nombreRemitente = (string)(await getNombre.ExecuteScalarAsync() ?? "");
+
+        var mensajeData = new
+        {
+            id_mensaje = Convert.ToInt32(idMensaje),
+            id_chat = dto.id_chat,
+            id_remitente = dto.id_remitente,
+            id_destinatario = dto.id_destinatario,
+            mensaje = dto.mensaje,
+            tipo = dto.tipo,
+            fecha_envio = DateTime.UtcNow.ToString("o"),
+            leido = false,
+            nombre_remitente = nombreRemitente
+        };
+
+        await _hubContext.Clients.All.SendAsync("RecibirMensaje", mensajeData);
 
         Console.WriteLine($"[Chat] Mensaje insertado: chat={dto.id_chat}, remitente={dto.id_remitente}, destinatario={dto.id_destinatario}");
         return Ok(new { id_mensaje = Convert.ToInt32(idMensaje), fecha_envio = DateTime.UtcNow });

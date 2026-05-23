@@ -96,7 +96,8 @@ builder.Services.AddCors(options =>
             policy.WithOrigins(allowedOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries))
                   .AllowAnyHeader()
                   .AllowAnyMethod()
-                  .AllowCredentials();
+                  .AllowCredentials()
+                  .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
         });
 });
 

@@ -49,18 +49,21 @@ export default function ChatWindow({ chat, usuarioId, usuariosOnline }) {
     const unsub = on("onMensaje", (data) => {
       if (data.id_chat === chat.id_chat) {
         setMensajes((prev) => {
-          const exists = prev.some((m) => m.mensaje === data.mensaje && m.id_remitente === data.id_remitente);
+          const exists = prev.some(
+            (m) => m.id_mensaje === data.id_mensaje ||
+            (m.mensaje === data.mensaje && m.id_remitente === data.id_remitente && Math.abs(new Date(m.fecha_envio) - new Date(data.fecha_envio)) < 5000)
+          );
           if (exists) return prev;
           return [...prev, {
-            id_mensaje: Date.now(),
+            id_mensaje: data.id_mensaje || Date.now(),
             id_chat: data.id_chat,
             id_remitente: data.id_remitente,
             id_destinatario: data.id_destinatario,
             mensaje: data.mensaje,
             fecha_envio: data.fecha_envio,
-            leido: false,
+            leido: data.leido ?? false,
             tipo: data.tipo || "texto",
-            nombre_remitente: data.id_remitente === parseInt(usuarioId) ? "Tú" : "",
+            nombre_remitente: data.id_remitente === parseInt(usuarioId) ? "Tú" : (data.nombre_remitente || ""),
           }];
         });
       }
@@ -89,13 +92,14 @@ export default function ChatWindow({ chat, usuarioId, usuariosOnline }) {
   const handleInputChange = useCallback((e) => {
     setNuevoMensaje(e.target.value);
 
-    if (chat && e.target.value.trim()) {
-      enviarEscribiendo(chat.id_chat, parseInt(usuarioId), true);
+    if (chat) {
+      const tieneTexto = e.target.value.trim().length > 0;
+      enviarEscribiendo(chat.id_chat, parseInt(usuarioId), tieneTexto);
 
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = setTimeout(() => {
         enviarEscribiendo(chat.id_chat, parseInt(usuarioId), false);
-      }, 2000);
+      }, 3000);
     }
   }, [chat, usuarioId]);
 

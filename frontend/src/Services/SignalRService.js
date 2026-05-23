@@ -1,6 +1,6 @@
 import * as signalR from "@microsoft/signalr";
 
-const HUB_URL = "http://localhost:5165/chathub";
+const HUB_URL = "/chathub";
 
 let connection = null;
 let callbacks = {};
@@ -16,10 +16,7 @@ export function iniciarSignalR(usuarioId) {
   }
 
   connection = new signalR.HubConnectionBuilder()
-    .withUrl(HUB_URL, {
-      skipNegotiation: true,
-      transport: signalR.HttpTransportType.WebSockets,
-    })
+    .withUrl(HUB_URL)
     .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
     .build();
 
@@ -29,7 +26,8 @@ export function iniciarSignalR(usuarioId) {
   });
 
   connection.on("MensajeEnviado", (data) => {
-    (callbacks.onMensajeEnviado || []).forEach((cb) => cb(data));
+    console.log("[SignalR] Mensaje enviado confirmado:", data);
+    (callbacks.onMensaje || []).forEach((cb) => cb(data));
   });
 
   connection.on("UsuarioConectado", (id) => {

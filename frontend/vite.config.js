@@ -14,6 +14,11 @@ export default defineConfig({
       "/imagenes-servicios": {
         target: "http://localhost:5165",
         changeOrigin: true,
+      },
+      "/chathub": {
+        target: "http://localhost:5165",
+        changeOrigin: true,
+        ws: true,
       }
     }
   }
