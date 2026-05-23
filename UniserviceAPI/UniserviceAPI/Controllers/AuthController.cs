@@ -133,7 +133,7 @@ public class AuthController : ControllerBase
             int id, idRol;
             string nombreUser, correoUser;
 
-            var cmd = new NpgsqlCommand("SELECT id_usuario, id_rol, nombre, correo FROM usuarios WHERE correo = @correo", conn);
+            var cmd = new NpgsqlCommand("SELECT id_usuario, id_rol, nombre, correo, password_hash FROM usuarios WHERE correo = @correo", conn);
             cmd.Parameters.AddWithValue("@correo", dto.correo);
 
             using (var reader = await cmd.ExecuteReaderAsync())

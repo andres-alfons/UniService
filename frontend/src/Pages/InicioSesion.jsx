@@ -492,7 +492,7 @@ const res = await fetch("/api/Auth/verify-code", {
     // FLUJO NORMAL: Si no es un admin hardcodeado, autentica contra la base de datos
     setCargandoLogin(true);
     try {
-      const res = await fetch("/api/Users/login", {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo, password: pass }),
@@ -515,7 +515,7 @@ const res = await fetch("/api/Auth/verify-code", {
           navigate("/home", { replace: true });
         }
       } else {
-        notificar(data.message || "Credenciales incorrectas");
+        notificar(data.error || "Credenciales incorrectas");
       }
     } catch {
       notificar("Error de conexión con el servidor");
@@ -739,7 +739,6 @@ const res = await fetch("/api/Auth/verify-code", {
                 onError={handleGoogleError}
                 text="continue_with"
                 locale="es"
-                width="100%"
               />
 
               <p className="pie">
