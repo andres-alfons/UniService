@@ -4,6 +4,7 @@ import { formatFecha } from "./UtilidadesAdmin";
 const API = "/api";
 
 export default function SeccionServiciosPendientes({ onRefresh }) {
+  const [razonRechazo, setRazonRechazo] = useState("");
   const [pendientes, setPendientes] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [accionandoId, setAccionandoId] = useState(null);
@@ -79,28 +80,33 @@ export default function SeccionServiciosPendientes({ onRefresh }) {
   };
 
   const rechazar = async (id) => {
-    const servicio = pendientes.find((s) => s.id_servicio === id);
-    setModal({
-      tipo: "confirm",
-      titulo: "Rechazar servicio",
-      mensaje: `¿Rechazar "${servicio?.titulo}"? Esta acción eliminará el servicio.`,
-      onConfirm: async () => {
-        setAccionandoId(id);
-        try {
-          await fetch(`${API}/services/${id}/rechazar`, { method: "PUT" });
-          setPendientes((prev) => prev.filter((s) => s.id_servicio !== id));
-          if (window.registrarLogAdmin) {
-            window.registrarLogAdmin("Rechazó servicio", `${servicio?.titulo} (ID: ${id})`);
-          }
-          setModal({ tipo: "success", titulo: "Servicio rechazado", mensaje: `"${servicio?.titulo}" ha sido rechazado.` });
-        } catch (err) {
-          setModal({ tipo: "error", titulo: "Error", mensaje: err.message });
-        } finally {
-          setAccionandoId(null);
+  const servicio = pendientes.find((s) => s.id_servicio === id);
+  setRazonRechazo("");
+  setModal({
+    tipo: "rechazar",
+    titulo: "Rechazar servicio",
+    servicio,
+    onConfirm: async (razon) => {
+      setAccionandoId(id);
+      try {
+        await fetch(`${API}/services/${id}/rechazar`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ razon }),
+        });
+        setPendientes((prev) => prev.filter((s) => s.id_servicio !== id));
+        if (window.registrarLogAdmin) {
+          window.registrarLogAdmin("Rechazó servicio", `${servicio?.titulo} (ID: ${id})`);
         }
-      },
-    });
-  };
+        setModal({ tipo: "success", titulo: "Servicio rechazado", mensaje: `"${servicio?.titulo}" ha sido rechazado y el proveedor fue notificado.` });
+      } catch (err) {
+        setModal({ tipo: "error", titulo: "Error", mensaje: err.message });
+      } finally {
+        setAccionandoId(null);
+      }
+    },
+  });
+};
 
   return (
     <section className="admin-section">
@@ -326,9 +332,59 @@ export default function SeccionServiciosPendientes({ onRefresh }) {
 }
 
 function AdminModal({ modal, onClose }) {
+  const [razon, setRazon] = useState("");
+
+  if (modal.tipo === "rechazar") {
+    return (
+      <div className="admin-modal-overlay" onClick={onClose}>
+        <div className="admin-modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="admin-modal-icon">
+            <i className="bi bi-x-circle-fill" style={{ fontSize: "2.5rem", color: "#ef4444" }}></i>
+          </div>
+          <h3 className="admin-modal-title">Rechazar servicio</h3>
+          <p className="admin-modal-message">
+            ¿Rechazar <strong>"{modal.servicio?.titulo}"</strong>? El proveedor será notificado por correo.
+          </p>
+          <div style={{ width: "100%", marginBottom: "16px" }}>
+            <label style={{ display: "block", fontSize: "0.85rem", color: "var(--texto2)", marginBottom: "6px" }}>
+              Razón del rechazo <span style={{ color: "#999" }}>(opcional)</span>
+            </label>
+            <textarea
+              value={razon}
+              onChange={(e) => setRazon(e.target.value)}
+              placeholder="Ej: Las imágenes no cumplen con los requisitos de calidad..."
+              rows={3}
+              style={{
+                width: "100%",
+                padding: "10px",
+                borderRadius: "8px",
+                border: "1px solid var(--borde)",
+                background: "var(--bg2)",
+                color: "var(--texto)",
+                fontSize: "0.85rem",
+                resize: "vertical",
+                boxSizing: "border-box",
+              }}
+            />
+          </div>
+          <div className="admin-modal-actions">
+            <button className="admin-btn-action admin-btn-action--ghost" onClick={onClose}>
+              Cancelar
+            </button>
+            <button
+              className="admin-btn-action admin-btn-action--danger"
+              onClick={() => { onClose(); modal.onConfirm(razon); }}
+            >
+              Confirmar rechazo
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const isConfirm = modal.tipo === "confirm";
   const isSuccess = modal.tipo === "success";
-
   const icon = isConfirm
     ? <i className="bi bi-question-circle-fill" style={{ fontSize: "2.5rem", color: "#f59e0b" }}></i>
     : isSuccess
@@ -344,17 +400,11 @@ function AdminModal({ modal, onClose }) {
         <div className="admin-modal-actions">
           {isConfirm ? (
             <>
-              <button className="admin-btn-action admin-btn-action--ghost" onClick={onClose}>
-                Cancelar
-              </button>
-              <button className="admin-btn-action admin-btn-action--danger" onClick={() => { onClose(); modal.onConfirm(); }}>
-                Confirmar
-              </button>
+              <button className="admin-btn-action admin-btn-action--ghost" onClick={onClose}>Cancelar</button>
+              <button className="admin-btn-action admin-btn-action--danger" onClick={() => { onClose(); modal.onConfirm(); }}>Confirmar</button>
             </>
           ) : (
-            <button className="admin-btn-action admin-btn-action--success" onClick={onClose}>
-              Entendido
-            </button>
+            <button className="admin-btn-action admin-btn-action--success" onClick={onClose}>Entendido</button>
           )}
         </div>
       </div>
