@@ -15,11 +15,13 @@ public class ServicesController : ControllerBase
 {
     private readonly IConfiguration _config;
     private readonly SupabaseStorageService _storageService;
+    private readonly UniserviceAPI.Services.EmailService _emailService;
 
-    public ServicesController(IConfiguration config, SupabaseStorageService storageService)
+    public ServicesController(IConfiguration config, SupabaseStorageService storageService, UniserviceAPI.Services.EmailService emailService)
     {
         _config = config;
         _storageService = storageService;
+        _emailService = emailService;
     }
 
     // =========================
@@ -564,6 +566,33 @@ public class ServicesController : ControllerBase
             cmd.Parameters.AddWithValue("@direccion", (object)dto.direccion ?? DBNull.Value);
 
             var idServicio = await cmd.ExecuteScalarAsync();
+            // Notificar a todos los admins del nuevo servicio pendiente
+            try
+            {
+                using var cmdAdmins = new NpgsqlCommand(
+                    "SELECT email, nombre FROM usuarios WHERE rol = 1", conn);
+                using var rAdmins = await cmdAdmins.ExecuteReaderAsync();
+                var admins = new List<(string email, string nombre)>();
+                while (await rAdmins.ReadAsync())
+                    admins.Add((rAdmins["email"].ToString()!, rAdmins["nombre"].ToString()!));
+                rAdmins.Close();
+
+                // Obtener nombre del proveedor
+                using var cmdProv = new NpgsqlCommand(
+                    "SELECT nombre FROM usuarios WHERE id_usuario = @id", conn);
+                cmdProv.Parameters.AddWithValue("@id", dto.id_proveedor);
+                var nombreProv = (await cmdProv.ExecuteScalarAsync())?.ToString() ?? "Usuario";
+
+                foreach (var (email, nombre) in admins)
+                {
+                    _ = _emailService.EnviarNotificacionNuevoServicio(
+                        email, nombre, nombreProv, dto.titulo, Convert.ToInt32(idServicio));
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[EMAIL] No se pudo notificar a admins: {ex.Message}");
+            }
 
             return Ok(new { ok = true, message = "Servicio creado correctamente", id_servicio = idServicio });
         }
@@ -905,7 +934,6 @@ public class ServicesController : ControllerBase
         }
     }
 
-    // ── PUT /api/services/{id}/aprobar (Admin)
     [HttpPut("{id}/aprobar")]
     public async Task<IActionResult> Aprobar(int id)
     {
@@ -914,43 +942,109 @@ public class ServicesController : ControllerBase
             using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            using var cmd = new NpgsqlCommand(
-                "UPDATE servicios SET disponibilidad = 2 WHERE id_servicio = @id", conn);
-            cmd.Parameters.AddWithValue("@id", id);
+            // 1. Obtener info del proveedor PRIMERO (antes del UPDATE)
+            string emailProv = "", nombreProv = "", tituloServ = "";
+            using (var cmdInfo = new NpgsqlCommand(@"
+            SELECT u.correo, u.nombre, s.titulo
+            FROM servicios s
+            INNER JOIN usuarios u ON s.id_proveedor = u.id_usuario
+            WHERE s.id_servicio = @id", conn))
+            {
+                cmdInfo.Parameters.AddWithValue("@id", id);
+                using var r = await cmdInfo.ExecuteReaderAsync();
+                if (await r.ReadAsync())
+                {
+                    emailProv = r["correo"].ToString()!;
+                    nombreProv = r["nombre"].ToString()!;
+                    tituloServ = r["titulo"].ToString()!;
+                }
+            }
 
-            int filas = await cmd.ExecuteNonQueryAsync();
-            if (filas == 0)
-                return NotFound(new { error = "Servicio no encontrado" });
+            // 2. Aprobar el servicio
+            using (var cmd = new NpgsqlCommand(
+                "UPDATE servicios SET disponibilidad = 2 WHERE id_servicio = @id", conn))
+            {
+                cmd.Parameters.AddWithValue("@id", id);
+                int filas = await cmd.ExecuteNonQueryAsync();
+                if (filas == 0)
+                    return NotFound(new { error = "Servicio no encontrado" });
+            }
+
+            // 3. Enviar correo
+            if (!string.IsNullOrEmpty(emailProv))
+            {
+                Console.WriteLine($"[EMAIL] Enviando aprobación a {emailProv}...");
+                await _emailService.EnviarResultadoRevision(emailProv, nombreProv, tituloServ, aprobado: true);
+            }
+            else
+            {
+                Console.WriteLine($"[EMAIL] No se encontró correo del proveedor para servicio {id}");
+            }
 
             return Ok(new { ok = true });
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"[ERROR] Aprobar: {ex.Message}");
             return StatusCode(500, new { error = ex.Message });
         }
     }
-
     // ── PUT /api/services/{id}/rechazar (Admin)
     [HttpPut("{id}/rechazar")]
-    public async Task<IActionResult> Rechazar(int id)
+    public async Task<IActionResult> Rechazar(int id, [FromBody] RechazarServicioDTO dto)
     {
         try
         {
             using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            using var cmd = new NpgsqlCommand(
-                "DELETE FROM servicios WHERE id_servicio = @id", conn);
-            cmd.Parameters.AddWithValue("@id", id);
+            // 1. Obtener info del proveedor ANTES de borrar
+            string emailProv = "", nombreProv = "", tituloServ = "";
+            using (var cmdInfo = new NpgsqlCommand(@"
+            SELECT u.correo, u.nombre, s.titulo
+            FROM servicios s
+            INNER JOIN usuarios u ON s.id_proveedor = u.id_usuario
+            WHERE s.id_servicio = @id", conn))
+            {
+                cmdInfo.Parameters.AddWithValue("@id", id);
+                using var r = await cmdInfo.ExecuteReaderAsync();
+                if (await r.ReadAsync())
+                {
+                    emailProv = r["correo"].ToString()!;
+                    nombreProv = r["nombre"].ToString()!;
+                    tituloServ = r["titulo"].ToString()!;
+                }
+            }
 
-            int filas = await cmd.ExecuteNonQueryAsync();
-            if (filas == 0)
-                return NotFound(new { error = "Servicio no encontrado" });
+            // 2. Eliminar el servicio
+            using (var cmd = new NpgsqlCommand(
+                "DELETE FROM servicios WHERE id_servicio = @id", conn))
+            {
+                cmd.Parameters.AddWithValue("@id", id);
+                int filas = await cmd.ExecuteNonQueryAsync();
+                if (filas == 0)
+                    return NotFound(new { error = "Servicio no encontrado" });
+            }
+
+            // 3. Enviar correo
+            if (!string.IsNullOrEmpty(emailProv))
+            {
+                Console.WriteLine($"[EMAIL] Enviando rechazo a {emailProv}...");
+                await _emailService.EnviarResultadoRevision(
+                    emailProv, nombreProv, tituloServ,
+                    aprobado: false,
+                    razonRechazo: dto?.razon);
+            }
+            else
+            {
+                Console.WriteLine($"[EMAIL] No se encontró correo del proveedor para servicio {id}");
+            }
 
             return Ok(new { ok = true });
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"[ERROR] Rechazar: {ex.Message}");
             return StatusCode(500, new { error = ex.Message });
         }
     }
