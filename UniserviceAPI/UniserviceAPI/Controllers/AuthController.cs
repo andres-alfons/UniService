@@ -130,25 +130,28 @@ public class AuthController : ControllerBase
         {
             await conn.OpenAsync();
 
-            var cmd = new NpgsqlCommand("SELECT * FROM usuarios WHERE correo = @correo", conn);
+            int id, idRol;
+            string nombreUser, correoUser;
+
+            var cmd = new NpgsqlCommand("SELECT id_usuario, id_rol, nombre, correo FROM usuarios WHERE correo = @correo", conn);
             cmd.Parameters.AddWithValue("@correo", dto.correo);
 
-            var reader = await cmd.ExecuteReaderAsync();
+            using (var reader = await cmd.ExecuteReaderAsync())
+            {
+                if (!await reader.ReadAsync())
+                    return NotFound(new { error = "Usuario no existe" });
 
-            if (!reader.HasRows)
-                return NotFound(new { error = "Usuario no existe" });
+                string hash = reader["password_hash"]?.ToString() ?? "";
 
-            await reader.ReadAsync();
+                if (string.IsNullOrEmpty(hash) || !BCrypt.Net.BCrypt.Verify(dto.password, hash))
+                    return Unauthorized(new { error = "Contraseña incorrecta" });
 
-            string hash = reader["password_hash"]?.ToString() ?? "";
+                id = (int)reader["id_usuario"];
+                idRol = reader["id_rol"] != DBNull.Value ? Convert.ToInt32(reader["id_rol"]) : 2;
+                nombreUser = reader["nombre"]?.ToString();
+                correoUser = reader["correo"]?.ToString();
+            }
 
-            if (string.IsNullOrEmpty(hash) || !BCrypt.Net.BCrypt.Verify(dto.password, hash))
-                return Unauthorized(new { error = "Contraseña incorrecta" });
-
-            int id = (int)reader["id_usuario"];
-            int idRol = reader["id_rol"] != DBNull.Value ? Convert.ToInt32(reader["id_rol"]) : 2;
-
-            // Actualizar ultima_actividad al hacer login
             var updateAct = new NpgsqlCommand("UPDATE usuarios SET ultima_actividad = NOW() WHERE id_usuario = @id", conn);
             updateAct.Parameters.AddWithValue("@id", id);
             await updateAct.ExecuteNonQueryAsync();
@@ -172,8 +175,8 @@ public class AuthController : ControllerBase
                 user = new
                 {
                     id = id,
-                    nombre = reader["nombre"]?.ToString(),
-                    correo = reader["correo"]?.ToString(),
+                    nombre = nombreUser,
+                    correo = correoUser,
                     id_rol = idRol
                 }
             });
@@ -231,36 +234,37 @@ public class AuthController : ControllerBase
             {
                 await conn.OpenAsync();
 
-                var cmd = new NpgsqlCommand("SELECT * FROM usuarios WHERE correo = @correo", conn);
-                cmd.Parameters.AddWithValue("@correo", correo);
-
-                var reader = await cmd.ExecuteReaderAsync();
-
                 int id, idRol;
+                string nombreFinal = nombre;
 
-                if (reader.HasRows)
+                var selectCmd = new NpgsqlCommand("SELECT id_usuario, id_rol, nombre FROM usuarios WHERE correo = @correo", conn);
+                selectCmd.Parameters.AddWithValue("@correo", correo);
+                
+                using (var reader = await selectCmd.ExecuteReaderAsync())
                 {
-                    await reader.ReadAsync();
-                    id = (int)reader["id_usuario"];
-                    idRol = reader["id_rol"] != DBNull.Value ? Convert.ToInt32(reader["id_rol"]) : 2;
+                    if (await reader.ReadAsync())
+                    {
+                        id = (int)reader["id_usuario"];
+                        idRol = reader["id_rol"] != DBNull.Value ? Convert.ToInt32(reader["id_rol"]) : 2;
+                        nombreFinal = reader["nombre"]?.ToString() ?? nombre;
+                    }
+                    else
+                    {
+                        reader.Close();
+                        
+                        var insertCmd = new NpgsqlCommand(@"
+                            INSERT INTO usuarios (correo, nombre, id_rol)
+                            VALUES (@correo, @nombre, 2)
+                            RETURNING id_usuario", conn);
+                        insertCmd.Parameters.AddWithValue("@correo", correo);
+                        insertCmd.Parameters.AddWithValue("@nombre", nombre);
+
+                        var result = await insertCmd.ExecuteScalarAsync();
+                        id = Convert.ToInt32(result);
+                        idRol = 2;
+                    }
                 }
-                else
-                {
-                    reader.Close();
 
-                    var insertCmd = new NpgsqlCommand(@"
-                        INSERT INTO usuarios (correo, nombre, id_rol)
-                        VALUES (@correo, @nombre, 2)
-                        RETURNING id_usuario", conn);
-                    insertCmd.Parameters.AddWithValue("@correo", correo);
-                    insertCmd.Parameters.AddWithValue("@nombre", nombre);
-
-                    var result = await insertCmd.ExecuteScalarAsync();
-                    id = Convert.ToInt32(result);
-                    idRol = 2;
-                }
-
-                // Actualizar ultima_actividad al hacer login con Google
                 var updateActGoogle = new NpgsqlCommand("UPDATE usuarios SET ultima_actividad = NOW() WHERE id_usuario = @id", conn);
                 updateActGoogle.Parameters.AddWithValue("@id", id);
                 await updateActGoogle.ExecuteNonQueryAsync();
@@ -283,7 +287,7 @@ public class AuthController : ControllerBase
                     user = new
                     {
                         id = id,
-                        nombre = nombre,
+                        nombre = nombreFinal,
                         correo = correo,
                         id_rol = idRol
                     }
