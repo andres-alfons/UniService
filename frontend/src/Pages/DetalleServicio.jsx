@@ -10,7 +10,13 @@ import FormSolicitud from "./Servicio/FormularioSolicitud";
 import FormCalificacion from "./Servicio/FormularioCalificacion";
 import MapaModal from "../Components/MapaModal";
 import ChatPanel from "./Principal/ChatPanel";
-import { mostrarModalidad, mostrarDisponibilidad, colorAvatar } from "./Servicio/utilidades";
+import ModalReporte from "../Components/ModalReporte";
+
+import {
+  mostrarModalidad,
+  mostrarDisponibilidad,
+  colorAvatar,
+} from "./Servicio/utilidades";
 import BotonTema from "../Components/B_StyleHome";
 
 const API = "/api/services";
@@ -30,6 +36,7 @@ export default function Servicio() {
   const [modalMapa, setModalMapa] = useState(false);
   const [modal, setModal] = useState({ show: false, type: "", message: "" });
   const [chatPanelAbierto, setChatPanelAbierto] = useState(false);
+  const [modalReporteServicio, setModalReporteServicio] = useState(false);
 
   const showModal = (type, message) => {
     setModal({ show: true, type, message });
@@ -41,21 +48,34 @@ export default function Servicio() {
   }, [navigate]);
 
   useEffect(() => {
-    if (!idServicio) { setError(true); setCargando(false); return; }
+    if (!idServicio) {
+      setError(true);
+      setCargando(false);
+      return;
+    }
 
     fetch(`${API}/${idServicio}`)
       .then((res) => {
-        if (!res.ok) return res.json().then(err => { throw new Error(err.error || "Servicio no encontrado"); });
+        if (!res.ok)
+          return res.json().then((err) => {
+            throw new Error(err.error || "Servicio no encontrado");
+          });
         return res.json();
       })
       .then((data) => {
         const s = Array.isArray(data) ? data[0] : data;
-        if (!s || !s.id_servicio) { setError(true); return; }
+        if (!s || !s.id_servicio) {
+          setError(true);
+          return;
+        }
         console.log("Servicio cargado:", s);
         console.log("Imagenes:", s.imagenes);
         setServicio(s);
       })
-      .catch((err) => { console.error("Error cargando servicio:", err); setError(true); })
+      .catch((err) => {
+        console.error("Error cargando servicio:", err);
+        setError(true);
+      })
       .finally(() => setCargando(false));
   }, [idServicio, recargarResenas]);
 
@@ -76,7 +96,9 @@ export default function Servicio() {
     return (
       <>
         <Navbar onCerrarSesion={handleCerrarSesion} />
-        <div className="container" style={{ padding: "80px 24px" }}><Skeleton /></div>
+        <div className="container" style={{ padding: "80px 24px" }}>
+          <Skeleton />
+        </div>
       </>
     );
 
@@ -84,34 +106,52 @@ export default function Servicio() {
     return (
       <>
         <Navbar onCerrarSesion={handleCerrarSesion} />
-        <div className="container" style={{ textAlign: "center", padding: "80px 24px" }}>
+        <div
+          className="container"
+          style={{ textAlign: "center", padding: "80px 24px" }}
+        >
           <p style={{ fontSize: "3rem" }}>😕</p>
           <h2>Servicio no encontrado</h2>
-          <p className="texto-muted" style={{ margin: "12px 0 24px" }}>El servicio que buscas no existe o fue eliminado.</p>
-          <a href="/home" className="btn btn-verde">← Volver al inicio</a>
+          <p className="texto-muted" style={{ margin: "12px 0 24px" }}>
+            El servicio que buscas no existe o fue eliminado.
+          </p>
+          <a href="/home" className="btn btn-verde">
+            ← Volver al inicio
+          </a>
         </div>
       </>
     );
 
-  const { texto: estrellasTexto, prom, num } = calcularEstrellas(servicio.resenas);
+  const {
+    texto: estrellasTexto,
+    prom,
+    num,
+  } = calcularEstrellas(servicio.resenas);
 
   const universidad =
     servicio.universidad === 1 || servicio.universidad === "1"
       ? "Universidad Popular del Cesar"
       : servicio.universidad === "No pertenece a ninguna universidad"
-      ? "Independiente"
-      : servicio.universidad
-      ? `${servicio.universidad}`
-      : "Comunidad académica";
+        ? "Independiente"
+        : servicio.universidad
+          ? `${servicio.universidad}`
+          : "Comunidad académica";
 
   const tieneUbicacion = servicio.ubicacion_lat && servicio.ubicacion_lng;
-  const esArriendo = servicio.nombre_categoria?.toLowerCase().includes("arriendo");
+  const esArriendo = servicio.nombre_categoria
+    ?.toLowerCase()
+    .includes("arriendo");
 
-  const imagenes = servicio.imagenes && servicio.imagenes.length > 0
-    ? servicio.imagenes
-        .filter((img) => !img.url_imagen?.includes("default") && !img.url_imagen?.startsWith("img/"))
-        .sort((a, b) => new Date(a.fecha_subida) - new Date(b.fecha_subida))
-    : null;
+  const imagenes =
+    servicio.imagenes && servicio.imagenes.length > 0
+      ? servicio.imagenes
+          .filter(
+            (img) =>
+              !img.url_imagen?.includes("default") &&
+              !img.url_imagen?.startsWith("img/"),
+          )
+          .sort((a, b) => new Date(a.fecha_subida) - new Date(b.fecha_subida))
+      : null;
 
   const iconosGaleria = [
     servicio.icono?.startsWith("bi-") ? servicio.icono : "bi-pin",
@@ -121,10 +161,11 @@ export default function Servicio() {
   ];
 
   const handleImagenError = (index) => {
-    setImagenesError(prev => ({ ...prev, [index]: true }));
+    setImagenesError((prev) => ({ ...prev, [index]: true }));
   };
 
-  const esUrlValida = (url) => url && typeof url === "string" && url.trim() !== "";
+  const esUrlValida = (url) =>
+    url && typeof url === "string" && url.trim() !== "";
 
   return (
     <>
@@ -149,7 +190,9 @@ export default function Servicio() {
             {/* GALERÍA DE IMÁGENES */}
             <div className="galeria-principal">
               <div className="imagen-grande">
-                {imagenes && esUrlValida(imagenes[imagenActual]?.url_imagen) && !imagenesError[imagenActual] ? (
+                {imagenes &&
+                esUrlValida(imagenes[imagenActual]?.url_imagen) &&
+                !imagenesError[imagenActual] ? (
                   <img
                     src={imagenes[imagenActual].url_imagen}
                     alt={servicio.titulo}
@@ -161,25 +204,26 @@ export default function Servicio() {
                 )}
               </div>
               <div className="galeria-miniaturas">
-                {imagenes && imagenes.map((img, i) => (
-                  <button
-                    key={img.id_imagen || i}
-                    type="button"
-                    className={`miniatura${imagenActual === i ? " activa" : ""}`}
-                    onClick={() => setImagenActual(i)}
-                  >
-                    {esUrlValida(img.url_imagen) && !imagenesError[i] ? (
-                      <img
-                        src={img.url_imagen}
-                        alt={`Imagen ${i + 1}`}
-                        className="miniatura-img"
-                        onError={() => handleImagenError(i)}
-                      />
-                    ) : (
-                      <i className={`bi ${iconosGaleria[0]}`}></i>
-                    )}
-                  </button>
-                ))}
+                {imagenes &&
+                  imagenes.map((img, i) => (
+                    <button
+                      key={img.id_imagen || i}
+                      type="button"
+                      className={`miniatura${imagenActual === i ? " activa" : ""}`}
+                      onClick={() => setImagenActual(i)}
+                    >
+                      {esUrlValida(img.url_imagen) && !imagenesError[i] ? (
+                        <img
+                          src={img.url_imagen}
+                          alt={`Imagen ${i + 1}`}
+                          className="miniatura-img"
+                          onError={() => handleImagenError(i)}
+                        />
+                      ) : (
+                        <i className={`bi ${iconosGaleria[0]}`}></i>
+                      )}
+                    </button>
+                  ))}
               </div>
             </div>
 
@@ -195,25 +239,61 @@ export default function Servicio() {
 
             <div className="info-principal">
               <div className="header-servicio">
-                <div className="titulo-servicio">
-                  <h1>{servicio.titulo || "Sin título"}</h1>
-                  {servicio.nombre_categoria && (() => {
-                    const c = COLORES_CATEGORIA[servicio.nombre_categoria] || { bg: "rgba(148, 163, 184, 0.1)", color: "#94a3b8" };
-                    return (
-                      <span className="etiqueta" style={{ background: c.bg, color: c.color, border: `1px solid ${c.color}33` }}>
-                        {servicio.nombre_categoria}
-                      </span>
-                    );
-                  })()}
+                <div
+                  className="titulo-servicio"
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                  }}
+                >
+                  <h1 style={{ flex: 1 }}>{servicio.titulo || "Sin título"}</h1>
+                  <button
+                    onClick={() => setModalReporteServicio(true)}
+                    style={{
+                      background: "rgba(239,68,68,0.08)",
+                      border: "1px solid rgba(239,68,68,0.3)",
+                      borderRadius: "8px",
+                      padding: "6px 12px",
+                      cursor: "pointer",
+                      color: "#ff6b6b",
+                      fontSize: "0.82rem",
+                      fontWeight: "600",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      flexShrink: 0,
+                      transition: "all 0.2s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "rgba(239,68,68,0.18)";
+                      e.currentTarget.style.borderColor = "rgba(239,68,68,0.6)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "rgba(239,68,68,0.08)";
+                      e.currentTarget.style.borderColor = "rgba(239,68,68,0.3)";
+                    }}
+                  >
+                    <i
+                      className="bi bi-flag-fill"
+                      style={{ fontSize: "0.85rem" }}
+                    />
+                    Reportar
+                  </button>
                 </div>
               </div>
 
               <div className="rating-grande">
                 <div>
                   <div className="estrellas-grande">{estrellasTexto}</div>
-                  <div className="texto-rating"><strong>{prom}</strong> de 5.0</div>
+                  <div className="texto-rating">
+                    <strong>{prom}</strong> de 5.0
+                  </div>
                 </div>
-                <div className="texto-rating"><div>{num} reseñas</div></div>
+                <div className="texto-rating">
+                  <div>{num} reseñas</div>
+                </div>
               </div>
 
               <div className="desc-completa">
@@ -222,18 +302,26 @@ export default function Servicio() {
             </div>
 
             <div className="seccion-info" style={{ marginTop: "24px" }}>
-              <h3><i className="bi bi-card-checklist"></i> Detalles del Servicio</h3>
+              <h3>
+                <i className="bi bi-card-checklist"></i> Detalles del Servicio
+              </h3>
               <div className="info-row">
                 <span className="info-label">Modalidad</span>
-                <span className="info-valor">{mostrarModalidad(servicio.modalidad)}</span>
+                <span className="info-valor">
+                  {mostrarModalidad(servicio.modalidad)}
+                </span>
               </div>
               <div className="info-row">
                 <span className="info-label">Disponibilidad</span>
-                <span className="info-valor">{mostrarDisponibilidad(servicio.disponibilidad)}</span>
+                <span className="info-valor">
+                  {mostrarDisponibilidad(servicio.disponibilidad)}
+                </span>
               </div>
               <div className="info-row">
                 <span className="info-label">Precio por hora</span>
-                <span className="info-valor">${servicio.precio_hora || 0} COP</span>
+                <span className="info-valor">
+                  ${servicio.precio_hora || 0} COP
+                </span>
               </div>
               <div className="info-row">
                 <span className="info-label">Universidad</span>
@@ -241,7 +329,9 @@ export default function Servicio() {
               </div>
               <div className="info-row">
                 <span className="info-label">Publicado</span>
-                <span className="info-valor">{formatearFecha(servicio.fecha_publicacion) || "—"}</span>
+                <span className="info-valor">
+                  {formatearFecha(servicio.fecha_publicacion) || "—"}
+                </span>
               </div>
               {servicio.contacto && (
                 <div className="info-row">
@@ -260,27 +350,37 @@ export default function Servicio() {
             </div>
 
             <div className="seccion-info">
-              <h3><i className="bi bi-star-fill"></i> Reseñas de Clientes</h3>
-              {Array.isArray(servicio.resenas) && servicio.resenas.length > 0 ? (
+              <h3>
+                <i className="bi bi-star-fill"></i> Reseñas de Clientes
+              </h3>
+              {Array.isArray(servicio.resenas) &&
+              servicio.resenas.length > 0 ? (
                 <div className="resenas-container">
                   {servicio.resenas.map((r, i) => (
                     <div key={i} className="resena">
                       <div className="resena-header">
                         <div className="resena-autor">
-                          <div className="avatar-resena">{iniciales(r.autor)}</div>
+                          <div className="avatar-resena">
+                            {iniciales(r.autor)}
+                          </div>
                           <div className="resena-info">
                             <h4>{r.autor || "Anónimo"}</h4>
                             <div className="resena-fecha">{r.fecha || ""}</div>
                           </div>
                         </div>
-                        <div className="resena-rating">{"★".repeat(r.estrellas || 5)}</div>
+                        <div className="resena-rating">
+                          {"★".repeat(r.estrellas || 5)}
+                        </div>
                       </div>
                       <div className="resena-texto">{r.comentario || ""}</div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="texto-muted" style={{ textAlign: "center", padding: "20px 0" }}>
+                <p
+                  className="texto-muted"
+                  style={{ textAlign: "center", padding: "20px 0" }}
+                >
                   Aún no hay reseñas para este servicio.
                 </p>
               )}
@@ -289,7 +389,7 @@ export default function Servicio() {
             <FormCalificacion
               servicioId={idServicio}
               showModal={showModal}
-              onNuevaResena={() => setRecargarResenas(n => n + 1)}
+              onNuevaResena={() => setRecargarResenas((n) => n + 1)}
             />
           </div>
 
@@ -305,7 +405,9 @@ export default function Servicio() {
                     universidad: universidad,
                     contacto: servicio.contacto,
                     estrellas: servicio.estrellas,
-                    resenas: Array.isArray(servicio.resenas) ? servicio.resenas.length : (servicio.resenas ?? 0),
+                    resenas: Array.isArray(servicio.resenas)
+                      ? servicio.resenas.length
+                      : (servicio.resenas ?? 0),
                   },
                 }}
                 style={{ textDecoration: "none" }}
@@ -313,17 +415,26 @@ export default function Servicio() {
                 <div className="card-proveedor" style={{ cursor: "pointer" }}>
                   <div className="card-proveedor-glow" />
                   <div className="card-proveedor-header">
-                    <div className={`avatar-grande ${colorAvatar(servicio.proveedor)}`}>
+                    <div
+                      className={`avatar-grande ${colorAvatar(servicio.proveedor)}`}
+                    >
                       {iniciales(servicio.proveedor)}
                     </div>
                     <div className="card-proveedor-info">
-                      <div className="nombre-proveedor">{servicio.proveedor || "Proveedor anónimo"}</div>
+                      <div className="nombre-proveedor">
+                        {servicio.proveedor || "Proveedor anónimo"}
+                      </div>
                       <div className="ubicacion-proveedor">{universidad}</div>
                     </div>
                   </div>
                   <div className="card-proveedor-footer">
                     <span className="badge-proveedor">
-                      <i className="bi bi-star-fill"></i> {servicio.estrellas || "0"} · {Array.isArray(servicio.resenas) ? servicio.resenas.length : (servicio.resenas ?? 0)} reseñas
+                      <i className="bi bi-star-fill"></i>{" "}
+                      {servicio.estrellas || "0"} ·{" "}
+                      {Array.isArray(servicio.resenas)
+                        ? servicio.resenas.length
+                        : (servicio.resenas ?? 0)}{" "}
+                      reseñas
                     </span>
                     <span className="badge-ver">Ver perfil →</span>
                   </div>
@@ -339,11 +450,12 @@ export default function Servicio() {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <i className="bi bi-envelope-fill"></i> Contactar por Gmail
+                      <i className="bi bi-envelope-fill"></i> Contactar por
+                      Gmail
                     </a>
                   ) : (
                     <a
-                      href={`https://wa.me/57${servicio.contacto.replace(/\D/g, "")}?text=${encodeURIComponent("Hola, vi tu servicio \"" + (servicio.titulo || "") + "\" en UniService y me interesa. ¿Podrías darme más información?")}` }
+                      href={`https://wa.me/57${servicio.contacto.replace(/\D/g, "")}?text=${encodeURIComponent('Hola, vi tu servicio "' + (servicio.titulo || "") + '" en UniService y me interesa. ¿Podrías darme más información?')}`}
                       className="btn-primary btn-contacto btn-whatsapp"
                       target="_blank"
                       rel="noreferrer"
@@ -362,7 +474,9 @@ export default function Servicio() {
             </div>
 
             <div className="seccion-info">
-              <h3><i className="bi bi-person-fill"></i> Información del Proveedor</h3>
+              <h3>
+                <i className="bi bi-person-fill"></i> Información del Proveedor
+              </h3>
               <div className="info-row">
                 <span className="info-label">Publicaciones</span>
                 <span className="info-valor">1 servicio</span>
@@ -423,10 +537,18 @@ export default function Servicio() {
         <div className="container">
           <hr />
           <p className="footer-copy">
-            © 2026 UniService — Hecho por y para estudiantes <i className="bi bi-mortarboard-fill"></i>
+            © 2026 UniService — Hecho por y para estudiantes{" "}
+            <i className="bi bi-mortarboard-fill"></i>
           </p>
         </div>
       </footer>
+      {modalReporteServicio && (
+  <ModalReporte
+    onClose={() => setModalReporteServicio(false)}
+    idServicio={parseInt(idServicio)}
+    contexto="servicio"
+  />
+)}
     </>
   );
 }
