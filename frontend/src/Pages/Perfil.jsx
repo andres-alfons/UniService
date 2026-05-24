@@ -733,13 +733,11 @@ const Perfil = () => {
 
                 <div className="action-buttons">
                   {esPerfilExterno ? (
-                    // Perfil ajeno: se muestran Seguir, Chatear y Compartir
                     <>
                       <button
-                        className={`btn-seguir ${siguiendo ? "btn-siguiendo" : ""}`}
+                        className={`btn-action btn-seguir ${siguiendo ? "btn-siguiendo" : ""}`}
                         onClick={toggleSeguir}
                         disabled={enviandoSeguimiento}
-                        style={{ flex: 1 }}
                       >
                         {siguiendo ? (
                           <>
@@ -752,16 +750,14 @@ const Perfil = () => {
                         )}
                       </button>
                       <button
-                        className="btn btn-primary btn-chat-perfil"
+                        className="btn-action btn-chatear"
                         onClick={() => setChatPanelAbierto(true)}
-                        style={{ flex: 1 }}
                       >
                         <i className="bi bi-chat-dots-fill"></i> Chatear
                       </button>
                       <button
-                        className="btn btn-secondary"
+                        className="btn-action btn-compartir"
                         onClick={handleShare}
-                        style={{ flex: 1 }}
                       >
                         <i className="bi bi-link-45deg"></i> Compartir
                       </button>
@@ -769,18 +765,14 @@ const Perfil = () => {
                   ) : (
                     <>
                       <button
-                        className="btn btn-primary"
+                        className="btn-action btn-editar"
                         onClick={() => setActiveModal("info")}
-                        style={{ flex: 1 }}
                       >
-                        <>
-                          <i className="bi bi-pencil"></i> Editar Perfil
-                        </>
+                        <i className="bi bi-pencil"></i> Editar Perfil
                       </button>
                       <button
-                        className="btn btn-secondary"
+                        className="btn-action btn-compartir"
                         onClick={handleShare}
-                        style={{ flex: 1 }}
                       >
                         <i className="bi bi-link-45deg"></i> Compartir
                       </button>

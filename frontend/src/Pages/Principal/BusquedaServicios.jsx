@@ -1,6 +1,6 @@
 // ─── BusquedaServicios.jsx ───────────────────────────────────────────────────
 // Sección de búsqueda y exploración de servicios para usuarios autenticados.
-// AHORA usa paginación y filtrado del BACKEND para mejor rendimiento.
+// Usa paginación con flechas, animación de desvanecimiento e indicador de páginas.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useEffect, useCallback, useRef } from "react";
@@ -9,24 +9,23 @@ import { normalizar, promedioEstrellas, debounce } from "../shared/utilidades";
 import TarjetaServicio from "../shared/TarjetaServicio";
 
 export default function SeccionBuscar() {
-  // Estado del buscador, categoría activa, orden y paginación
   const [busqueda, setBusqueda] = useState("");
   const [categoriaActual, setCategoriaActual] = useState("todos");
   const [orden, setOrden] = useState("recientes");
   const [pagina, setPagina] = useState(1);
-  
-  // Datos del backend
+
   const [resultados, setResultados] = useState([]);
   const [totalResultados, setTotalResultados] = useState(0);
   const [totalPaginas, setTotalPaginas] = useState(0);
   const [cargando, setCargando] = useState(false);
+  const [fadeClass, setFadeClass] = useState("fade-visible");
 
-  // Ref para debounce
   const busquedaRef = useRef("");
 
-  // Función para cargar servicios desde el backend con paginación
   const cargarServicios = useCallback(async (page, texto, cat, ord) => {
     setCargando(true);
+    setFadeClass("fade-exit");
+
     try {
       const params = new URLSearchParams({
         page: page,
@@ -41,29 +40,29 @@ export default function SeccionBuscar() {
       const data = await res.json();
 
       if (data.servicios) {
-        // Respuesta paginada (nuevo)
         setResultados(data.servicios);
         setTotalResultados(data.paginacion.total);
         setTotalPaginas(data.paginacion.totalPaginas);
       } else if (Array.isArray(data)) {
-        // Respuesta legacy (todos los servicios)
         setResultados(data);
         setTotalResultados(data.length);
         setTotalPaginas(Math.ceil(data.length / CANTIDAD_POR_PAGINA));
       }
+
+      setTimeout(() => setFadeClass("fade-enter"), 50);
+      setTimeout(() => setFadeClass("fade-visible"), 200);
     } catch (err) {
       console.error("Error cargando servicios:", err);
+      setFadeClass("fade-visible");
     } finally {
       setCargando(false);
     }
   }, []);
 
-  // Carga inicial
   useEffect(() => {
     cargarServicios(1, "", "todos", "recientes");
   }, [cargarServicios]);
 
-  // Función debounce para búsqueda por texto
   const cargarConDebounce = useRef(
     debounce((texto, cat, ord) => {
       setPagina(1);
@@ -71,7 +70,6 @@ export default function SeccionBuscar() {
     }, 400)
   ).current;
 
-  // Maneja cambios en el campo de búsqueda por texto
   const handleBusqueda = (e) => {
     const val = e.target.value;
     setBusqueda(val);
@@ -79,14 +77,12 @@ export default function SeccionBuscar() {
     cargarConDebounce(val, categoriaActual, orden);
   };
 
-  // Maneja clics en los chips de categoría
   const handleCategoria = (cat) => {
     setCategoriaActual(cat);
     setPagina(1);
     cargarServicios(1, busquedaRef.current, cat, orden);
   };
 
-  // Maneja cambios en el selector de ordenamiento
   const handleOrden = (e) => {
     const val = e.target.value;
     setOrden(val);
@@ -94,14 +90,12 @@ export default function SeccionBuscar() {
     cargarServicios(1, busquedaRef.current, categoriaActual, val);
   };
 
-  // Cargar más (siguiente página)
-  const handleMostrarMas = () => {
-    const nuevaPagina = pagina + 1;
+  const irPagina = (nuevaPagina) => {
+    if (nuevaPagina < 1 || nuevaPagina > totalPaginas || cargando) return;
     setPagina(nuevaPagina);
     cargarServicios(nuevaPagina, busquedaRef.current, categoriaActual, orden);
   };
 
-  // Invertir el orden actual
   const handleToggleOrden = () => {
     const pares = {
       recientes: "antiguos",
@@ -117,8 +111,31 @@ export default function SeccionBuscar() {
     cargarServicios(1, busquedaRef.current, categoriaActual, nuevo);
   };
 
-  const resultadosMostrados = resultados.length;
-  const hayMasResultados = pagina < totalPaginas;
+  const generarPaginas = () => {
+    const paginas = [];
+    const maxVisible = 5;
+    let inicio = Math.max(1, pagina - Math.floor(maxVisible / 2));
+    const fin = Math.min(totalPaginas, inicio + maxVisible - 1);
+    if (fin - inicio < maxVisible - 1) {
+      inicio = Math.max(1, fin - maxVisible + 1);
+    }
+
+    if (inicio > 1) {
+      paginas.push(1);
+      if (inicio > 2) paginas.push("...");
+    }
+
+    for (let i = inicio; i <= fin; i++) {
+      paginas.push(i);
+    }
+
+    if (fin < totalPaginas) {
+      if (fin < totalPaginas - 1) paginas.push("...");
+      paginas.push(totalPaginas);
+    }
+
+    return paginas;
+  };
 
   return (
     <section className="seccion seccion-oscura" id="buscar">
@@ -129,7 +146,6 @@ export default function SeccionBuscar() {
           <h1 className="reveal delay-1" style={{ fontSize: "2.5rem" }}>
             Todos los <span className="acento">servicios</span>
           </h1>
-          {/* Barra de búsqueda principal */}
           <div className="search-container reveal delay-2" style={{ maxWidth: "700px", margin: "30px auto" }}>
             <div className="search-input-wrapper">
               <input
@@ -144,7 +160,6 @@ export default function SeccionBuscar() {
         </div>
       </header>
 
-      {/* Chips de filtro por categoría */}
       <div className="container chips-container-enhanced" id="filtros-categorias" style={{ marginBottom: "24px" }}>
         {CHIPS_CATEGORIA.map((chip) => (
           <button
@@ -159,18 +174,13 @@ export default function SeccionBuscar() {
       </div>
 
       <div className="container">
-        {/* Barra de ordenamiento con selector y botón para invertir */}
         <div className="sort-bar reveal">
           <p className="texto-muted">
             Resultados: <strong className="texto-claro">{totalResultados}</strong>
             {cargando && " (cargando...)"}
           </p>
           <div className="sort-group">
-            <select
-              className="sort-select"
-              value={orden}
-              onChange={handleOrden}
-            >
+            <select className="sort-select" value={orden} onChange={handleOrden}>
               <option value="recientes">Más recientes</option>
               <option value="antiguos">Más antiguos</option>
               <option value="precio-menor">Menor precio</option>
@@ -184,8 +194,7 @@ export default function SeccionBuscar() {
           </div>
         </div>
 
-        {/* Cuadrícula de resultados */}
-        <div className="cards-grid" id="contenedor-explorar">
+        <div className={`cards-grid ${fadeClass}`} id="contenedor-explorar">
           {cargando && resultados.length === 0 ? (
             <p className="texto-muted" style={{ gridColumn: "1 / -1", textAlign: "center", padding: "32px 0" }}>
               Cargando servicios...
@@ -201,19 +210,54 @@ export default function SeccionBuscar() {
           )}
         </div>
 
-        {/* Botón "Mostrar más" */}
-        <div id="contenedor-boton" style={{ textAlign: "center", marginTop: "32px" }}>
-          {hayMasResultados && (
-            <button 
-              type="button" 
-              className="btn btn-verde" 
-              onClick={handleMostrarMas}
-              disabled={cargando}
+        {/* Navegación con flechas e indicador de páginas */}
+        {totalPaginas > 1 && (
+          <div className="paginacion-container">
+            <button
+              type="button"
+              className="btn-pagina btn-pagina-arrow"
+              onClick={() => irPagina(pagina - 1)}
+              disabled={pagina <= 1 || cargando}
+              aria-label="Página anterior"
             >
-              {cargando ? "Cargando..." : `Mostrar más (${totalResultados - resultadosMostrados} restantes)`}
+              <i className="bi bi-chevron-left"></i>
             </button>
-          )}
-        </div>
+
+            <div className="paginas-numeros">
+              {generarPaginas().map((p, idx) =>
+                p === "..." ? (
+                  <span key={`dots-${idx}`} className="paginas-separador">…</span>
+                ) : (
+                  <button
+                    key={p}
+                    type="button"
+                    className={`btn-pagina-numero${pagina === p ? " activo" : ""}`}
+                    onClick={() => irPagina(p)}
+                    disabled={cargando}
+                  >
+                    {p}
+                  </button>
+                )
+              )}
+            </div>
+
+            <button
+              type="button"
+              className="btn-pagina btn-pagina-arrow"
+              onClick={() => irPagina(pagina + 1)}
+              disabled={pagina >= totalPaginas || cargando}
+              aria-label="Página siguiente"
+            >
+              <i className="bi bi-chevron-right"></i>
+            </button>
+          </div>
+        )}
+
+        {totalPaginas > 0 && (
+          <p className="paginas-info">
+            Página {pagina} de {totalPaginas}
+          </p>
+        )}
       </div>
     </section>
   );

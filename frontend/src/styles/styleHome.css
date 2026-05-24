@@ -3451,3 +3451,190 @@ html {
 .modal-rechazo-acciones .btn {
   flex: 1;
 }
+
+/* ══════════════════════════════
+   PAGINACIÓN CON FLECHAS
+══════════════════════════════ */
+.paginacion-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 32px;
+  padding: 16px 0;
+}
+
+.btn-pagina {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--borde);
+  background: var(--bg2);
+  color: var(--texto);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: var(--trans);
+  font-family: "Poppins", sans-serif;
+}
+
+.btn-pagina:hover:not(:disabled) {
+  border-color: var(--teal);
+  color: var(--teal);
+  background: var(--teal-dim);
+  transform: translateY(-2px);
+}
+
+.btn-pagina:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-pagina-arrow {
+  width: 46px;
+  height: 46px;
+  font-size: 1.15rem;
+  background: var(--bg3);
+  border-color: var(--borde2);
+}
+
+.btn-pagina-arrow:hover:not(:disabled) {
+  background: var(--teal);
+  color: var(--bg);
+  border-color: var(--teal);
+  box-shadow: 0 6px 16px rgba(14, 165, 160, 0.3);
+}
+
+.paginas-numeros {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-pagina-numero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--borde);
+  background: var(--bg2);
+  color: var(--texto2);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--trans);
+  font-family: "Poppins", sans-serif;
+}
+
+.btn-pagina-numero:hover:not(:disabled) {
+  border-color: var(--teal);
+  color: var(--teal);
+  background: var(--teal-dim);
+  transform: translateY(-2px);
+}
+
+.btn-pagina-numero.activo {
+  background: linear-gradient(135deg, var(--teal), var(--teal2));
+  border-color: transparent;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(14, 165, 160, 0.35);
+  transform: translateY(-2px);
+}
+
+.paginas-separador {
+  color: var(--texto3);
+  font-size: 1rem;
+  padding: 0 4px;
+  letter-spacing: 2px;
+}
+
+.paginas-info {
+  text-align: center;
+  color: var(--texto3);
+  font-size: 0.82rem;
+  margin-top: 12px;
+  font-weight: 500;
+}
+
+/* ══════════════════════════════
+   ANIMACIÓN DE DESVANECIMIENTO
+══════════════════════════════ */
+.cards-grid.fade-exit {
+  opacity: 0;
+  transform: translateY(12px) scale(0.98);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.cards-grid.fade-enter {
+  opacity: 0.3;
+  transform: translateY(-8px) scale(1.01);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.cards-grid.fade-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Responsive paginación */
+@media (max-width: 640px) {
+  .paginacion-container {
+    gap: 6px;
+    margin-top: 24px;
+  }
+
+  .btn-pagina {
+    width: 38px;
+    height: 38px;
+    font-size: 0.9rem;
+    border-radius: 10px;
+  }
+
+  .btn-pagina-arrow {
+    width: 42px;
+    height: 42px;
+  }
+
+  .btn-pagina-numero {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    font-size: 0.82rem;
+    border-radius: 8px;
+  }
+
+  .paginas-numeros {
+    gap: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .paginas-numeros {
+    gap: 3px;
+  }
+
+  .btn-pagina-numero {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    font-size: 0.78rem;
+  }
+
+  .btn-pagina {
+    width: 36px;
+    height: 36px;
+  }
+
+  .btn-pagina-arrow {
+    width: 38px;
+    height: 38px;
+  }
+}

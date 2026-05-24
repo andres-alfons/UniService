@@ -7,16 +7,18 @@ export default function SeccionBuscar({ serviciosTotales }) {
   const [busqueda, setBusqueda] = useState("");
   const [categoriaActual, setCategoriaActual] = useState("todos");
   const [orden, setOrden] = useState("recientes");
-  const [mostrados, setMostrados] = useState(CANTIDAD_POR_PAGINA);
+  const [pagina, setPagina] = useState(1);
   const [resultados, setResultados] = useState([]);
+  const [totalFiltrados, setTotalFiltrados] = useState(0);
+  const [fadeClass, setFadeClass] = useState("fade-visible");
 
   useEffect(() => {
-    aplicarFiltros(busqueda, categoriaActual, orden, CANTIDAD_POR_PAGINA);
-    setMostrados(CANTIDAD_POR_PAGINA);
+    aplicarFiltros(busqueda, categoriaActual, orden, 1);
+    setPagina(1);
   }, [serviciosTotales]);
 
   const aplicarFiltros = useCallback(
-    (texto, cat, ord, limite) => {
+    (texto, cat, ord, page) => {
       let filtrados = [...serviciosTotales].filter((s) => {
         const q = normalizar(texto);
         const coincideTexto =
@@ -71,7 +73,9 @@ export default function SeccionBuscar({ serviciosTotales }) {
           );
       }
 
-      setResultados(filtrados.slice(0, limite));
+      setTotalFiltrados(filtrados.length);
+      const inicio = (page - 1) * CANTIDAD_POR_PAGINA;
+      setResultados(filtrados.slice(inicio, inicio + CANTIDAD_POR_PAGINA));
     },
     [serviciosTotales],
   );
@@ -79,7 +83,8 @@ export default function SeccionBuscar({ serviciosTotales }) {
   const handleBusqueda = (e) => {
     const val = e.target.value;
     setBusqueda(val);
-    aplicarFiltros(val, categoriaActual, orden, mostrados);
+    setPagina(1);
+    aplicarFiltros(val, categoriaActual, orden, 1);
   };
 
   const handleCategoria = (cat, e) => {
@@ -88,13 +93,15 @@ export default function SeccionBuscar({ serviciosTotales }) {
       .forEach((b) => b.classList.remove("activo"));
     e.target.classList.add("activo");
     setCategoriaActual(cat);
-    aplicarFiltros(busqueda, cat, orden, mostrados);
+    setPagina(1);
+    aplicarFiltros(busqueda, cat, orden, 1);
   };
 
   const handleOrden = (e) => {
     const val = e.target.value;
     setOrden(val);
-    aplicarFiltros(busqueda, categoriaActual, val, mostrados);
+    setPagina(1);
+    aplicarFiltros(busqueda, categoriaActual, val, 1);
   };
 
   const handleToggleOrden = () => {
@@ -108,13 +115,49 @@ export default function SeccionBuscar({ serviciosTotales }) {
     };
     const nuevo = pares[orden] || "recientes";
     setOrden(nuevo);
-    aplicarFiltros(busqueda, categoriaActual, nuevo, mostrados);
+    setPagina(1);
+    aplicarFiltros(busqueda, categoriaActual, nuevo, 1);
   };
 
-  const handleMostrarMas = () => {
-    const nuevo = mostrados + CANTIDAD_POR_PAGINA;
-    setMostrados(nuevo);
-    aplicarFiltros(busqueda, categoriaActual, orden, nuevo);
+  const irPagina = (nuevaPagina) => {
+    const totalPaginas = Math.ceil(totalFiltrados / CANTIDAD_POR_PAGINA);
+    if (nuevaPagina < 1 || nuevaPagina > totalPaginas) return;
+
+    setFadeClass("fade-exit");
+    setTimeout(() => {
+      setPagina(nuevaPagina);
+      aplicarFiltros(busqueda, categoriaActual, orden, nuevaPagina);
+      setFadeClass("fade-enter");
+      setTimeout(() => setFadeClass("fade-visible"), 200);
+    }, 150);
+  };
+
+  const totalPaginas = Math.ceil(totalFiltrados / CANTIDAD_POR_PAGINA);
+
+  const generarPaginas = () => {
+    const paginas = [];
+    const maxVisible = 5;
+    let inicio = Math.max(1, pagina - Math.floor(maxVisible / 2));
+    const fin = Math.min(totalPaginas, inicio + maxVisible - 1);
+    if (fin - inicio < maxVisible - 1) {
+      inicio = Math.max(1, fin - maxVisible + 1);
+    }
+
+    if (inicio > 1) {
+      paginas.push(1);
+      if (inicio > 2) paginas.push("...");
+    }
+
+    for (let i = inicio; i <= fin; i++) {
+      paginas.push(i);
+    }
+
+    if (fin < totalPaginas) {
+      if (fin < totalPaginas - 1) paginas.push("...");
+      paginas.push(totalPaginas);
+    }
+
+    return paginas;
   };
 
   return (
@@ -167,7 +210,7 @@ export default function SeccionBuscar({ serviciosTotales }) {
         <div className="sort-bar reveal">
           <p className="texto-muted">
             Resultados:{" "}
-            <strong className="texto-claro">{resultados.length}</strong>
+            <strong className="texto-claro">{totalFiltrados}</strong>
           </p>
           <div className="sort-group">
             <select
@@ -188,7 +231,7 @@ export default function SeccionBuscar({ serviciosTotales }) {
           </div>
         </div>
 
-        <div className="cards-grid" id="contenedor-explorar">
+        <div className={`cards-grid ${fadeClass}`} id="contenedor-explorar">
           {resultados.length === 0 ? (
             <p
               className="texto-muted"
@@ -207,20 +250,52 @@ export default function SeccionBuscar({ serviciosTotales }) {
           )}
         </div>
 
-        <div
-          id="contenedor-boton"
-          style={{ textAlign: "center", marginTop: "32px" }}
-        >
-          {resultados.length >= mostrados && (
+        {totalPaginas > 1 && (
+          <div className="paginacion-container">
             <button
               type="button"
-              className="btn btn-verde"
-              onClick={handleMostrarMas}
+              className="btn-pagina btn-pagina-arrow"
+              onClick={() => irPagina(pagina - 1)}
+              disabled={pagina <= 1}
+              aria-label="Página anterior"
             >
-              Mostrar más servicios
+              <i className="bi bi-chevron-left"></i>
             </button>
-          )}
-        </div>
+
+            <div className="paginas-numeros">
+              {generarPaginas().map((p, idx) =>
+                p === "..." ? (
+                  <span key={`dots-${idx}`} className="paginas-separador">…</span>
+                ) : (
+                  <button
+                    key={p}
+                    type="button"
+                    className={`btn-pagina-numero${pagina === p ? " activo" : ""}`}
+                    onClick={() => irPagina(p)}
+                  >
+                    {p}
+                  </button>
+                )
+              )}
+            </div>
+
+            <button
+              type="button"
+              className="btn-pagina btn-pagina-arrow"
+              onClick={() => irPagina(pagina + 1)}
+              disabled={pagina >= totalPaginas}
+              aria-label="Página siguiente"
+            >
+              <i className="bi bi-chevron-right"></i>
+            </button>
+          </div>
+        )}
+
+        {totalPaginas > 0 && (
+          <p className="paginas-info">
+            Página {pagina} de {totalPaginas}
+          </p>
+        )}
       </div>
     </section>
   );

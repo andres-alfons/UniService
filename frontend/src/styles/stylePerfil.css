@@ -458,46 +458,104 @@ body {
 /* Botones de acción */
 .action-buttons {
   display: flex;
-  gap: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-.btn {
+.btn-action {
   flex: 1;
-  padding: 12px 20px;
-  border-radius: 10px;
-  font-size: 0.85rem;
+  min-width: 0;
+  padding: 11px 14px;
+  border-radius: 12px;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
   transition: var(--trans);
-  border: none;
   font-family: "Poppins", sans-serif;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 7px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  min-height: 44px;
 }
 
-.btn-primary {
+.btn-action i {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* Seguir — teal sólido */
+.btn-seguir {
   background: var(--teal);
   color: var(--bg);
+  border-color: var(--teal);
 }
 
-.btn-primary:hover {
+.btn-seguir:hover:not(:disabled) {
   background: var(--teal2);
+  border-color: var(--teal2);
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(14, 165, 160, 0.3);
+  box-shadow: 0 8px 20px rgba(14, 165, 160, 0.3);
 }
 
-.btn-secondary {
+.btn-seguir:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Siguiendo — outline style */
+.btn-siguiendo {
   background: transparent;
-  color: var(--texto);
-  border: 1px solid var(--borde2);
-  max-height: 46px;
+  color: var(--teal);
+  border-color: var(--teal);
 }
 
-.btn-secondary:hover {
+.btn-siguiendo:hover {
+  background: var(--teal-dim);
+  transform: translateY(-2px);
+}
+
+/* Chatear — fondo oscuro con borde teal */
+.btn-chatear {
+  background: var(--bg2);
+  color: var(--texto);
+  border-color: var(--borde);
+}
+
+.btn-chatear:hover {
   border-color: var(--teal);
   color: var(--teal);
+  background: var(--teal-dim);
+  transform: translateY(-2px);
+}
+
+/* Compartir — fondo oscuro con borde sutil */
+.btn-compartir {
+  background: var(--bg2);
+  color: var(--texto2);
+  border-color: var(--borde);
+}
+
+.btn-compartir:hover {
+  border-color: var(--borde2);
+  color: var(--texto);
+  transform: translateY(-2px);
+}
+
+/* Editar perfil — teal sólido */
+.btn-editar {
+  background: var(--teal);
+  color: var(--bg);
+  border-color: var(--teal);
+}
+
+.btn-editar:hover {
+  background: var(--teal2);
+  border-color: var(--teal2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(14, 165, 160, 0.3);
 }
 
 /* ══════════════════════════════
@@ -698,6 +756,11 @@ body {
 
   .action-buttons {
     flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn-action {
+    width: 100%;
   }
 
   .info-grid {
