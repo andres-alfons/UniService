@@ -80,14 +80,6 @@ export default function ModalReporte({
     if (form.titulo.length > 150) { setError("El título no puede superar 150 caracteres."); return; }
     setError("");
     setEnviando(true);
-    console.log("[ModalReporte] Enviando reporte:", {
-      contexto,
-      idUsuarioReportado,
-      id_usuario,
-      id_servicio: idServicio || null,
-      id_solicitud: idSolicitud || null,
-      tipo_reporte: form.tipo_reporte,
-    });
     try {
       const res = await fetch(`/api/reportes`, {
         method: "POST",

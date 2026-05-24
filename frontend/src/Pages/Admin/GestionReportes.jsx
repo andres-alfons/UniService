@@ -52,7 +52,6 @@ export default function SeccionReportes() {
           : `/api/reportes/admin?estado=${filtro}`;
       const res = await fetch(url);
       const data = await res.json();
-      console.log("[GestionReportes] Datos recibidos:", data);
       setReportes(Array.isArray(data) ? data : []);
     } catch {
       setReportes([]);

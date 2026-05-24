@@ -22,8 +22,6 @@ public class ReportesController : ControllerBase
     {
         try
         {
-            Console.WriteLine($"[CREAR REPORTE] id_usuario={dto.id_usuario}, id_usuario_reportado={dto.id_usuario_reportado}, tipo={dto.tipo_reporte}, titulo={dto.titulo}");
-
             using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
@@ -47,7 +45,6 @@ public class ReportesController : ControllerBase
             using var reader = await cmd.ExecuteReaderAsync();
             if (await reader.ReadAsync())
             {
-                Console.WriteLine($"[CREAR REPOTE] INSERTADO: id_reporte={reader.GetInt32(0)}, id_usuario_reportado={dto.id_usuario_reportado}");
                 return Ok(new
                 {
                     ok = true,
