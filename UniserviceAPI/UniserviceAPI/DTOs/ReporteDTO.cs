@@ -3,6 +3,7 @@
     public int id_usuario { get; set; }
     public int? id_servicio { get; set; }
     public int? id_solicitud { get; set; }
+    public int? id_usuario_reportado { get; set; }
     public string tipo_reporte { get; set; } = "";
     public string titulo { get; set; } = "";
     public string descripcion { get; set; } = "";

@@ -10,9 +10,13 @@ const TIPOS_SERVICIO = [
 ];
 
 const TIPOS_USUARIO = [
-  { value: "usuario_acoso",   label: "⚠️ Acoso o amenazas" },
-  { value: "usuario_fraude",  label: "⛔ Fraude de usuario" },
-  { value: "otro",            label: "📝 Otro" },
+  { value: "usuario_acoso",        label: "⚠️ Acoso o amenazas" },
+  { value: "usuario_abuso",        label: "🚫 Abuso de la plataforma" },
+  { value: "usuario_fraude",       label: "⛔ Fraude o estafa" },
+  { value: "usuario_suplantacion", label: "🎭 Suplantación de identidad" },
+  { value: "usuario_spam",         label: "📨 Spam o publicidad no deseada" },
+  { value: "usuario_comportamiento", label: "😤 Comportamiento inapropiado" },
+  { value: "otro",                 label: "📝 Otro" },
 ];
 
 const TIPOS_PAGINA = [

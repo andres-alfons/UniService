@@ -27,15 +27,16 @@ public class ReportesController : ControllerBase
 
             using var cmd = new NpgsqlCommand(@"
                 INSERT INTO reportes
-                    (id_usuario, id_servicio, id_solicitud, tipo_reporte, titulo, descripcion, evidencia)
+                    (id_usuario, id_servicio, id_solicitud, id_usuario_reportado, tipo_reporte, titulo, descripcion, evidencia)
                 VALUES
-                    (@id_usuario, @id_servicio, @id_solicitud, @tipo_reporte, @titulo, @descripcion, @evidencia)
+                    (@id_usuario, @id_servicio, @id_solicitud, @id_usuario_reportado, @tipo_reporte, @titulo, @descripcion, @evidencia)
                 RETURNING id_reporte, fecha_creacion, estado
             ", conn);
 
             cmd.Parameters.AddWithValue("@id_usuario", dto.id_usuario);
             cmd.Parameters.AddWithValue("@id_servicio", dto.id_servicio.HasValue ? (object)dto.id_servicio.Value : DBNull.Value);
             cmd.Parameters.AddWithValue("@id_solicitud", dto.id_solicitud.HasValue ? (object)dto.id_solicitud.Value : DBNull.Value);
+            cmd.Parameters.AddWithValue("@id_usuario_reportado", dto.id_usuario_reportado.HasValue ? (object)dto.id_usuario_reportado.Value : DBNull.Value);
             cmd.Parameters.AddWithValue("@tipo_reporte", dto.tipo_reporte);
             cmd.Parameters.AddWithValue("@titulo", dto.titulo);
             cmd.Parameters.AddWithValue("@descripcion", dto.descripcion);
@@ -74,10 +75,12 @@ public class ReportesController : ControllerBase
                 SELECT r.id_reporte, r.tipo_reporte, r.titulo, r.descripcion,
                        r.estado, r.fecha_creacion, r.fecha_resolucion,
                        r.resolucion_notas, r.evidencia,
-                       s.titulo_servicio, sol.estado AS estado_solicitud
+                       s.titulo_servicio, sol.estado AS estado_solicitud,
+                       ur.nombre AS nombre_reportado
                 FROM reportes r
                 LEFT JOIN servicios s ON r.id_servicio = s.id_servicio
                 LEFT JOIN solicitudes sol ON r.id_solicitud = sol.id_solicitud
+                LEFT JOIN usuarios ur ON r.id_usuario_reportado = ur.id_usuario
                 WHERE r.id_usuario = @id_usuario
                 ORDER BY r.fecha_creacion DESC
             ", conn);
@@ -101,6 +104,7 @@ public class ReportesController : ControllerBase
                     evidencia = reader.IsDBNull(8) ? null : reader.GetString(8),
                     titulo_servicio = reader.IsDBNull(9) ? null : reader.GetString(9),
                     estado_solicitud = reader.IsDBNull(10) ? null : reader.GetString(10),
+                    nombre_reportado = reader.IsDBNull(11) ? null : reader.GetString(11),
                 });
             }
 
@@ -128,10 +132,12 @@ public class ReportesController : ControllerBase
                    r.estado, r.fecha_creacion, r.fecha_resolucion,
                    r.resolucion_notas, r.evidencia,
                    u.nombre AS nombre_usuario, u.correo AS correo_usuario,
-                   s.titulo AS titulo_servicio
+                   s.titulo AS titulo_servicio,
+                   ur.nombre AS nombre_reportado, ur.correo AS correo_reportado
                FROM reportes r
                JOIN usuarios u ON r.id_usuario = u.id_usuario
                LEFT JOIN servicios s ON r.id_servicio = s.id_servicio
+               LEFT JOIN usuarios ur ON r.id_usuario_reportado = ur.id_usuario
                 {where}
                 ORDER BY r.fecha_creacion DESC
             ", conn);
@@ -157,6 +163,8 @@ public class ReportesController : ControllerBase
                     nombre_usuario = reader.GetString(9),
                     correo_usuario = reader.GetString(10),
                     titulo_servicio = reader.IsDBNull(11) ? null : reader.GetString(11),
+                    nombre_reportado = reader.IsDBNull(12) ? null : reader.GetString(12),
+                    correo_reportado = reader.IsDBNull(13) ? null : reader.GetString(13),
                 });
             }
 

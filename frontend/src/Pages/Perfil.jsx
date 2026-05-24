@@ -2035,7 +2035,11 @@ const Perfil = () => {
       />
       {/* ══ MODAL: Enviar Reporte ══ */}
       {modalReporteAbierto && (
-        <ModalReporte onClose={() => setModalReporteAbierto(false)} />
+        <ModalReporte
+          onClose={() => setModalReporteAbierto(false)}
+          contexto={esPerfilExterno ? "usuario" : "pagina"}
+          idUsuarioReportado={esPerfilExterno ? parseInt(id_a_consultar) : null}
+        />
       )}
     </>
   );

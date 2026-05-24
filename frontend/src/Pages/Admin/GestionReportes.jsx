@@ -13,11 +13,16 @@ const ETIQUETA_TIPO = {
   servicio_fraude: "🚨 Fraude en servicio",
   servicio_inapropiado: "🔞 Servicio inapropiado",
   usuario_acoso: "⚠️ Acoso de usuario",
+  usuario_abuso: "🚫 Abuso de plataforma",
   usuario_fraude: "⛔ Fraude de usuario",
+  usuario_suplantacion: "🎭 Suplantación de identidad",
+  usuario_spam: "📨 Spam / Publicidad",
+  usuario_comportamiento: "😤 Comportamiento inapropiado",
   bug_tecnico: "🐛 Error técnico",
   queja_general: "💬 Queja general",
   sugerencia: "💡 Sugerencia",
   contenido_inapropiado: "🚫 Contenido inapropiado",
+  pago_problema: "💳 Problema de pago",
   otro: "📝 Otro",
 };
 
@@ -195,8 +200,16 @@ export default function SeccionReportes() {
                       {ETIQUETA_TIPO[r.tipo_reporte] || r.tipo_reporte}
                       {" · "}
                       <span style={{ color: "var(--texto2)" }}>
-                        {r.nombre_usuario} ({r.correo_usuario})
+                        Reportado por: {r.nombre_usuario}
                       </span>
+                      {r.nombre_reportado && (
+                        <>
+                          {" · "}
+                          <span style={{ color: "#f87171", fontWeight: 600 }}>
+                            Contra: {r.nombre_reportado}
+                          </span>
+                        </>
+                      )}
                       {" · "}
                       {new Date(r.fecha_creacion).toLocaleDateString("es-CO")}
                     </p>
@@ -313,6 +326,20 @@ export default function SeccionReportes() {
                       }}
                     >
                       Servicio relacionado: <strong>{r.titulo_servicio}</strong>
+                    </p>
+                  )}
+                  {r.nombre_reportado && (
+                    <p
+                      style={{
+                        fontSize: "0.82rem",
+                        color: "#f87171",
+                        marginTop: "6px",
+                        fontWeight: 600,
+                      }}
+                    >
+                      <i className="bi bi-person-x-fill" style={{ marginRight: "4px" }} />
+                      Usuario reportado: {r.nombre_reportado}
+                      {r.correo_reportado && ` (${r.correo_reportado})`}
                     </p>
                   )}
                   {r.resolucion_notas && (
