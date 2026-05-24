@@ -850,7 +850,7 @@ const Perfil = () => {
                     label="Teléfono"
                     value={userData.telefono || "No disponible"}
                   />
-                  {/* Acceso rápido a secciones de seguridad, solo visible para el usuario propio */}
+                  {/* Opciones solo para perfil propio */}
                   {!esPerfilExterno && (
                     <div className="menu-list">
                       <MenuItem
@@ -859,6 +859,12 @@ const Perfil = () => {
                         desc="Gestiona tu cuenta"
                         onClick={() => setActiveModal("seguridad")}
                       />
+                    </div>
+                  )}
+
+                  {/* Reportar — visible solo en perfiles externos */}
+                  {esPerfilExterno && (
+                    <div className="menu-list">
                       <MenuItem
                         icon={
                           <i
@@ -866,8 +872,8 @@ const Perfil = () => {
                             style={{ color: "#ff6b6b" }}
                           ></i>
                         }
-                        title="Enviar un reporte"
-                        desc="Reporta un error, fraude o problema"
+                        title="Reportar usuario"
+                        desc="Acoso, fraude, abuso u otro motivo"
                         onClick={() => setModalReporteAbierto(true)}
                       />
                     </div>
