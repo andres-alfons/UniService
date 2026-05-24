@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 // Tipos según contexto
 const TIPOS_SERVICIO = [
@@ -36,6 +36,23 @@ export default function ModalReporte({
 }) {
   const id_usuario = parseInt(localStorage.getItem("usuarioId") || "0");
   const fileInputRef = useRef(null);
+  const modalRef = useRef(null);
+
+  // Focus trap on mount
+  useEffect(() => {
+    setTimeout(() => {
+      modalRef.current?.querySelector("select")?.focus();
+    }, 100);
+  }, []);
+
+  // Close on Escape
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [onClose]);
 
   const tipos =
     contexto === "servicio" ? TIPOS_SERVICIO :
@@ -117,12 +134,12 @@ export default function ModalReporte({
   const btnSecondary = { background:"transparent",color:"var(--texto2,#aaa)",border:"1px solid var(--borde,#444)",borderRadius:"8px",padding:"10px 18px",cursor:"pointer",fontSize:"0.9rem" };
 
   return (
-    <div style={overlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div style={overlay} onClick={(e) => e.target === e.currentTarget && onClose()} role="dialog" aria-modal="true" aria-labelledby="modal-reporte-title" ref={modalRef}>
       <div style={card}>
         {exito ? (
           <div style={{ textAlign:"center", padding:"20px 0" }}>
-            <div style={{ fontSize:"2.5rem", marginBottom:"12px" }}>✅</div>
-            <h3 style={{ marginBottom:"8px" }}>Reporte enviado</h3>
+            <div style={{ fontSize:"2.5rem", marginBottom:"12px" }} aria-hidden="true">✅</div>
+            <h3 id="modal-reporte-title" style={{ marginBottom:"8px" }}>Reporte enviado</h3>
             <p style={{ color:"var(--texto2,#aaa)", fontSize:"0.9rem" }}>
               Nuestro equipo lo revisará pronto. Puedes ver el estado en tu perfil → "Mis reportes".
             </p>
@@ -131,28 +148,28 @@ export default function ModalReporte({
         ) : (
           <>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"18px" }}>
-              <h3 style={{ margin:0, fontSize:"1.1rem" }}>
-                <i className="bi bi-flag-fill" style={{ color:"var(--teal,#00b4d8)", marginRight:"8px" }} />
+              <h3 id="modal-reporte-title" style={{ margin:0, fontSize:"1.1rem" }}>
+                <i className="bi bi-flag-fill" style={{ color:"var(--teal,#00b4d8)", marginRight:"8px" }} aria-hidden="true" />
                 {titulo_modal}
               </h3>
-              <button onClick={onClose} style={{ background:"none",border:"none",color:"var(--texto2)",fontSize:"1.3rem",cursor:"pointer" }}>×</button>
+              <button onClick={onClose} style={{ background:"none",border:"none",color:"var(--texto2)",fontSize:"1.3rem",cursor:"pointer" }} aria-label="Cerrar modal">×</button>
             </div>
 
-            <label style={lbl}>Tipo de reporte *</label>
-            <select name="tipo_reporte" value={form.tipo_reporte} onChange={handleChange} style={inp}>
+            <label htmlFor="tipo-reporte" style={lbl}>Tipo de reporte *</label>
+            <select id="tipo-reporte" name="tipo_reporte" value={form.tipo_reporte} onChange={handleChange} style={inp} aria-required="true">
               <option value="">— Selecciona un tipo —</option>
               {tipos.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
 
-            <label style={lbl}>Título *</label>
-            <input name="titulo" type="text" maxLength={150} placeholder="Resume el problema brevemente" value={form.titulo} onChange={handleChange} style={inp} />
-            <span style={{ fontSize:"0.75rem", color:"var(--texto2)", float:"right" }}>{form.titulo.length}/150</span>
+            <label htmlFor="titulo-reporte" style={lbl}>Título *</label>
+            <input id="titulo-reporte" name="titulo" type="text" maxLength={150} placeholder="Resume el problema brevemente" value={form.titulo} onChange={handleChange} style={inp} aria-required="true" />
+            <span style={{ fontSize:"0.75rem", color:"var(--texto2)", float:"right" }} aria-live="polite">{form.titulo.length}/150</span>
 
-            <label style={lbl}>Descripción detallada *</label>
-            <textarea name="descripcion" rows={4} placeholder="Explica con detalle qué ocurrió..." value={form.descripcion} onChange={handleChange} style={{ ...inp, resize:"vertical", minHeight:"90px" }} />
+            <label htmlFor="desc-reporte" style={lbl}>Descripción detallada *</label>
+            <textarea id="desc-reporte" name="descripcion" rows={4} placeholder="Explica con detalle qué ocurrió..." value={form.descripcion} onChange={handleChange} style={{ ...inp, resize:"vertical", minHeight:"90px" }} aria-required="true" />
 
-            <label style={{ ...lbl, marginTop:"18px" }}>Imágenes de evidencia (máx. 3) — opcional</label>
-            <input type="file" ref={fileInputRef} onChange={handleImagenes} accept="image/jpeg,image/png,image/webp" multiple style={{ display:"none" }} />
+            <label htmlFor="img-reporte" style={{ ...lbl, marginTop:"18px" }}>Imágenes de evidencia (máx. 3) — opcional</label>
+            <input type="file" id="img-reporte" ref={fileInputRef} onChange={handleImagenes} accept="image/jpeg,image/png,image/webp" multiple style={{ display:"none" }} />
 
             {imagenes.length < 3 && (
               <button type="button" onClick={() => fileInputRef.current?.click()} style={{ display:"flex",alignItems:"center",justifyContent:"center",gap:"8px",width:"100%",marginTop:"8px",padding:"14px",borderRadius:"10px",border:"2px dashed var(--borde,#444)",background:"var(--fondo,#12121f)",color:"var(--texto2,#aaa)",cursor:"pointer",fontSize:"0.9rem" }}

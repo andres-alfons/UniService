@@ -124,16 +124,18 @@ export default function HomePrincipal() {
   return (
     <>
       <Navbar scrolled={scrolled} onCerrarSesion={handleCerrarSesion} />
-      <Presentacion primaryBtn={{href:"#buscar", className:"btn btn-verde", label:"Explorar servicios"}} secondaryBtn={{href:"#publicar", className:"btn btn-borde", label:"Publicar mi servicio"}} />
-      <SeccionBuscar serviciosTotales={serviciosTotales} />
-      <SeccionRecientes servicios={recientes} cargando={cargando} />
-      <SeccionDestacados top3={top3} />
-      <SeccionPublicar onPublicado={cargarServicios} />
-      <SeccionSolicitudes />
-      <BotonTema />
-      <ChatPanel abierto={chatAbierto} onCerrar={() => setChatAbierto(false)} />
-      <NotificacionesFlotantes onToggleChat={() => setChatAbierto((v) => !v)} />
-      <Footer />
+      <main id="main-content" role="main">
+        <Presentacion primaryBtn={{href:"#buscar", className:"btn btn-verde", label:"Explorar servicios"}} secondaryBtn={{href:"#publicar", className:"btn btn-borde", label:"Publicar mi servicio"}} />
+        <SeccionBuscar serviciosTotales={serviciosTotales} />
+        <SeccionRecientes servicios={recientes} cargando={cargando} />
+        <SeccionDestacados top3={top3} />
+        <SeccionPublicar onPublicado={cargarServicios} />
+        <SeccionSolicitudes />
+        <BotonTema />
+        <ChatPanel abierto={chatAbierto} onCerrar={() => setChatAbierto(false)} />
+        <NotificacionesFlotantes onToggleChat={() => setChatAbierto((v) => !v)} />
+        <Footer />
+      </main>
     </>
   );
 }

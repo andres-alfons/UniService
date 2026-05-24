@@ -31,7 +31,7 @@ export default function TarjetaServicio({ servicio, linkBase = "/servicio?id=" }
     : null;
 
   return (
-    <a href={`${linkBase}${servicio.id_servicio}`} className="card-servicio card-3d">
+    <a href={`${linkBase}${servicio.id_servicio}`} className="card-servicio card-3d" aria-label={`Servicio: ${servicio.titulo || "Sin título"} por ${servicio.proveedor || "Proveedor anónimo"}, precio: $${servicio.precio_hora || 0}`}>
       {/* Imagen de portada o icono de categoría */}
       {portada ? (
         <div className="card-icono card-icono-imagen">
@@ -43,7 +43,7 @@ export default function TarjetaServicio({ servicio, linkBase = "/servicio?id=" }
           />
         </div>
       ) : (
-        <div className="card-icono card-icono-azul">
+        <div className="card-icono card-icono-azul" aria-hidden="true">
           <i className={`bi ${ICONOS_POR_NOMBRE_CATEGORIA[servicio.nombre_categoria] || (servicio.icono?.startsWith("bi-") ? servicio.icono : "bi-pin")}`}></i>
         </div>
       )}
@@ -64,6 +64,7 @@ export default function TarjetaServicio({ servicio, linkBase = "/servicio?id=" }
               width: "32px", height: "32px", borderRadius: "50%",
               fontSize: "0.75rem", fontWeight: "700", flexShrink: 0,
             }}
+            aria-hidden="true"
           >
             {(servicio.proveedor || "?").charAt(0).toUpperCase()}
           </div>
@@ -77,10 +78,10 @@ export default function TarjetaServicio({ servicio, linkBase = "/servicio?id=" }
         <div className="card-footer">
           <div>
             <hr className="card-divider" />
-            <div className="estrellas">{estrellas}</div>
+            <div className="estrellas" aria-label={`${numReseñas} reseñas, ${estrellas.length} de 5 estrellas`}>{estrellas}</div>
             <div className="texto-muted">{numReseñas} reseñas</div>
           </div>
-          <div className="precio">${servicio.precio_hora || 0}</div>
+          <div className="precio" aria-label={`Precio: $${servicio.precio_hora || 0} por hora`}>${servicio.precio_hora || 0}</div>
         </div>
       </div>
     </a>

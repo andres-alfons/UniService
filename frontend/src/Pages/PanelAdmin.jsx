@@ -56,8 +56,8 @@ export default function HomeAdmin() {
         setSeccion={setSeccion}
         onCerrarSesion={handleCerrarSesion}
       />
-      <main className="admin-main">
-        <div className="admin-bg-decorative" />
+      <main id="main-content" className="admin-main" role="main">
+        <div className="admin-bg-decorative" aria-hidden="true" />
         <div className="admin-container">
           {vistas[seccion] ?? <SeccionDashboard />}
         </div>

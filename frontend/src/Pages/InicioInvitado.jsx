@@ -75,13 +75,15 @@ export default function HomeGuest() {
   return (
     <>
       <Navbar scrolled={scrolled} />
-      {/* El linkBase="/login?id=" obliga a iniciar sesión para ver detalles */}
-      <Presentacion primaryBtn={{href:"#buscar", className:"btn btn-verde reveal delay-3", label:"Explorar servicios"}} secondaryBtn={{href:"/login", className:"btn btn-borde reveal delay-3", label:"Publicar mi servicio"}} />
-      <SeccionBuscar serviciosTotales={serviciosTotales} />
-      <SeccionRecientes servicios={recientes} cargando={cargando} linkBase="/login?id=" />
-      <SeccionDestacados top3={top3} linkBase="/login?id=" />
-      <BotonTema />
-      <Footer />
+      <main id="main-content" role="main">
+        {/* El linkBase="/login?id=" obliga a iniciar sesión para ver detalles */}
+        <Presentacion primaryBtn={{href:"#buscar", className:"btn btn-verde reveal delay-3", label:"Explorar servicios"}} secondaryBtn={{href:"/login", className:"btn btn-borde reveal delay-3", label:"Publicar mi servicio"}} />
+        <SeccionBuscar serviciosTotales={serviciosTotales} />
+        <SeccionRecientes servicios={recientes} cargando={cargando} linkBase="/login?id=" />
+        <SeccionDestacados top3={top3} linkBase="/login?id=" />
+        <BotonTema />
+        <Footer />
+      </main>
     </>
   );
 }

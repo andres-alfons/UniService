@@ -15,34 +15,36 @@ export default function NavbarAdmin({ seccionActual, setSeccion, onCerrarSesion 
   ];
 
   return (
-    <nav className="admin-nav">
+    <nav className="admin-nav" aria-label="Navegación de administración">
       <div className="admin-nav__logo-container">
-        <div className="admin-nav__logo-icon">A</div>
+        <div className="admin-nav__logo-icon" aria-hidden="true">A</div>
         <span className="admin-nav__logo-text">
           Uni<span className="admin-nav__logo-text--highlight">Admin</span>
         </span>
         <span className="admin-nav__badge-internal">PANEL INTERNO</span>
       </div>
 
-      <div className="admin-nav__links">
+      <div className="admin-nav__links" role="navigation" aria-label="Secciones">
         {secciones.map((s) => (
           <button
             key={s.id}
             type="button"
             onClick={() => setSeccion(s.id)}
             className={`admin-nav__btn ${seccionActual === s.id ? "is-active" : ""}`}
+            aria-current={seccionActual === s.id ? "page" : undefined}
           >
-            <i className={`bi ${s.icon}`}></i> {s.label}
+            <i className={`bi ${s.icon}`} aria-hidden="true"></i> {s.label}
           </button>
         ))}
       </div>
 
       <div className="admin-nav__user">
-        <div className="admin-nav__user-info"><i className="bi bi-shield-fill-check"></i> {adminNombre}</div>
+        <div className="admin-nav__user-info"><i className="bi bi-shield-fill-check" aria-hidden="true"></i> {adminNombre}</div>
         <button
           type="button"
           onClick={onCerrarSesion}
           className="admin-nav__logout"
+          aria-label="Cerrar sesión"
         >
           Salir
         </button>

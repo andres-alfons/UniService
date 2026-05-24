@@ -658,7 +658,7 @@ const Perfil = () => {
       <BotonTema />
 
       <div className="profile-page-wrapper">
-        <div className="dynamic-bg">
+        <div className="dynamic-bg" aria-hidden="true">
           <div className="floating-shapes">
             <div className="shape shape-1"></div>
             <div className="shape shape-2"></div>
@@ -666,7 +666,7 @@ const Perfil = () => {
           </div>
         </div>
 
-        <main className="main-container">
+        <main id="main-content" className="main-container" role="main">
           <div className="profile-wrapper">
             {/* ══ TARJETA IZQUIERDA ══ */}
             <div className="profile-card">

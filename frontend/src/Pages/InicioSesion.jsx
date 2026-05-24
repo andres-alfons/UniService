@@ -611,8 +611,8 @@ const res = await fetch("/api/Auth/verify-code", {
       />
       <input type="radio" className="tab-radio" name="tab" id="r-reg" />
 
-      <div className="auth-wrapper">
-        <div className="auth-box">
+      <main id="main-content" className="auth-wrapper" role="main">
+        <div className="auth-box" role="region" aria-label="Autenticación">
           {/* ── COLUMNA IZQUIERDA: Logo y descripción de la plataforma ── */}
           <div className="auth-lateral">
             <div className="lateral-contenido">
@@ -672,32 +672,40 @@ const res = await fetch("/api/Auth/verify-code", {
             </div>
 
             {/* ── PANEL LOGIN ── */}
-            <div className="form-panel" id="panel-login">
+            <div className="form-panel" id="panel-login" role="tabpanel" aria-labelledby="r-login">
               {/* Campo de correo con validación en tiempo real */}
               <div className="campo">
-                <label className="campo-label">Correo electrónico</label>
+                <label htmlFor="login-correo" className="campo-label">Correo electrónico</label>
                 <input
+                  id="login-correo"
                   type="email"
                   placeholder="tu@correo.com"
                   value={correo}
                   onChange={(e) => validarCorreo(e.target.value, "login")}
+                  autoComplete="email"
+                  aria-invalid={!!errores.correo}
+                  aria-describedby={errores.correo ? "login-correo-error" : undefined}
                 />
                 {errores.correo && (
-                  <span className="error-msg">{errores.correo}</span>
+                  <span id="login-correo-error" className="error-msg" role="alert">{errores.correo}</span>
                 )}
               </div>
 
               {/* Campo de contraseña con validación de longitud mínima */}
               <div className="campo">
-                <label className="campo-label">Contraseña</label>
+                <label htmlFor="login-pass" className="campo-label">Contraseña</label>
                 <input
+                  id="login-pass"
                   type="password"
                   placeholder="Tu contraseña"
                   value={pass}
                   onChange={(e) => validarPassLogin(e.target.value)}
+                  autoComplete="current-password"
+                  aria-invalid={!!errores.pass}
+                  aria-describedby={errores.pass ? "login-pass-error" : undefined}
                 />
                 {errores.pass && (
-                  <span className="error-msg">{errores.pass}</span>
+                  <span id="login-pass-error" className="error-msg" role="alert">{errores.pass}</span>
                 )}
               </div>
 
@@ -750,37 +758,45 @@ const res = await fetch("/api/Auth/verify-code", {
             </div>
 
             {/* ── PANEL REGISTRO ── */}
-            <div className="form-panel" id="panel-reg">
+            <div className="form-panel" id="panel-reg" role="tabpanel" aria-labelledby="r-reg">
               {/* Campo nombre con validación de longitud */}
               <div className="campo">
-                <label className="campo-label">Nombre completo</label>
+                <label htmlFor="reg-nombre" className="campo-label">Nombre completo</label>
                 <input
+                  id="reg-nombre"
                   type="text"
                   placeholder="Tu nombre y apellido"
                   value={nombre}
                   onChange={(e) => validarNombre(e.target.value)}
+                  autoComplete="name"
+                  aria-invalid={!!errores.nombre}
+                  aria-describedby={errores.nombre ? "reg-nombre-error" : undefined}
                 />
                 {errores.nombre && (
-                  <span className="error-msg">{errores.nombre}</span>
+                  <span id="reg-nombre-error" className="error-msg" role="alert">{errores.nombre}</span>
                 )}
               </div>
 
               {/* Campo correo con botón para enviar código de verificación.
                   Se deshabilita una vez que el correo fue verificado exitosamente. */}
               <div className="campo">
-                <label className="campo-label">Correo electrónico</label>
+                <label htmlFor="reg-correo" className="campo-label">Correo electrónico</label>
                 <div className="correo-verify-wrap">
                   <input
+                    id="reg-correo"
                     type="email"
                     placeholder="tu@correo.com"
                     value={correoReg}
                     onChange={(e) => validarCorreo(e.target.value, "registro")}
-                    disabled={correoVerificado} // No editable si ya fue verificado
+                    disabled={correoVerificado}
                     className={correoVerificado ? "input-verified" : ""}
+                    autoComplete="email"
+                    aria-invalid={!!errores.correoReg}
+                    aria-describedby={errores.correoReg ? "reg-correo-error" : undefined}
                   />
                   {/* Muestra badge "Verificado" o el botón de enviar código según estado */}
                   {correoVerificado ? (
-                    <span className="verified-badge">✓ Verificado</span>
+                    <span className="verified-badge" aria-label="Correo verificado">✓ Verificado</span>
                   ) : (
                     <button
                       type="button"
@@ -797,35 +813,43 @@ const res = await fetch("/api/Auth/verify-code", {
                   )}
                 </div>
                 {errores.correoReg && (
-                  <span className="error-msg">{errores.correoReg}</span>
+                  <span id="reg-correo-error" className="error-msg" role="alert">{errores.correoReg}</span>
                 )}
               </div>
 
               {/* Campo contraseña del registro */}
               <div className="campo">
-                <label className="campo-label">Contraseña</label>
+                <label htmlFor="reg-pass" className="campo-label">Contraseña</label>
                 <input
+                  id="reg-pass"
                   type="password"
                   placeholder="Mínimo 8 caracteres"
                   value={passReg}
                   onChange={(e) => validarPassReg(e.target.value)}
+                  autoComplete="new-password"
+                  aria-invalid={!!errores.passReg}
+                  aria-describedby={errores.passReg ? "reg-pass-error" : undefined}
                 />
                 {errores.passReg && (
-                  <span className="error-msg">{errores.passReg}</span>
+                  <span id="reg-pass-error" className="error-msg" role="alert">{errores.passReg}</span>
                 )}
               </div>
 
               {/* Campo de confirmación — compara con el campo anterior */}
               <div className="campo">
-                <label className="campo-label">Confirmar contraseña</label>
+                <label htmlFor="reg-pass2" className="campo-label">Confirmar contraseña</label>
                 <input
+                  id="reg-pass2"
                   type="password"
                   placeholder="Repite tu contraseña"
                   value={passReg2}
                   onChange={(e) => validarPassReg2(e.target.value)}
+                  autoComplete="new-password"
+                  aria-invalid={!!errores.passReg2}
+                  aria-describedby={errores.passReg2 ? "reg-pass2-error" : undefined}
                 />
                 {errores.passReg2 && (
-                  <span className="error-msg">{errores.passReg2}</span>
+                  <span id="reg-pass2-error" className="error-msg" role="alert">{errores.passReg2}</span>
                 )}
               </div>
 
@@ -833,10 +857,12 @@ const res = await fetch("/api/Auth/verify-code", {
               <div className="terminos">
                 <input
                   type="checkbox"
+                  id="reg-terminos"
                   checked={terminos}
                   onChange={(e) => setTerminos(e.target.checked)}
+                  aria-describedby="terminos-desc"
                 />
-                <p>
+                <p id="terminos-desc">
                   Acepto los <a href="/terminos">Términos y Condiciones</a> y la
                   <a href="/privacidad"> Política de Privacidad</a>.
                 </p>
@@ -859,7 +885,7 @@ const res = await fetch("/api/Auth/verify-code", {
             </div>
           </div>
         </div>
-      </div>
+      </main>
 
       <AdminModal
         visible={modalAdmin}

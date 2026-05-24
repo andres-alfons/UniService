@@ -3,14 +3,19 @@ const MenuItem = ({ icon, title, desc, tag, onClick, danger }) => (
   <div
     className="menu-item"
     onClick={onClick}
+    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick?.(); } }}
+    role="button"
+    tabIndex={0}
     style={{
       cursor: "pointer",
       ...(danger && { borderColor: "rgba(239, 68, 68, 0.3)" }),
     }}
+    aria-label={desc ? `${title} - ${desc}` : title}
   >
     <div
       className="menu-icon"
       style={danger ? { background: "rgba(239,68,68,0.15)" } : {}}
+      aria-hidden="true"
     >
       {icon}
     </div>
@@ -22,7 +27,7 @@ const MenuItem = ({ icon, title, desc, tag, onClick, danger }) => (
       {desc && <div className="menu-desc">{desc}</div>}
     </div>
     {tag && <span className="status-tag online">{tag}</span>}
-    <span className="menu-arrow" style={danger ? { color: "#f87171" } : {}}>
+    <span className="menu-arrow" style={danger ? { color: "#f87171" } : {}} aria-hidden="true">
       →
     </span>
   </div>
