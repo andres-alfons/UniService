@@ -7,18 +7,15 @@
 import { useState } from "react";
 
 // Componente de la barra de navegación
-export default function Navbar({ scrolled, onCerrarSesion }) {
+export default function Navbar({ scrolled, onCerrarSesion, onAbrirSolicitudes }) {
   const [menuAbierto, setMenuAbierto] = useState(false);
-  // Obtiene el nombre del usuario desde localStorage
   const nombreUsuario = localStorage.getItem("usuarioNombre") || localStorage.getItem("usuario") || "Usuario";
 
   return (
     <nav className={`navbar-custom${scrolled ? " scrolled" : ""}`} aria-label="Navegación principal">
       <div className="container">
-        {/* Marca / logo */}
         <a href="#inicio" className="navbar-brand-custom" aria-label="UniService - Inicio"><span className="uni-brand">Uni</span><span className="service-brand">Service</span></a>
 
-        {/* Botón hamburguesa para menú responsive */}
         <button
           className={`nav-toggle${menuAbierto ? " active" : ""}`}
           onClick={() => setMenuAbierto((v) => !v)}
@@ -29,14 +26,12 @@ export default function Navbar({ scrolled, onCerrarSesion }) {
           <span /><span /><span />
         </button>
 
-        {/* Enlaces de navegación */}
         <div id="nav-links" className={`navbar-links${menuAbierto ? " active" : ""}`} role="menubar">
           {[
             ["#inicio", "Inicio"],
             ["#buscar", "Buscar servicios"],
             ["#mejor-calificados", "Top destacados"],
             ["#publicar", "Publicar servicio"],
-            ["#solicitudes", "Mis solicitudes"],
             ["#soporte", "Soporte"],
           ].map(([href, label]) => (
             <a
@@ -49,11 +44,17 @@ export default function Navbar({ scrolled, onCerrarSesion }) {
               {label}
             </a>
           ))}
-          {/* Enlace al perfil con nombre del usuario */}
+          <button
+            type="button"
+            className="nav-link-custom nav-solicitudes-btn"
+            role="menuitem"
+            onClick={() => { setMenuAbierto(false); onAbrirSolicitudes?.(); }}
+          >
+            Mis solicitudes
+          </button>
           <a href="/perfil" className="nav-link-custom nav-iniciar" role="menuitem">
             <i className="bi bi-person" aria-hidden="true"></i> {nombreUsuario}
           </a>
-          {/* Botón para cerrar sesión */}
           <button type="button" className="nav-Cerrar" role="menuitem" onClick={onCerrarSesion}>
             Cerrar Sesión
           </button>

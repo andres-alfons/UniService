@@ -11,8 +11,9 @@ import "../styles/styleHome.css";
 import "../styles/styleChat.css";
 import Navbar from "./Principal/BarraNavegacion";
 import SeccionBuscar from "./Principal/BusquedaServicios";
-import SeccionPublicar from "./Principal/PublicarServicio";
-import SeccionSolicitudes from "./Principal/SeccionSolicitudes";
+import ModalPublicarServicio from "./Principal/ModalPublicarServicio";
+import ModalSolicitudes from "./Principal/ModalSolicitudes";
+import TarjetaPublicar from "./Principal/TarjetaPublicar";
 import NotificacionesFlotantes from "./Principal/Notificaciones";
 import ChatPanel from "./Principal/ChatPanel";
 import BotonTema from "../Components/B_StyleHome";
@@ -23,45 +24,35 @@ import Presentacion from "./shared/Presentacion";
 import { API_HOME } from "./shared/constantes";
 import { promedioEstrellas } from "./shared/utilidades";
 
-// ── Componente principal del Home para usuarios logueados ──
 export default function HomePrincipal() {
   const navigate = useNavigate();
-  // Estado del scroll para cambiar estilo del navbar al hacer scroll
   const [scrolled, setScrolled] = useState(false);
-  // Estado del panel de chat
   const [chatAbierto, setChatAbierto] = useState(false);
-  // Lista completa de servicios, recientes y top 3 mejor calificados
+  const [modalPublicar, setModalPublicar] = useState(false);
+  const [modalSolicitudes, setModalSolicitudes] = useState(false);
   const [serviciosTotales, setServiciosTotales] = useState([]);
   const [recientes, setRecientes] = useState([]);
   const [top3, setTop3] = useState([]);
   const [cargando, setCargando] = useState(true);
 
-  // ── Efecto inicial: redirige si no hay token, detecta scroll ──
   useEffect(() => {
     if (!localStorage.getItem("token")) navigate("/login");
-
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, [navigate]);
 
-  // ── Carga todos los servicios desde la API con paginación optimizada ──
   const cargarServicios = useCallback(() => {
     setCargando(true);
-    // Pedir una página grande para el home (recientes + top)
     fetch(`${API_HOME}?page=1&pageSize=50&orden=recientes`)
       .then((res) => res.json())
       .then((data) => {
         const lista = data.servicios || data;
         if (!Array.isArray(lista)) return;
-        
         setServiciosTotales([...lista].reverse());
         setRecientes(lista.slice(0, 4));
         const top = [...lista]
-          .sort(
-            (a, b) =>
-              promedioEstrellas(b.estrellas) - promedioEstrellas(a.estrellas),
-          )
+          .sort((a, b) => promedioEstrellas(b.estrellas) - promedioEstrellas(a.estrellas))
           .slice(0, 3);
         setTop3(top);
       })
@@ -69,73 +60,58 @@ export default function HomePrincipal() {
       .finally(() => setCargando(false));
   }, []);
 
-  useEffect(() => {
-    cargarServicios();
-  }, [cargarServicios]);
+  useEffect(() => { cargarServicios(); }, [cargarServicios]);
 
-  // ── IntersectionObserver para animaciones de entrada (reveal) ──
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-          }
-        });
-      },
+      (entries) => { entries.forEach((entry) => { if (entry.isIntersecting) entry.target.classList.add("visible"); }); },
       { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
     );
-
     const revealElements = document.querySelectorAll(".reveal, .reveal-left, .reveal-right, .reveal-scale");
     revealElements.forEach((el) => observer.observe(el));
-
     return () => observer.disconnect();
   }, []);
 
-  // ── Cierra sesión: limpia localStorage (excepto notifs leídas) ──
   const handleCerrarSesion = async () => {
     const usuarioId = localStorage.getItem("usuarioId");
     if (usuarioId) {
-      try {
-        await fetch("/api/auth/logout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id_usuario: parseInt(usuarioId) }),
-        });
-      } catch (err) {
-        console.error("Error en logout:", err);
-      }
+      try { await fetch("/api/auth/logout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_usuario: parseInt(usuarioId) }) }); } catch (err) { console.error("Error en logout:", err); }
     }
-
     const keysToPreserve = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.startsWith("notificaciones_leidas_")) {
-        keysToPreserve.push({ key, value: localStorage.getItem(key) });
-      }
+      if (key && key.startsWith("notificaciones_leidas_")) keysToPreserve.push({ key, value: localStorage.getItem(key) });
     }
     localStorage.clear();
-    keysToPreserve.forEach(({ key, value }) => {
-      localStorage.setItem(key, value);
-    });
+    keysToPreserve.forEach(({ key, value }) => { localStorage.setItem(key, value); });
     navigate("/home-guest");
   };
 
   return (
     <>
-      <Navbar scrolled={scrolled} onCerrarSesion={handleCerrarSesion} />
+      <Navbar scrolled={scrolled} onCerrarSesion={handleCerrarSesion} onAbrirSolicitudes={() => setModalSolicitudes(true)} />
       <main id="main-content" role="main">
         <Presentacion primaryBtn={{href:"#buscar", className:"btn btn-verde", label:"Explorar servicios"}} secondaryBtn={{href:"#publicar", className:"btn btn-borde", label:"Publicar mi servicio"}} />
         <SeccionBuscar serviciosTotales={serviciosTotales} />
         <SeccionRecientes servicios={recientes} cargando={cargando} />
         <SeccionDestacados top3={top3} />
-        <SeccionPublicar onPublicado={cargarServicios} />
-        <SeccionSolicitudes />
+        <TarjetaPublicar onAbrir={() => setModalPublicar(true)} />
         <BotonTema />
         <ChatPanel abierto={chatAbierto} onCerrar={() => setChatAbierto(false)} />
         <NotificacionesFlotantes onToggleChat={() => setChatAbierto((v) => !v)} />
         <Footer />
       </main>
+
+      <ModalPublicarServicio
+        abierto={modalPublicar}
+        onCerrar={() => setModalPublicar(false)}
+        onPublicado={cargarServicios}
+      />
+
+      <ModalSolicitudes
+        abierto={modalSolicitudes}
+        onCerrar={() => setModalSolicitudes(false)}
+      />
     </>
   );
 }
