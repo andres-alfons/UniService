@@ -859,10 +859,21 @@ const Perfil = () => {
                         desc="Gestiona tu cuenta"
                         onClick={() => setActiveModal("seguridad")}
                       />
+                      <MenuItem
+                        icon={
+                          <i
+                            className="bi bi-bug-fill"
+                            style={{ color: "#f59e0b" }}
+                          ></i>
+                        }
+                        title="Reportar problema"
+                        desc="Bugs, errores o fallos del sistema"
+                        onClick={() => setModalReporteAbierto(true)}
+                      />
                     </div>
                   )}
 
-                  {/* Reportar — visible solo en perfiles externos */}
+                  {/* Reportar usuario — visible solo en perfiles externos */}
                   {esPerfilExterno && (
                     <div className="menu-list">
                       <MenuItem
