@@ -39,8 +39,8 @@ public class UsuariosController : ControllerBase
                 await file.CopyToAsync(stream);
             }
 
-            // 5. URL pública que React usará para mostrar la imagen
-            var avatarUrl = $"http://localhost:5165/avatars/{nombreArchivo}";
+            // 5. URL relativa que funciona en cualquier entorno
+            var avatarUrl = $"/avatars/{nombreArchivo}";
 
             // 6. Actualizar la URL en la base de datos
             using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));

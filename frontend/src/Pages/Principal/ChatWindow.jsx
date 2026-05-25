@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import ChatMessage from "./ChatMessage";
 import { API_CHAT } from "../shared/constantes";
 import { enviarMensaje, unirseChat, salirChat, on, enviarEscribiendo } from "../../Services/SignalRService";
+import { apiImageUrl } from "../../utils/apiFetch";
 
 export default function ChatWindow({ chat, usuarioId, usuariosOnline }) {
   const [mensajes, setMensajes] = useState([]);
@@ -185,7 +186,7 @@ export default function ChatWindow({ chat, usuarioId, usuariosOnline }) {
           <div className="chat-window-avatar">
             {chat.avatar_otro ? (
               <img
-                src={chat.avatar_otro}
+                src={apiImageUrl(chat.avatar_otro)}
                 alt={chat.nombre_otro}
                 onError={(e) => {
                   e.currentTarget.style.display = "none";

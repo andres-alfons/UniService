@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { API_CHAT } from "../shared/constantes";
+import { apiImageUrl } from "../../utils/apiFetch";
 
 export default function ChatList({ chats, chatSeleccionado, onSelectChat, usuariosOnline }) {
   const [busqueda, setBusqueda] = useState("");
@@ -57,7 +58,7 @@ export default function ChatList({ chats, chatSeleccionado, onSelectChat, usuari
               <div className="chat-item-avatar">
                 {chat.avatar_otro ? (
                   <img
-                    src={chat.avatar_otro}
+                    src={apiImageUrl(chat.avatar_otro)}
                     alt={chat.nombre_otro}
                     onError={(e) => {
                       e.currentTarget.style.display = "none";

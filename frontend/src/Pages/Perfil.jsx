@@ -134,6 +134,10 @@ const Perfil = () => {
     if (!avatar) return "/img/default_avatar.png";
     if (avatar === "img/default_avatar.png") return "/img/default_avatar.png";
     if (avatar.startsWith("http")) return avatar;
+    if (avatar.startsWith("/avatars/") || avatar.startsWith("/imagenes-servicios/")) {
+      const API_BASE = import.meta.env.VITE_API_URL || "";
+      return `${API_BASE}${avatar}`;
+    }
     if (avatar.startsWith("/src") || avatar.startsWith("../")) return avatar;
     return `/${avatar}`;
   };
@@ -624,11 +628,11 @@ const Perfil = () => {
                 >
                   <div className="avatar-ring"></div>
                   <img
-                    src={userData.avatar}
+                    src={apiImageUrl(userData.avatar) || "/img/default_avatar.png"}
                     alt="Avatar"
                     className="avatar"
                     onError={(e) => {
-                      e.currentTarget.onerror = null; // evita bucle infinito
+                      e.currentTarget.onerror = null;
                       e.currentTarget.src = "/img/default_avatar.png";
                     }}
                   />
