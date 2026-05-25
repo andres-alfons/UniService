@@ -98,7 +98,7 @@ builder.Services.AddCors(options =>
             
             if (origins.Contains("*"))
             {
-                policy.AllowAnyOrigin()
+                policy.SetIsOriginAllowed(_ => true)
                       .AllowAnyHeader()
                       .AllowAnyMethod()
                       .AllowCredentials()
