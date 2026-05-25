@@ -86,18 +86,32 @@ builder.Services.AddHttpClient();
 // IMPORTANTE: Se agregan los puertos 5173 y 5174 por si Vite cambia de puerto automáticamente
 // Para producción, configurar la variable AllowedOrigins
 var allowedOrigins = Environment.GetEnvironmentVariable("AllowedOrigins")
-                     ?? "http://localhost:5173,http://localhost:5174";
+                     ?? "http://localhost:5173,http://localhost:5174,https://uniservice.onrender.com";
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReact",
         policy =>
         {
-            policy.WithOrigins(allowedOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries))
-                  .AllowAnyHeader()
-                  .AllowAnyMethod()
-                  .AllowCredentials()
-                  .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
+            var origins = allowedOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(o => o.Trim()).ToArray();
+            
+            if (origins.Contains("*"))
+            {
+                policy.AllowAnyOrigin()
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials()
+                      .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
+            }
+            else
+            {
+                policy.WithOrigins(origins)
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials()
+                      .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
+            }
         });
 });
 
