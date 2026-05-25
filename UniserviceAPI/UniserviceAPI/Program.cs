@@ -86,7 +86,7 @@ builder.Services.AddHttpClient();
 // IMPORTANTE: Se agregan los puertos 5173 y 5174 por si Vite cambia de puerto automáticamente
 // Para producción, configurar la variable AllowedOrigins
 var allowedOrigins = Environment.GetEnvironmentVariable("AllowedOrigins")
-                     ?? "http://localhost:5173,http://localhost:5174,https://uniservice.onrender.com";
+                     ?? "http://localhost:5173,http://localhost:5174,https://uniservice.onrender.com,https://uni-service-ibtg33vqj-andres-alfons-projects.vercel.app,https://uni-service-git-main-andres-alfons-projects.vercel.app";
 
 builder.Services.AddCors(options =>
 {
