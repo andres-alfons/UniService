@@ -897,3 +897,36 @@ input[type="email"].input-verified {
 .separator span {
   padding: 0 12px;
 }
+
+/* ════════════════════════════
+   GOOGLE LOGIN BUTTON FIX
+   ════════════════════════════ */
+.auth-formulario .g_id_signin,
+.auth-formulario .g_id_signin iframe,
+.auth-formulario div[id^="g_id_"] {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.auth-formulario .g_id_signin > div {
+  width: 100% !important;
+}
+
+/* Evitar que los estilos globales de input afecten al botón de Google */
+.auth-formulario button[class*="google"],
+.auth-formulario div[class*="google"] {
+  all: unset;
+}
+
+/* Contenedor del botón de Google */
+.google-login-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.google-login-wrapper > div,
+.google-login-wrapper iframe {
+  border-radius: 10px !important;
+}

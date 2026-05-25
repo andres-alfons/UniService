@@ -728,12 +728,15 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
                 <span>o continúa con</span>
               </div>
 
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={handleGoogleError}
-                text="continue_with"
-                locale="es"
-              />
+              <div className="google-login-wrapper">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                  text="continue_with"
+                  locale="es"
+                  width="100%"
+                />
+              </div>
 
               <p className="pie">
                 ¿No tienes cuenta?{" "}
