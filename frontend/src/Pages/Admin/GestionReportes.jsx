@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Badge, formatFecha } from "./UtilidadesAdmin";
+import { apiFetch } from "../../utils/apiFetch";
 
 const ESTADOS = [
   "Pendiente",
@@ -50,8 +51,7 @@ export default function SeccionReportes() {
         filtro === "todos"
           ? `/api/reportes/admin`
           : `/api/reportes/admin?estado=${filtro}`;
-      const res = await fetch(url);
-      const data = await res.json();
+      const { data } = await apiFetch(url);
       setReportes(Array.isArray(data) ? data : []);
     } catch {
       setReportes([]);
@@ -74,16 +74,15 @@ export default function SeccionReportes() {
     if (!nuevoEstado) return;
     setGuardando(true);
     try {
-      const res = await fetch(`/api/reportes/${resolviendo}/estado`, {
+      const { ok } = await apiFetch(`/api/reportes/${resolviendo}/estado`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           estado: nuevoEstado,
           resolucion_notas: notasAdmin || null,
           id_admin,
         }),
       });
-      if (res.ok) {
+      if (ok) {
         setResolviendo(null);
         setExpandido(null);
         cargar();

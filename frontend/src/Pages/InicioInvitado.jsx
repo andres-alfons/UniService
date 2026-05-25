@@ -14,25 +14,23 @@ import SeccionDestacados from "./shared/SeccionDestacados";
 import Presentacion from "./shared/Presentacion";
 import { promedioEstrellas } from "./shared/utilidades";
 import BotonTema from "../Components/B_StyleHome";
+import { apiFetch } from "../utils/apiFetch";
 
 const API = "/api/services";
 
 export default function HomeGuest() {
-  // Estado del scroll para cambiar estilo del navbar
   const [scrolled, setScrolled] = useState(false);
   const [serviciosTotales, setServiciosTotales] = useState([]);
   const [recientes, setRecientes] = useState([]);
   const [top3, setTop3] = useState([]);
   const [cargando, setCargando] = useState(true);
 
-  // ── Detecta scroll ──
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // ── Animaciones reveal al hacer scroll ──
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -44,22 +42,17 @@ export default function HomeGuest() {
       },
       { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
     );
-
     const revealElements = document.querySelectorAll(".reveal, .reveal-left, .reveal-right, .reveal-scale");
     revealElements.forEach((el) => observer.observe(el));
-
     return () => observer.disconnect();
   }, []);
 
-  // ── Carga servicios desde la API ──
   useEffect(() => {
-    fetch(API)
-      .then((res) => res.json())
-      .then((data) => {
+    apiFetch(API)
+      .then(({ data }) => {
         const ordenados = [...data].reverse();
         setServiciosTotales(ordenados);
         setRecientes(ordenados.slice(0, 4));
-
         const top = [...data]
           .sort(
             (a, b) =>

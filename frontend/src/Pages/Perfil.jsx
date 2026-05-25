@@ -13,22 +13,8 @@ import ActivityItem from "./Perfil/ElementoActividad";
 import BotonTema from "../Components/B_StyleHome";
 import ChatPanel from "./Principal/ChatPanel";
 import ModalReporte from "../Components/ModalReporte";
-// ════════════════════════════════════════════════════════════════
-// PÁGINA DE PERFIL DE USUARIO
-// Muestra la tarjeta de perfil (avatar, nombre, stats, acciones),
-// información detallada, servicios publicados y modales para
-// editar perfil, cambiar avatar, ver actividad y editar/eliminar
-// servicios.
-// Soporta dos modos: perfil propio y perfil externo (con botón seguir).
-// ════════════════════════════════════════════════════════════════
+import { apiFetch, apiImageUrl } from "../utils/apiFetch";
 
-// ════════════════════════════════════════════════════════════════
-// NOTA SOBRE LAS CREDENCIALES DE ADMIN
-// Este bloque fue eliminado/movido a InicioSesion.jsx.
-// Perfil.jsx ya no maneja lógica de admin.
-// ════════════════════════════════════════════════════════════════
-
-// URL base del API de usuarios
 const API_USUARIO = "/api/users";
 
 const Perfil = () => {
@@ -118,10 +104,9 @@ const Perfil = () => {
     setModalSeguidores(true);
     setCargandoSeguidores(true);
     try {
-      const res = await fetch(
+      const { data } = await apiFetch(
         `/api/seguidores/lista?id_usuario=${id_a_consultar}`,
       );
-      const data = await res.json();
       setListaSeguidores(data);
     } catch (err) {
       console.error("Error al cargar seguidores:", err);
@@ -134,10 +119,9 @@ const Perfil = () => {
     setModalSiguiendo(true);
     setCargandoSiguiendo(true);
     try {
-      const res = await fetch(
+      const { data } = await apiFetch(
         `/api/seguidores/siguiendo?id_usuario=${id_a_consultar}`,
       );
-      const data = await res.json();
       setListaSiguiendo(data);
     } catch (err) {
       console.error("Error al cargar siguiendo:", err);
@@ -148,7 +132,7 @@ const Perfil = () => {
 
   const getAvatarUrl = (avatar) => {
     if (!avatar) return "/img/default_avatar.png";
-    if (avatar === "img/default_avatar.png") return "/img/default_avatar.png"; // 👈 este caso
+    if (avatar === "img/default_avatar.png") return "/img/default_avatar.png";
     if (avatar.startsWith("http")) return avatar;
     if (avatar.startsWith("/src") || avatar.startsWith("../")) return avatar;
     return `/${avatar}`;
@@ -160,11 +144,10 @@ const Perfil = () => {
 
   useEffect(() => {
     if (esPerfilExterno && id_usuario_logueado && id_a_consultar) {
-      fetch(
+      apiFetch(
         `/api/seguidores/estado?seguidor=${id_usuario_logueado}&seguido=${id_a_consultar}`,
       )
-        .then((res) => res.json())
-        .then((data) => setSiguiendo(data.sigues)) // ← también cambia esSeguidor → sigues
+        .then(({ data }) => setSiguiendo(data.sigues))
         .catch((err) => console.error("Error al verificar seguimiento:", err));
     }
   }, [id_a_consultar, esPerfilExterno, id_usuario_logueado]);
@@ -180,13 +163,9 @@ const Perfil = () => {
     }
 
     // GET al endpoint de usuarios con el token JWT en el header para autenticar
-    fetch(`/api/users/${id_a_consultar}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
+    apiFetch(`/api/users/${id_a_consultar}`)
+      .then(({ data }) => {
         if (!data.error) {
-          // Calculamos si está en línea basado en ultima_actividad (últimos 2 minutos)
           let enLinea = false;
           if (data.ultima_actividad) {
             const ultima = new Date(data.ultima_actividad);
@@ -194,7 +173,6 @@ const Perfil = () => {
             const diffMinutos = (ahora - ultima) / 60000;
             enLinea = diffMinutos < 2;
           }
-
           setUserData({
             ...data,
             estado: enLinea,
@@ -221,9 +199,8 @@ const Perfil = () => {
       return;
 
     // Traemos servicios del usuario con paginación (pedimos más para asegurar)
-    fetch(`/api/services?page=1&pageSize=50&orden=recientes`)
-      .then((r) => r.json())
-      .then((data) => {
+    apiFetch(`/api/services?page=1&pageSize=50&orden=recientes`)
+      .then(({ data }) => {
         const lista = data.servicios || data;
         if (!Array.isArray(lista)) return;
         setMisServicios(
@@ -240,17 +217,11 @@ const Perfil = () => {
   // Esto permite reusar la misma función para nombre, descripción, teléfono, etc.
   const handleUpdate = async (campo, valor) => {
     try {
-      const res = await fetch(`/api/users/${id_usuario_logueado}`, {
+      const { ok, data } = await apiFetch(`/api/users/${id_usuario_logueado}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ [campo]: valor }), // Enviamos solo el campo que cambió
+        body: JSON.stringify({ [campo]: valor }),
       });
-      const result = await res.json();
-      if (result.ok) {
-        // Actualizamos el estado local sin necesidad de recargar la página
+      if (ok) {
         setUserData((prev) => ({ ...prev, [campo]: valor }));
         setActiveModal(null);
       }
@@ -264,19 +235,13 @@ const Perfil = () => {
   // ═════════════
   const handleCerrarSesion = async () => {
     try {
-      // Antes de salir, marcamos al usuario como desconectado en la BD
-      await fetch(`/api/users/${id_usuario_logueado}`, {
+      await apiFetch(`/api/users/${id_usuario_logueado}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ estado: 0 }), // 0 = desconectado
+        body: JSON.stringify({ estado: 0 }),
       });
     } catch (err) {
       console.error("Error al cerrar sesión:", err);
     } finally {
-      // Siempre limpiamos el localStorage y redirigimos, aunque falle el PUT
       localStorage.clear();
       navigate("/home-guest");
     }
@@ -293,14 +258,12 @@ const Perfil = () => {
       icono: s.icono || "bi-pin",
     };
 
-    const res = await fetch(`/api/services/${s.id_servicio}`, {
+    const { ok, data } = await apiFetch(`/api/services/${s.id_servicio}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
 
-    if (res.ok) {
-      // Actualizamos solo el servicio modificado en el estado local (sin recargar toda la lista)
+    if (ok) {
       setMisServicios((prev) =>
         prev.map((x) =>
           x.id_servicio === s.id_servicio ? { ...x, ...body } : x,
@@ -308,8 +271,7 @@ const Perfil = () => {
       );
       setEditando(null);
     } else {
-      const err = await res.json();
-      mostrarAlerta("error", "Error", err.error || "No se pudo guardar.");
+      mostrarAlerta("error", "Error", data?.error || "No se pudo guardar.");
     }
   };
 
@@ -340,8 +302,7 @@ const Perfil = () => {
     setEditandoImagenes(servicio);
     setCargandoImagenes(true);
     try {
-      const res = await fetch(`/api/services/${servicio.id_servicio}`);
-      const data = await res.json();
+      const { data } = await apiFetch(`/api/services/${servicio.id_servicio}`);
       const imgs = (data.imagenes || [])
         .filter(
           (img) =>
@@ -382,19 +343,19 @@ const Perfil = () => {
     files.forEach((file) => formData.append("imagenes", file));
 
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `/api/services/${editandoImagenes.id_servicio}/imagenes`,
         {
           method: "POST",
+          skipAuth: true,
+          headers: {},
           body: formData,
         },
       );
-      const data = await res.json();
-      if (data.ok) {
-        const res = await fetch(
+      if (res.ok) {
+        const { data: servicioData } = await apiFetch(
           `/api/services/${editandoImagenes.id_servicio}`,
         );
-        const servicioData = await res.json();
         const imgs = (servicioData.imagenes || [])
           .filter(
             (img) =>
@@ -412,7 +373,7 @@ const Perfil = () => {
         mostrarAlerta(
           "error",
           "Error",
-          data.error || "No se pudieron subir las imágenes.",
+          res.data?.error || "No se pudieron subir las imágenes.",
         );
       }
     } catch (err) {
@@ -431,14 +392,13 @@ const Perfil = () => {
     if (!confirm("¿Eliminar esta imagen?")) return;
 
     try {
-      const res = await fetch(
+      const { ok } = await apiFetch(
         `/api/services/${editandoImagenes.id_servicio}/imagenes/${idImagen}`,
         {
           method: "DELETE",
         },
       );
-      const data = await res.json();
-      if (data.ok) {
+      if (ok) {
         setImagenesServicio((prev) =>
           prev.filter((img) => img.id_imagen !== idImagen),
         );
@@ -470,11 +430,10 @@ const Perfil = () => {
     try {
       for (let i = 0; i < imagenesServicio.length; i++) {
         const img = imagenesServicio[i];
-        await fetch(
+        await apiFetch(
           `/api/services/${editandoImagenes.id_servicio}/imagenes/${img.id_imagen}/orden`,
           {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ orden: i, es_principal: i === 0 }),
           },
         );
@@ -533,26 +492,21 @@ const Perfil = () => {
     formData.append("id_usuario", id_usuario_logueado);
 
     try {
-      const response = await fetch("/api/usuarios/upload-avatar", {
+      const response = await apiFetch("/api/usuarios/upload-avatar", {
         method: "POST",
-        headers: {
-          // No incluyas Content-Type, el navegador lo pondrá automáticamente con el boundary correcto
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        skipAuth: true,
+        headers: {},
         body: formData,
       });
 
-      const result = await response.json();
-
-      if (response.ok && result.ok) {
-        // Actualizamos el avatar en el estado sin recargar la página
-        setUserData((prev) => ({ ...prev, avatar: result.avatarUrl }));
+      if (response.ok && response.data?.ok) {
+        setUserData((prev) => ({ ...prev, avatar: response.data.avatarUrl }));
         setActiveModal(null);
       } else {
         mostrarAlerta(
           "error",
           "Error al subir",
-          result.error || "Error en el servidor.",
+          response.data?.error || "Error en el servidor.",
         );
       }
     } catch (err) {
@@ -611,12 +565,8 @@ const Perfil = () => {
     const accionActual = siguiendo;
 
     try {
-      const response = await fetch(`/api/seguidores/toggle`, {
+      const response = await apiFetch(`/api/seguidores/toggle`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
         body: JSON.stringify({
           id_seguidor: parseInt(id_usuario_logueado),
           id_seguido: parseInt(id_a_consultar),
@@ -624,7 +574,6 @@ const Perfil = () => {
       });
 
       if (response.ok) {
-        // No dependemos del string del SP, usamos el estado anterior invertido
         const ahoraSigue = !accionActual;
         setSiguiendo(ahoraSigue);
         setUserData((prev) => ({

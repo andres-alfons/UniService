@@ -18,6 +18,7 @@ import {
   colorAvatar,
 } from "./Servicio/utilidades";
 import BotonTema from "../Components/B_StyleHome";
+import { apiFetch, apiImageUrl } from "../utils/apiFetch";
 
 const API = "/api/services";
 const API_USUARIO = "/api/users";
@@ -54,15 +55,10 @@ export default function Servicio() {
       return;
     }
 
-    fetch(`${API}/${idServicio}`)
-      .then((res) => {
-        if (!res.ok)
-          return res.json().then((err) => {
-            throw new Error(err.error || "Servicio no encontrado");
-          });
-        return res.json();
-      })
-      .then((data) => {
+    apiFetch(`${API}/${idServicio}`)
+      .then(({ ok, data }) => {
+        if (!ok)
+          throw new Error(data?.error || "Servicio no encontrado");
         const s = Array.isArray(data) ? data[0] : data;
         if (!s || !s.id_servicio) {
           setError(true);
@@ -70,6 +66,12 @@ export default function Servicio() {
         }
         console.log("Servicio cargado:", s);
         console.log("Imagenes:", s.imagenes);
+        if (s.imagenes) {
+          s.imagenes = s.imagenes.map(img => ({
+            ...img,
+            url_imagen: apiImageUrl(img.url_imagen)
+          }));
+        }
         setServicio(s);
       })
       .catch((err) => {
@@ -82,9 +84,8 @@ export default function Servicio() {
   const handleCerrarSesion = async () => {
     const id = localStorage.getItem("usuarioId");
     try {
-      await fetch(`${API_USUARIO}/${id}`, {
+      await apiFetch(`${API_USUARIO}/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ estado: 0 }),
       });
     } catch {}

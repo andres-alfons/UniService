@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { getConfiguracionSolicitud } from "../shared/constantes";
+import { apiFetch } from "../../utils/apiFetch";
 
 const API_SOLICITUD = "/api/solicitudes";
 
@@ -30,10 +31,9 @@ function FormSolicitud({
     const verificar = async () => {
       try {
         const id_cliente = Number(localStorage.getItem("usuarioId"));
-        const res = await fetch(
+        const { data } = await apiFetch(
           `${API_SOLICITUD}/verificar?id_cliente=${id_cliente}&id_servicio=${servicioId}`,
         );
-        const data = await res.json();
         setSolicitudExiste(data.existe);
       } catch (error) {
         console.error(error);
@@ -137,12 +137,11 @@ function FormSolicitud({
 
     if (solicitudExiste) {
       try {
-        const res = await fetch(
+        const { ok, data } = await apiFetch(
           `${API_SOLICITUD}/eliminar?id_cliente=${id_cliente}&id_servicio=${id_servicio_num}`,
           { method: "DELETE" },
         );
-        const data = await res.json();
-        if (res.ok) {
+        if (ok) {
           setSolicitudExiste(false);
           showModal("success", "Solicitud eliminada");
         } else {
@@ -160,15 +159,12 @@ function FormSolicitud({
     const payload = construirPayload();
 
     try {
-      const res = await fetch(API_SOLICITUD, {
+      const { ok, data } = await apiFetch(API_SOLICITUD, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
-
-      if (res.ok) {
+      if (ok) {
         setSolicitudExiste(true);
         const initial = {};
         config.campos.forEach((campo) => {
@@ -178,7 +174,7 @@ function FormSolicitud({
         window.dispatchEvent(new CustomEvent("solicitud-actualizada"));
         showModal("success", "Solicitud enviada");
       } else {
-        showModal("error", data.message || data.error || "Error al enviar");
+        showModal("error", data?.message || data?.error || "Error al enviar");
       }
     } catch (error) {
       showModal("error", "Error al enviar solicitud");

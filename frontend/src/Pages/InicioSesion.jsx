@@ -8,6 +8,7 @@ import ResetPasswordModal from "./Login/ModalRecuperarClave";
 import VerificationCodeModal from "./Login/ModalVerificarCodigo";
 import NotificationModal from "./Login/ModalNotificacion";
 import BotonTema from "../Components/B_StyleHome";
+import { apiFetch } from "../utils/apiFetch";
 
 // ══════════════════════════════════════════════════════════════════
 // CREDENCIALES DE ADMINISTRADOR HARDCODEADAS
@@ -184,14 +185,13 @@ export default function Login() {
     }
     setEnviandoCodigo(true); // Cambia el botón a "Enviando..."
     try {
-      const res = await fetch("/api/Auth/send-code", {
+      const { ok, data } = await apiFetch("/api/Auth/send-code", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo: correoReg }),
       });
-      if (res.ok) {
+      if (ok) {
         setCodigoEnviado(true);
-        setMostrarModalCodigo(true); // Abre el modal para que el usuario ingrese el código
+        setMostrarModalCodigo(true);
       } else {
         notificar("Error al enviar el código");
       }
@@ -210,12 +210,10 @@ export default function Login() {
       return;
     }
     try {
-const res = await fetch("/api/Auth/verify-code", {
+const { data } = await apiFetch("/api/Auth/verify-code", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ correo: correoReg, codigo: codigoInput }),
       });
-      const data = await res.json();
       if (data.valido) {
         setCorreoVerificado(true); // Habilita el botón de crear cuenta
         setMostrarModalCodigo(false); // Cierra el modal del código
@@ -242,16 +240,15 @@ const res = await fetch("/api/Auth/verify-code", {
     }
     setResetCargando(true);
     try {
-      const res = await fetch(
+      const { ok, data } = await apiFetch(
         "/api/Auth/forgot-password",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ correo: resetCorreo }),
         },
       );
-      if (res.ok) {
-        setResetPaso("codigo"); // Avanza al paso 2: ingresar el código
+      if (ok) {
+        setResetPaso("codigo");
       } else {
         notificar("Error al enviar el código");
       }
@@ -266,9 +263,8 @@ const res = await fetch("/api/Auth/verify-code", {
   const handleResetReenviarCodigo = async () => {
     setResetCargando(true);
     try {
-      await fetch("/api/Auth/forgot-password", {
+      await apiFetch("/api/Auth/forgot-password", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo: resetCorreo }),
       });
       notificar("Código reenviado", "success");
@@ -287,12 +283,10 @@ const res = await fetch("/api/Auth/verify-code", {
     }
     setResetCargando(true);
     try {
-      const res = await fetch("/api/Auth/verify-code", {
+      const { data } = await apiFetch("/api/Auth/verify-code", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo: resetCorreo, codigo: resetCodigo }),
       });
-      const data = await res.json();
       if (data.valido) {
         setResetPaso("nueva"); // Avanza al paso 3: escribir la nueva contraseña
       } else {
@@ -317,11 +311,10 @@ const res = await fetch("/api/Auth/verify-code", {
     }
     setResetCargando(true);
     try {
-      const res = await fetch(
+      const { ok, data } = await apiFetch(
         "/api/Auth/reset-password",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             correo: resetCorreo,
             codigo: resetCodigo,
@@ -329,8 +322,7 @@ const res = await fetch("/api/Auth/verify-code", {
           }),
         },
       );
-      const data = await res.json();
-      if (data.ok) {
+      if (data?.ok) {
         notificar(
           "Contraseña cambiada correctamente. Ya puedes iniciar sesión.",
           "success",
@@ -423,12 +415,10 @@ const res = await fetch("/api/Auth/verify-code", {
       return;
     }
     try {
-      const res = await fetch("/api/auth/google-login", {
+      const { data } = await apiFetch("/api/auth/google-login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ credential: cred }),
       });
-      const data = await res.json();
       console.log("Backend response:", data);
 
       if (data.token) {
@@ -492,12 +482,10 @@ const res = await fetch("/api/Auth/verify-code", {
     // FLUJO NORMAL: Si no es un admin hardcodeado, autentica contra la base de datos
     setCargandoLogin(true);
     try {
-      const res = await fetch("/api/auth/login", {
+      const { data } = await apiFetch("/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo, password: pass }),
       });
-      const data = await res.json();
 
       if (data.token) {
         // Guarda el token JWT y los datos del usuario en localStorage para mantener la sesión
@@ -548,17 +536,15 @@ const res = await fetch("/api/Auth/verify-code", {
     }
     setCargandoRegistro(true);
     try {
-      const res = await fetch("/api/Auth/register", {
+      const { data } = await apiFetch("/api/Auth/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           correo: correoReg,
           password: passReg,
           nombre: nombre.trim(),
-          codigo: codigoInput, // El backend valida que el código siga siendo válido
+          codigo: codigoInput,
         }),
       });
-      const data = await res.json();
       if (data.error) {
         notificar(data.error);
       } else {

@@ -23,6 +23,7 @@ import SeccionDestacados from "./shared/SeccionDestacados";
 import Presentacion from "./shared/Presentacion";
 import { API_HOME } from "./shared/constantes";
 import { promedioEstrellas } from "./shared/utilidades";
+import { apiFetch } from "../utils/apiFetch";
 
 export default function HomePrincipal() {
   const navigate = useNavigate();
@@ -75,7 +76,7 @@ export default function HomePrincipal() {
   const handleCerrarSesion = async () => {
     const usuarioId = localStorage.getItem("usuarioId");
     if (usuarioId) {
-      try { await fetch("/api/auth/logout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id_usuario: parseInt(usuarioId) }) }); } catch (err) { console.error("Error en logout:", err); }
+      try { await apiFetch("/api/auth/logout", { method: "POST", body: JSON.stringify({ id_usuario: parseInt(usuarioId) }) }); } catch (err) { console.error("Error en logout:", err); }
     }
     const keysToPreserve = [];
     for (let i = 0; i < localStorage.length; i++) {

@@ -1,10 +1,10 @@
 // Formulario para calificar un servicio con estrellas y comentario opcional
 import { useState, useEffect } from "react";
+import { apiFetch } from "../../utils/apiFetch";
 
 const API_CALIFICACIONES = "/api/calificaciones";
 
 function FormCalificacion({ servicioId, showModal, onNuevaResena }) {
-  // Permiso de calificación (null = cargando, {puede, yaCalifico} = resultado)
   const [permiso, setPermiso] = useState(null);
   const [estrellas, setEstrellas] = useState(0);
   const [hover, setHover] = useState(0);
@@ -12,14 +12,12 @@ function FormCalificacion({ servicioId, showModal, onNuevaResena }) {
   const [enviando, setEnviando] = useState(false);
   const [editando, setEditando] = useState(false);
 
-  // Verificar si el usuario puede calificar este servicio
   useEffect(() => {
     const id_cliente = Number(localStorage.getItem("usuarioId"));
     if (!id_cliente || !servicioId) return;
 
-    fetch(`${API_CALIFICACIONES}/puede-calificar?id_cliente=${id_cliente}&id_servicio=${servicioId}`)
-      .then(r => r.json())
-      .then(data => {
+    apiFetch(`${API_CALIFICACIONES}/puede-calificar?id_cliente=${id_cliente}&id_servicio=${servicioId}`)
+      .then(({ data }) => {
         setPermiso(data);
         if (data.mi_calificacion) {
           setEstrellas(data.mi_calificacion.puntuacion);
@@ -29,15 +27,13 @@ function FormCalificacion({ servicioId, showModal, onNuevaResena }) {
       .catch(() => setPermiso(null));
   }, [servicioId]);
 
-  // Enviar la calificación al backend
   const handleEnviar = async () => {
     if (estrellas === 0) { showModal("error", "Selecciona una puntuación"); return; }
     const id_cliente = Number(localStorage.getItem("usuarioId"));
     setEnviando(true);
     try {
-      const res = await fetch(API_CALIFICACIONES, {
+      const { ok, data } = await apiFetch(API_CALIFICACIONES, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id_solicitud: permiso.id_solicitud,
           id_cliente,
@@ -46,13 +42,12 @@ function FormCalificacion({ servicioId, showModal, onNuevaResena }) {
           comentario: comentario || null
         })
       });
-      const data = await res.json();
-      if (res.ok) {
+      if (ok) {
         showModal("success", "¡Reseña enviada!");
         setPermiso(p => ({ ...p, puede: false, yaCalifico: true }));
         onNuevaResena();
       } else {
-        showModal("error", data.error || "Error al enviar reseña");
+        showModal("error", data?.error || "Error al enviar reseña");
       }
     } catch {
       showModal("error", "Error de conexión");
@@ -61,15 +56,13 @@ function FormCalificacion({ servicioId, showModal, onNuevaResena }) {
     }
   };
 
-  // Actualizar calificación existente
   const handleActualizar = async () => {
     if (estrellas === 0) { showModal("error", "Selecciona una puntuación"); return; }
     const id_cliente = Number(localStorage.getItem("usuarioId"));
     setEnviando(true);
     try {
-      const res = await fetch(`${API_CALIFICACIONES}/${permiso.mi_calificacion.id_calificacion}`, {
+      const { ok, data } = await apiFetch(`${API_CALIFICACIONES}/${permiso.mi_calificacion.id_calificacion}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id_calificacion: permiso.mi_calificacion.id_calificacion,
           id_cliente,
@@ -78,13 +71,12 @@ function FormCalificacion({ servicioId, showModal, onNuevaResena }) {
           comentario: comentario || null
         })
       });
-      const data = await res.json();
-      if (res.ok) {
+      if (ok) {
         showModal("success", "¡Reseña actualizada!");
         setEditando(false);
         onNuevaResena();
       } else {
-        showModal("error", data.error || "Error al actualizar reseña");
+        showModal("error", data?.error || "Error al actualizar reseña");
       }
     } catch {
       showModal("error", "Error de conexión");

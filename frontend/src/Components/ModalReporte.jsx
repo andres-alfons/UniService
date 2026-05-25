@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { apiFetch } from "../utils/apiFetch";
 
 // Tipos según contexto
 const TIPOS_SERVICIO = [
@@ -98,9 +99,8 @@ export default function ModalReporte({
     setError("");
     setEnviando(true);
     try {
-      const res = await fetch(`/api/reportes`, {
+      const { ok, data } = await apiFetch(`/api/reportes`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id_usuario,
           id_servicio: idServicio || null,
@@ -112,13 +112,12 @@ export default function ModalReporte({
           evidencia: null,
         }),
       });
-      const data = await res.json();
-      if (!res.ok || !data.ok) { setError(data.error || "No se pudo crear el reporte."); return; }
+      if (!ok || !data?.ok) { setError(data?.error || "No se pudo crear el reporte."); return; }
 
       if (imagenes.length > 0) {
         const formData = new FormData();
         imagenes.forEach((img) => formData.append("imagenes", img));
-        await fetch(`/api/reportes/${data.id_reporte}/imagenes`, { method: "POST", body: formData });
+        await apiFetch(`/api/reportes/${data.id_reporte}/imagenes`, { method: "POST", skipAuth: true, headers: {}, body: formData });
       }
       setExito(true);
     } catch { setError("Error de conexión. Intenta de nuevo."); }
