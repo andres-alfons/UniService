@@ -85,33 +85,16 @@ builder.Services.AddHttpClient();
 // 3. Configuración de CORS
 // IMPORTANTE: Se agregan los puertos 5173 y 5174 por si Vite cambia de puerto automáticamente
 // Para producción, configurar la variable AllowedOrigins
-var allowedOrigins = Environment.GetEnvironmentVariable("AllowedOrigins")
-                     ?? "http://localhost:5173,http://localhost:5174,https://uniservice.onrender.com,https://uni-service-omega.vercel.app,https://uni-service-git-main-andres-alfons-projects.vercel.app,https://uni-service-ibtg33vqj-andres-alfons-projects.vercel.app,https://uni-service-2y75ekg9c-andres-alfons-projects.vercel.app";
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReact",
         policy =>
         {
-            var origins = allowedOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(o => o.Trim()).ToArray();
-            
-            if (origins.Contains("*"))
-            {
-                policy.SetIsOriginAllowed(_ => true)
-                      .AllowAnyHeader()
-                      .AllowAnyMethod()
-                      .AllowCredentials()
-                      .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
-            }
-            else
-            {
-                policy.WithOrigins(origins)
-                      .AllowAnyHeader()
-                      .AllowAnyMethod()
-                      .AllowCredentials()
-                      .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
-            }
+            policy.SetIsOriginAllowed(_ => true)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials()
+                  .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH");
         });
 });
 
