@@ -15,6 +15,10 @@
     {
       "source": "/chathub",
       "destination": "https://uniservice.onrender.com/chathub"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
