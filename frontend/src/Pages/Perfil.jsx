@@ -347,8 +347,6 @@ const Perfil = () => {
         `/api/services/${editandoImagenes.id_servicio}/imagenes`,
         {
           method: "POST",
-          skipAuth: true,
-          headers: {},
           body: formData,
         },
       );
@@ -494,8 +492,6 @@ const Perfil = () => {
     try {
       const response = await apiFetch("/api/usuarios/upload-avatar", {
         method: "POST",
-        skipAuth: true,
-        headers: {},
         body: formData,
       });
 

@@ -117,7 +117,7 @@ export default function ModalReporte({
       if (imagenes.length > 0) {
         const formData = new FormData();
         imagenes.forEach((img) => formData.append("imagenes", img));
-        await apiFetch(`/api/reportes/${data.id_reporte}/imagenes`, { method: "POST", skipAuth: true, headers: {}, body: formData });
+        await apiFetch(`/api/reportes/${data.id_reporte}/imagenes`, { method: "POST", body: formData });
       }
       setExito(true);
     } catch { setError("Error de conexión. Intenta de nuevo."); }

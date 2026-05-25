@@ -1,6 +1,7 @@
 ﻿import { useState, useRef } from "react";
 import { CATEGORIAS, MODALIDADES, DISPONIBILIDAD, initialPublicar, API_HOME, mapaIconos, mapaCategoriaId, MAPA_ICONOS_MODALIDAD, MAPA_ICONOS_DISPONIBILIDAD } from "../shared/constantes";
 import GoogleMapsAutocomplete from "../../Components/GoogleMapsAutocomplete";
+import { apiFetch } from "../../utils/apiFetch";
 
 export default function SeccionPublicar({ onPublicado }) {
   const [form, setForm] = useState(initialPublicar);
@@ -128,17 +129,14 @@ export default function SeccionPublicar({ onPublicado }) {
 
     setLoading(true);
     try {
-      const res = await fetch(API_HOME, {
+      const { ok, data } = await apiFetch(API_HOME, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(nuevoServicio),
       });
-      const data = await res.json();
       
-      if (data.ok) {
+      if (ok) {
         const idServicio = data.id_servicio;
 
-        // Subir imágenes si existen
         if (imagenes.length > 0 && idServicio) {
           console.log("Subiendo imágenes:", imagenes.length, "archivos");
           const formData = new FormData();
@@ -148,16 +146,15 @@ export default function SeccionPublicar({ onPublicado }) {
           });
           
           try {
-            const imgRes = await fetch(`${API_HOME}/${idServicio}/imagenes`, {
+            const { ok: imgOk, data: imgData } = await apiFetch(`${API_HOME}/${idServicio}/imagenes`, {
               method: "POST",
               body: formData,
             });
-            const imgData = await imgRes.json();
             console.log("Respuesta subida de imágenes:", imgData);
-            if (!imgData.ok) {
-              console.error("Error subiendo imágenes:", imgData.error);
+            if (!imgOk) {
+              console.error("Error subiendo imágenes:", imgData?.error);
             } else {
-              console.log("Imágenes subidas exitosamente:", imgData.urls?.length || 0);
+              console.log("Imágenes subidas exitosamente:", imgData?.urls?.length || 0);
             }
           } catch (imgErr) {
             console.error("Error subiendo imágenes:", imgErr);

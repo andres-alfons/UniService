@@ -3,10 +3,15 @@ const API_BASE = import.meta.env.VITE_API_URL || "";
 export async function apiFetch(path, options = {}) {
   const url = `${API_BASE}${path}`;
 
-  const headers = {
-    "Content-Type": "application/json",
-    ...options.headers,
-  };
+  const isFormData = options.body instanceof FormData;
+
+  const headers = {};
+
+  if (!isFormData) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  Object.assign(headers, options.headers);
 
   if (!options.skipAuth) {
     const token = localStorage.getItem("token");

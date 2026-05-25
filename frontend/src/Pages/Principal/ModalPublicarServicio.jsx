@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { CATEGORIAS, MODALIDADES, DISPONIBILIDAD, initialPublicar, API_HOME, mapaIconos, mapaCategoriaId, MAPA_ICONOS_MODALIDAD, MAPA_ICONOS_DISPONIBILIDAD } from "../shared/constantes";
 import GoogleMapsAutocomplete from "../../Components/GoogleMapsAutocomplete";
+import { apiFetch } from "../../utils/apiFetch";
 
 export default function ModalPublicarServicio({ abierto, onCerrar, onPublicado }) {
   const [form, setForm] = useState(initialPublicar);
@@ -118,18 +119,17 @@ export default function ModalPublicarServicio({ abierto, onCerrar, onPublicado }
 
     setLoading(true);
     try {
-      const res = await fetch(API_HOME, {
-        method: "POST", headers: { "Content-Type": "application/json" },
+      const { ok, data } = await apiFetch(API_HOME, {
+        method: "POST",
         body: JSON.stringify(nuevoServicio),
       });
-      const data = await res.json();
-      if (data.ok) {
+      if (ok) {
         const idServicio = data.id_servicio;
         if (imagenes.length > 0 && idServicio) {
           const formData = new FormData();
           imagenes.forEach((img) => formData.append("imagenes", img));
           try {
-            await fetch(`${API_HOME}/${idServicio}/imagenes`, { method: "POST", body: formData });
+            await apiFetch(`${API_HOME}/${idServicio}/imagenes`, { method: "POST", body: formData });
           } catch { /* silently fail */ }
         }
         setModalExito(true);
