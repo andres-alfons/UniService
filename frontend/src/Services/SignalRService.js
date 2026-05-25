@@ -1,6 +1,8 @@
 import * as signalR from "@microsoft/signalr";
 
-const HUB_URL = "/chathub";
+const HUB_URL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/chathub`
+  : "/chathub";
 
 let connection = null;
 let callbacks = {};
