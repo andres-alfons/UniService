@@ -18,8 +18,8 @@ namespace UniserviceAPI.Services
 
         public SupabaseStorageService(IConfiguration config, IHttpClientFactory httpClientFactory)
         {
-            _supabaseUrl = config["Supabase:Url"] ?? "https://mpdeejiivmctbqcfflbz.supabase.co";
-            _serviceKey = config["Supabase:ServiceKey"] ?? "";
+            _supabaseUrl = (config["Supabase:Url"] ?? "https://mpdeejiivmctbqcfflbz.supabase.co").Trim();
+            _serviceKey = (config["Supabase:ServiceKey"] ?? "").Trim();
             _httpClient = httpClientFactory.CreateClient();
         }
 
