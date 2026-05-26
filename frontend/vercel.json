@@ -17,7 +17,7 @@
       "destination": "https://uniservice.onrender.com/chathub"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!sitemap\\.xml|robots\\.txt|og-image\\.png).*)",
       "destination": "/index.html"
     }
   ]
