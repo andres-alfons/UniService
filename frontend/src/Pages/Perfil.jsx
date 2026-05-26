@@ -629,8 +629,10 @@ const Perfil = () => {
                   <div className="avatar-ring"></div>
                   <img
                     src={apiImageUrl(userData.avatar) || "/img/default_avatar.png"}
-                    alt="Avatar"
+                    alt={`Avatar de ${userData.nombre || "usuario"}`}
                     className="avatar"
+                    loading="eager"
+                    fetchpriority="high"
                     onError={(e) => {
                       e.currentTarget.onerror = null;
                       e.currentTarget.src = "/img/default_avatar.png";
@@ -1269,7 +1271,9 @@ const Perfil = () => {
                             {/* Miniatura */}
                             <img
                               src={img.url_imagen}
-                              alt={`Imagen ${index + 1}`}
+                              alt={`Imagen ${index + 1} del servicio ${editandoImagenes?.titulo || "servicio"}`}
+                              loading="lazy"
+                              decoding="async"
                               style={{
                                 width: "56px",
                                 height: "56px",
@@ -1821,7 +1825,9 @@ const Perfil = () => {
                       {/* Avatar */}
                       <img
                         src={getAvatarUrl(seguidor.avatar)}
-                        alt={seguidor.nombre}
+                        alt={`Avatar de ${seguidor.nombre}`}
+                        loading="lazy"
+                        decoding="async"
                         onError={(e) => {
                           e.currentTarget.onerror = null; // evita bucle infinito
                           e.currentTarget.src = "/img/default_avatar.png";
@@ -1946,7 +1952,9 @@ const Perfil = () => {
                       {/* Avatar */}
                       <img
                         src={getAvatarUrl(usuario.avatar)}
-                        alt={usuario.nombre}
+                        alt={`Avatar de ${usuario.nombre}`}
+                        loading="lazy"
+                        decoding="async"
                         onError={(e) => {
                           e.currentTarget.onerror = null; // evita bucle infinito
                           e.currentTarget.src = "/img/default_avatar.png";

@@ -183,7 +183,7 @@ export default function ModalReporte({
               <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"8px", marginTop:"10px" }}>
                 {previews.map((p, i) => (
                   <div key={i} style={{ position:"relative",aspectRatio:"1",borderRadius:"8px",overflow:"hidden",border:"2px solid var(--borde,#444)" }}>
-                    <img src={p.preview} alt={`evidencia ${i+1}`} style={{ width:"100%",height:"100%",objectFit:"cover" }} />
+                    <img src={p.preview} alt={`Evidencia ${i+1} del reporte`} loading="lazy" decoding="async" style={{ width:"100%",height:"100%",objectFit:"cover" }} />
                     <button type="button" onClick={() => eliminarImagen(i)} style={{ position:"absolute",top:"4px",right:"4px",background:"rgba(239,68,68,0.9)",border:"none",color:"#fff",width:"22px",height:"22px",borderRadius:"50%",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.7rem" }}>
                       <i className="bi bi-x-lg" />
                     </button>

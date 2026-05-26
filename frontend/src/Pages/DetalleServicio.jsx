@@ -196,8 +196,10 @@ export default function Servicio() {
                 !imagenesError[imagenActual] ? (
                   <img
                     src={imagenes[imagenActual].url_imagen}
-                    alt={servicio.titulo}
+                    alt={`Imagen principal del servicio: ${servicio.titulo || "Servicio universitario"}`}
                     className="imagen-servicio-real"
+                    loading="eager"
+                    fetchpriority="high"
                     onError={() => handleImagenError(imagenActual)}
                   />
                 ) : (
@@ -216,8 +218,10 @@ export default function Servicio() {
                       {esUrlValida(img.url_imagen) && !imagenesError[i] ? (
                         <img
                           src={img.url_imagen}
-                          alt={`Imagen ${i + 1}`}
+                          alt={`Miniatura ${i + 1} del servicio: ${servicio.titulo || "Servicio"}`}
                           className="miniatura-img"
+                          loading="lazy"
+                          decoding="async"
                           onError={() => handleImagenError(i)}
                         />
                       ) : (

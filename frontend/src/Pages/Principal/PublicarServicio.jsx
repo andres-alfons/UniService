@@ -271,7 +271,7 @@ export default function SeccionPublicar({ onPublicado }) {
                 <div className="imagenes-preview-grid">
                   {imagenesPreview.map((img, index) => (
                     <div key={index} className="imagen-preview-item">
-                      <img src={img.preview} alt={`Preview ${index + 1}`} />
+                      <img src={img.preview} alt={`Vista previa de imagen ${index + 1} para el servicio`} loading="lazy" decoding="async" />
                       <button
                         type="button"
                         className="btn-eliminar-imagen"

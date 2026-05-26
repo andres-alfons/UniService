@@ -37,8 +37,9 @@ export default function TarjetaServicio({ servicio, linkBase = "/servicio?id=" }
         <div className="card-icono card-icono-imagen">
           <img 
             src={portada} 
-            alt={servicio.titulo} 
+            alt={`Servicio: ${servicio.titulo || "Sin título"} - ${servicio.nombre_categoria || "Servicio universitario"}`}
             loading="lazy"
+            decoding="async"
             onError={() => setImagenError(true)} 
           />
         </div>

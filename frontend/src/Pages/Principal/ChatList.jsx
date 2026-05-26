@@ -59,7 +59,9 @@ export default function ChatList({ chats, chatSeleccionado, onSelectChat, usuari
                 {chat.avatar_otro ? (
                   <img
                     src={apiImageUrl(chat.avatar_otro)}
-                    alt={chat.nombre_otro}
+                    alt={`Avatar de ${chat.nombre_otro}`}
+                    loading="lazy"
+                    decoding="async"
                     onError={(e) => {
                       e.currentTarget.style.display = "none";
                       e.currentTarget.parentElement.querySelector(".avatar-placeholder-fallback").style.display = "flex";

@@ -1,0 +1,17 @@
+# /robots.txt
+# UniService - Plataforma de Servicios Universitarios
+
+User-agent: *
+Allow: /
+
+# Block admin and API areas
+Disallow: /admin-dashboard
+Disallow: /api/
+Disallow: /chathub
+
+# Don't block resources needed for rendering
+# Allow: /src/
+# Allow: /assets/
+
+# Sitemap location
+Sitemap: https://uni-service-omega.vercel.app/sitemap.xml

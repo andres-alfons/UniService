@@ -6,11 +6,11 @@ export default function Presentacion({ primaryBtn, secondaryBtn }) {
         <h1>
           Intercambia <span className="acento">servicios</span>
           <br />
-          entre estudiantes
+          entre estudiantes universitarios
         </h1>
         <p className="hero-desc">
           Tutorías, ensayos, proyectos, diseño, programación y arriendo de
-          habitaciones — todo para la comunidad universitaria.
+          habitaciones — todo para la comunidad universitaria en Colombia.
         </p>
         <div className="hero-btns">
           <a href={primaryBtn.href} className={primaryBtn.className}>

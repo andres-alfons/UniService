@@ -221,7 +221,7 @@ export default function ModalPublicarServicio({ abierto, onCerrar, onPublicado }
                 <div className="mp-img-grid">
                   {imagenesPreview.map((img, i) => (
                     <div key={i} className="mp-img-item">
-                      <img src={img.preview} alt={`Preview ${i + 1}`} />
+                      <img src={img.preview} alt={`Vista previa de imagen ${i + 1} para el servicio`} loading="lazy" decoding="async" />
                       <button type="button" className="mp-img-del" onClick={() => eliminarImagen(i)}><i className="bi bi-x-lg"></i></button>
                       {i === 0 && <span className="mp-img-badge">Principal</span>}
                     </div>

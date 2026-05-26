@@ -279,7 +279,9 @@ export default function SeccionReportes() {
                             >
                               <img
                                 src={url.trim()}
-                                alt={`evidencia ${i + 1}`}
+                                alt={`Evidencia ${i + 1} del reporte ${reporte.titulo || reporte.id_reporte}`}
+                                loading="lazy"
+                                decoding="async"
                                 style={{
                                   width: "80px",
                                   height: "80px",

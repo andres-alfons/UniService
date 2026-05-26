@@ -187,7 +187,9 @@ export default function ChatWindow({ chat, usuarioId, usuariosOnline }) {
             {chat.avatar_otro ? (
               <img
                 src={apiImageUrl(chat.avatar_otro)}
-                alt={chat.nombre_otro}
+                alt={`Avatar de ${chat.nombre_otro}`}
+                loading="lazy"
+                decoding="async"
                 onError={(e) => {
                   e.currentTarget.style.display = "none";
                   e.currentTarget.parentElement.querySelector(".avatar-placeholder-sm-fallback").style.display = "flex";

@@ -396,7 +396,9 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
                   >
                     <img
                       src={img.url_imagen}
-                      alt="Servicio"
+                      alt={`Imagen del servicio: ${servicio.titulo || "Sin título"}`}
+                      loading="lazy"
+                      decoding="async"
                       style={{ width: "100%", height: "120px", objectFit: "cover", display: "block" }}
                       onError={(e) => { e.target.style.display = "none"; e.target.parentElement.innerHTML += '<p style="color:var(--texto2);font-size:0.7rem;padding:10px;text-align:center;">Error al cargar</p>'; }}
                     />

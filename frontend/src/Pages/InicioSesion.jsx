@@ -605,8 +605,10 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
               <div className="lateral-icono">
                 <img
                   src={logoIcon}
-                  alt="UniServices Logo"
+                  alt="UniService - Plataforma de servicios universitarios en Colombia"
                   className="lateral-icono-img"
+                  loading="eager"
+                  fetchpriority="high"
                 />
               </div>
               <h2 className="lateral-titulo">
