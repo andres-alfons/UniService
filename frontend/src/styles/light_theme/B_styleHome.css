@@ -3890,6 +3890,11 @@ html[data-theme="claro"] {
 [data-theme="claro"] .ms-header {
   border-bottom-color: #e2e8f0;
   background: #f8fafc;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid var(--borde);
 }
 
 [data-theme="claro"] .ms-header h3 {
@@ -3918,11 +3923,27 @@ html[data-theme="claro"] {
 
 [data-theme="claro"] .ms-tabs {
   border-bottom-color: #e2e8f0;
+  display: flex;
+  gap: 8px;
+  padding: 16px 28px;
+  border-bottom: 1px solid var(--borde);
 }
 
 [data-theme="claro"] .ms-tab {
   border-color: #cbd5e1;
   color: #475569;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 1.5px solid var(--borde);
+  color: var(--texto2);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--trans);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 [data-theme="claro"] .ms-tab:hover {
@@ -3937,7 +3958,7 @@ html[data-theme="claro"] {
 }
 
 [data-theme="claro"] .ms-count {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 [data-theme="claro"] .ms-tab.active .ms-count {
@@ -3946,6 +3967,11 @@ html[data-theme="claro"] {
 
 [data-theme="claro"] .ms-body {
   scrollbar-color: #cbd5e1 transparent;
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 28px 28px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--borde2) transparent;
 }
 
 [data-theme="claro"] .ms-body::-webkit-scrollbar-thumb {
