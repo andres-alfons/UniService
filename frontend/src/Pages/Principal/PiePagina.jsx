@@ -53,8 +53,8 @@ export default function Footer() {
             <h5>Soporte</h5>
             <div className="links-grid">
               <a href="#">Centro de ayuda</a>
-              <a href="/terms">Términos de uso</a>
-              <a href="/privacy">Privacidad</a>
+              <a href="/terminos">Términos de uso</a>
+              <a href="/privacidad">Privacidad</a>
               <a href="#">Contacto</a>
             </div>
           </div>
