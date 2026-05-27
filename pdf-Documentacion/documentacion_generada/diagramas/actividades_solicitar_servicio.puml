@@ -1,0 +1,76 @@
+@startuml
+skinparam backgroundColor #FEFEFE
+
+title Diagrama de Actividades - Solicitar un Servicio
+
+|Cliente|
+start
+:Iniciar sesion en UniService;
+:Navegar a pagina de Inicio;
+:Aplicar filtros o buscar texto;
+:Seleccionar servicio de interes;
+
+|#LightBlue|Frontend React|
+:GET /api/services/{id};
+:Renderizar detalle con imagenes,\nprecio, reseñas y calificacion;
+
+|Cliente|
+:Revisar informacion del proveedor;
+:Hacer clic en "Solicitar Servicio";
+
+|Frontend React|
+:Identificar categoria del servicio;
+:Renderizar formulario dinamico\n(campos segun categoria);
+
+|Cliente|
+:Completar campos requeridos\n(tema, descripcion, presupuesto,\nfecha deseada, urgencia, etc.);
+:Adjuntar archivo opcional;
+:Enviar solicitud;
+
+|Frontend React|
+:POST /api/solicitudes;
+:Validar que no exista pendiente;
+
+|#LightGreen|Backend .NET|
+:Recibir CrearSolicitudDTO;
+:Validar campos requeridos por categoria;
+:INSERT INTO solicitudes (estado = 'Pendiente');
+:Generar mensaje de sistema HTML;
+
+|PostgreSQL|
+:Guardar solicitud y mensaje;
+
+|Backend .NET|
+:Obtener datos de cliente y proveedor;
+:Crear o recuperar chat existente;
+:INSERT INTO mensajes (tipo = 'sistema');
+:Notificar via SignalR al grupo chat_{id};
+
+|#LightYellow|Servicio Email|
+:Enviar email al proveedor\n(MAIL Notificacion de solicitud);
+
+|Frontend React|
+:Mostrar confirmacion:\n"Solicitud enviada correctamente";
+:Redirigir a chat automatico;
+
+|Cliente|
+:Visualizar solicitud en "Enviadas";
+:Chatear con proveedor en tiempo real;
+stop
+
+|Proveedor|
+:Recibir email de notificacion;
+:Recibir mensaje de sistema en chat;
+:Visualizar solicitud en "Recibidas";
+:Decision: Aceptar o Rechazar;
+if (Aceptar?) then (Si)
+    :Responder "Aceptada";
+    :UPDATE solicitudes SET estado = 'Aceptada';
+else (No)
+    :Responder "Rechazada";
+    :Indicar motivo o contraoferta;
+    :UPDATE solicitudes SET estado = 'Rechazada';
+endif
+stop
+
+@enduml

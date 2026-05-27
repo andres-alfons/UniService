@@ -1,0 +1,62 @@
+@startuml
+skinparam backgroundColor #FEFEFE
+
+title Diagrama de Actividades - Proceso de Reporte
+
+|Usuario|
+start
+:Detectar servicio/usuario\ninapropiado o bug;
+:Navegar a detalle del servicio\no perfil del usuario;
+:Hacer clic en "Reportar";
+
+|#LightBlue|Frontend React|
+:Mostrar modal de reporte;
+:Listar tipos de reporte\n(servicio_fraude, usuario_acoso,\nbug_tecnico, etc.);
+
+|Usuario|
+:Seleccionar tipo de reporte;
+:Ingresar titulo y descripcion;
+:Opcional: adjuntar evidencia (URL/texto);
+:Enviar reporte;
+
+|Frontend React|
+:POST /api/reportes;
+:Validar campos obligatorios;
+
+|#LightGreen|Backend .NET|
+:Recibir datos del reporte;
+:INSERT INTO reportes (estado = 'Pendiente');
+:Obtener admins activos;
+
+|Servicio Email|
+:Enviar notificacion a admins;
+
+|Frontend React|
+:Mostrar confirmacion al usuario;
+
+|Usuario|
+:Reporte registrado exitosamente;
+stop
+
+|#LightCoral|Administrador|
+:Recepcion de notificacion;
+:Navegar a Admin Dashboard\n(seccion Reportes);
+:Visualizar lista de reportes\nfiltrados por estado;
+:Seleccionar reporte especifico;
+:Revisar evidencia y contexto;
+:Tomar accion correctiva;
+if (Tipo de accion) then (Usuario Reportado)
+    :Escalar o suspender usuario;
+    :UPDATE reportes SET estado = 'Resuelto';
+elseif (Servicio Reportado) then (Servicio)
+    :Pausar o eliminar servicio;
+    :UPDATE reportes SET estado = 'Resuelto';
+else (Bug/Otro)
+    :Documentar para correccion;
+    :UPDATE reportes SET estado = 'En_revision';
+endif
+:Agregar notas de resolucion;
+:Notificar al usuario reportante;
+stop
+
+@enduml

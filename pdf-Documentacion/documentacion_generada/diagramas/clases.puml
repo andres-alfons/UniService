@@ -1,0 +1,171 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #FEFEFE
+
+title Diagrama de Clases UML - UniService
+
+class RolUsuario {
+    +id_rol : INT <<PK>>
+    +nombre_rol : VARCHAR
+}
+
+class Usuario {
+    +id_usuario : INT <<PK>>
+    +telefono : VARCHAR
+    +password_hash : VARCHAR
+    +nombre : VARCHAR
+    +descripcion : TEXT
+    +correo : VARCHAR
+    +id_rol : INT <<FK>>
+    +universidad : VARCHAR
+    +ultima_actividad : TIMESTAMP
+    +registrar()
+    +autenticar()
+    +actualizarPerfil()
+}
+
+class Categoria {
+    +id_categoria : INT <<PK>>
+    +nombre_categoria : VARCHAR
+}
+
+class Servicio {
+    +id_servicio : INT <<PK>>
+    +id_proveedor : INT <<FK>>
+    +titulo : VARCHAR
+    +descripcion : TEXT
+    +id_categoria : INT <<FK>>
+    +precio_hora : NUMERIC
+    +contacto : VARCHAR
+    +modalidad : INT
+    +icono : VARCHAR
+    +disponibilidad : INT
+    +fecha_publicacion : TIMESTAMP
+    +ubicacion_lat : DECIMAL
+    +ubicacion_lng : DECIMAL
+    +direccion : VARCHAR
+    +crear()
+    +actualizar()
+    +eliminar()
+    +pausar()
+    +aprobar()
+}
+
+class ServicioImagen {
+    +id_imagen : INT <<PK>>
+    +id_servicio : INT <<FK>>
+    +url_imagen : TEXT
+    +es_principal : BOOLEAN
+    +fecha_subida : TIMESTAMP
+}
+
+class Solicitud {
+    +id_solicitud : INT <<PK>>
+    +id_cliente : INT <<FK>>
+    +id_proveedor : INT <<FK>>
+    +id_servicio : INT <<FK>>
+    +fue_aceptada : BOOLEAN
+    +estado : VARCHAR
+    +tipo_servicio : VARCHAR
+    +tema : VARCHAR
+    +descripcion : TEXT
+    +fecha_deseada : DATE
+    +hora_deseada : TIME
+    +duracion : VARCHAR
+    +modalidad : VARCHAR
+    +metodo_pago : VARCHAR
+    +presupuesto : NUMERIC
+    +pago_anticipado : BOOLEAN
+    +urgencia : VARCHAR
+    +archivo : VARCHAR
+    +campos_personalizados : JSONB
+    +motivo_rechazo : TEXT
+    +contraoferta : NUMERIC
+    +crear()
+    +aceptar()
+    +rechazar()
+    +completar()
+}
+
+class Calificacion {
+    +id_calificacion : INT <<PK>>
+    +id_solicitud : INT <<FK>>
+    +id_cliente : INT <<FK>>
+    +id_servicio : INT <<FK>>
+    +puntuacion : SMALLINT
+    +comentario : TEXT
+    +fecha_calificacion : TIMESTAMP
+    +calificar()
+}
+
+class AspectoDestacado {
+    +id_aspecto : INT <<PK>>
+    +id_calificacion : INT <<FK>>
+    +tipo_aspecto : VARCHAR
+}
+
+class Seguidor {
+    +id_seguidor : INT <<FK>>
+    +id_seguido : INT <<FK>>
+    +seguir()
+    +dejarDeSeguir()
+}
+
+class Chat {
+    +id_chat : INT <<PK>>
+    +id_usuario1 : INT <<FK>>
+    +id_usuario2 : INT <<FK>>
+    +fecha_creacion : TIMESTAMP
+    +ultimo_mensaje : TIMESTAMP
+    +crearChat()
+}
+
+class Mensaje {
+    +id_mensaje : INT <<PK>>
+    +id_chat : INT <<FK>>
+    +id_remitente : INT <<FK>>
+    +id_destinatario : INT <<FK>>
+    +mensaje : TEXT
+    +fecha_envio : TIMESTAMP
+    +leido : BOOLEAN
+    +tipo : VARCHAR
+    +enviar()
+    +marcarLeido()
+}
+
+class Reporte {
+    +id_reporte : INT <<PK>>
+    +id_usuario : INT <<FK>>
+    +id_servicio : INT <<FK>>
+    +id_solicitud : INT <<FK>>
+    +id_usuario_reportado : INT <<FK>>
+    +tipo_reporte : VARCHAR
+    +titulo : VARCHAR
+    +descripcion : TEXT
+    +evidencia : TEXT
+    +estado : VARCHAR
+    +fecha_creacion : TIMESTAMP
+    +fecha_resolucion : TIMESTAMP
+    +resolucion_notas : TEXT
+    +id_admin_responde : INT <<FK>>
+    +crear()
+    +resolver()
+}
+
+' Relaciones
+RolUsuario "1" -- "0..*" Usuario : asigna >
+Usuario "1" -- "0..*" Servicio : publica >
+Categoria "1" -- "0..*" Servicio : clasifica >
+Servicio "1" -- "0..*" ServicioImagen : contiene >
+Servicio "1" -- "0..*" Solicitud : recibe >
+Usuario "1" -- "0..*" Solicitud : envia >
+Solicitud "1" -- "0..1" Calificacion : genera >
+Calificacion "1" -- "0..*" AspectoDestacado : tiene >
+Usuario "1" -- "0..*" Seguidor : sigue >
+Usuario "1" -- "0..*" Chat : participa >
+Chat "1" -- "0..*" Mensaje : contiene >
+Usuario "1" -- "0..*" Reporte : crea >
+Servicio "1" -- "0..*" Reporte : asociado >
+Usuario "1" -- "0..*" Reporte : reportado >
+
+@enduml

@@ -379,4 +379,169 @@ public class AuthController : ControllerBase
             return StatusCode(500, new { error = ex.Message });
         }
     }
+
+    // =========================
+    // CAMBIAR CONTRASEÑA (usuario autenticado)
+    // =========================
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO dto)
+    {
+        try
+        {
+            var userIdClaim = User.FindFirst("id")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+                return Unauthorized(new { error = "Token inválido o expirado" });
+
+            int userId = int.Parse(userIdClaim);
+
+            if (string.IsNullOrEmpty(dto.ContrasenaActual) || string.IsNullOrEmpty(dto.ContrasenaNueva))
+                return BadRequest(new { error = "Todos los campos son requeridos" });
+
+            if (dto.ContrasenaNueva.Length < 8)
+                return BadRequest(new { error = "La nueva contraseña debe tener al menos 8 caracteres" });
+
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            var cmd = new NpgsqlCommand("SELECT password_hash FROM usuarios WHERE id_usuario = @id", conn);
+            cmd.Parameters.AddWithValue("@id", userId);
+
+            var hash = (string?)await cmd.ExecuteScalarAsync();
+            if (string.IsNullOrEmpty(hash))
+                return NotFound(new { error = "Usuario no encontrado" });
+
+            if (!BCrypt.Net.BCrypt.Verify(dto.ContrasenaActual, hash))
+                return BadRequest(new { error = "La contraseña actual es incorrecta" });
+
+            string nuevoHash = BCrypt.Net.BCrypt.HashPassword(dto.ContrasenaNueva);
+            var updateCmd = new NpgsqlCommand(
+                "UPDATE usuarios SET password_hash = @hash WHERE id_usuario = @id", conn);
+            updateCmd.Parameters.AddWithValue("@hash", nuevoHash);
+            updateCmd.Parameters.AddWithValue("@id", userId);
+
+            await updateCmd.ExecuteNonQueryAsync();
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    // =========================
+    // CAMBIAR CORREO (usuario autenticado)
+    // =========================
+    [HttpPost("change-email")]
+    public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailDTO dto)
+    {
+        try
+        {
+            var userIdClaim = User.FindFirst("id")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+                return Unauthorized(new { error = "Token inválido o expirado" });
+
+            int userId = int.Parse(userIdClaim);
+
+            if (string.IsNullOrEmpty(dto.NuevoCorreo) || string.IsNullOrEmpty(dto.Password))
+                return BadRequest(new { error = "Todos los campos son requeridos" });
+
+            if (!dto.NuevoCorreo.Contains("@"))
+                return BadRequest(new { error = "El correo no es válido" });
+
+            using var conn = new NpgsqlConnection(_config.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            var cmd = new NpgsqlCommand("SELECT password_hash FROM usuarios WHERE id_usuario = @id", conn);
+            cmd.Parameters.AddWithValue("@id", userId);
+
+            var hash = (string?)await cmd.ExecuteScalarAsync();
+            if (string.IsNullOrEmpty(hash))
+                return NotFound(new { error = "Usuario no encontrado" });
+
+            if (!BCrypt.Net.BCrypt.Verify(dto.Password, hash))
+                return BadRequest(new { error = "La contraseña es incorrecta" });
+
+            var checkCmd = new NpgsqlCommand(
+                "SELECT COUNT(*) FROM usuarios WHERE correo = @correo AND id_usuario != @id", conn);
+            checkCmd.Parameters.AddWithValue("@correo", dto.NuevoCorreo);
+            checkCmd.Parameters.AddWithValue("@id", userId);
+
+            int existe = Convert.ToInt32(await checkCmd.ExecuteScalarAsync());
+            if (existe > 0)
+                return BadRequest(new { error = "El correo ya está en uso por otra cuenta" });
+
+            var updateCmd = new NpgsqlCommand(
+                "UPDATE usuarios SET correo = @correo WHERE id_usuario = @id", conn);
+            updateCmd.Parameters.AddWithValue("@correo", dto.NuevoCorreo);
+            updateCmd.Parameters.AddWithValue("@id", userId);
+
+            await updateCmd.ExecuteNonQueryAsync();
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    // =========================
+    // VERIFICAR CONTRASEÑA MAESTRA DE ADMIN
+    // =========================
+    private static readonly Lazy<string> _defaultAdminMasterHash = new(() =>
+        BCrypt.Net.BCrypt.HashPassword("admin_2026"));
+
+    private static readonly Dictionary<int, (int intentos, DateTime bloqueadoHasta)> _adminAttempts = new();
+
+    [HttpPost("verify-admin-master")]
+    public async Task<IActionResult> VerifyAdminMaster([FromBody] VerifyAdminMasterDTO dto)
+    {
+        try
+        {
+            var userIdClaim = User.FindFirst("id")?.Value;
+            var rolClaim = User.FindFirst("id_rol")?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim))
+                return Unauthorized(new { error = "Token inválido o expirado" });
+
+            if (rolClaim != "1")
+                return StatusCode(403, new { error = "No tienes permisos de administrador" });
+
+            int userId = int.Parse(userIdClaim);
+
+            if (_adminAttempts.TryGetValue(userId, out var entry))
+            {
+                if (entry.bloqueadoHasta > DateTime.UtcNow)
+                {
+                    var minutosRestantes = (int)Math.Ceiling((entry.bloqueadoHasta - DateTime.UtcNow).TotalMinutes);
+                    return StatusCode(429, new { error = $"Demasiados intentos. Intenta de nuevo en {minutosRestantes} minuto(s).", bloqueado = true });
+                }
+
+                if (entry.bloqueadoHasta != default)
+                    _adminAttempts.Remove(userId);
+            }
+
+            var storedHash = _config["Admin:MasterPasswordHash"] ?? _defaultAdminMasterHash.Value;
+
+            if (!BCrypt.Net.BCrypt.Verify(dto.MasterPassword, storedHash))
+            {
+                var nuevosIntentos = entry.intentos + 1;
+                if (nuevosIntentos >= 3)
+                {
+                    var bloqueoHasta = DateTime.UtcNow.AddMinutes(10);
+                    _adminAttempts[userId] = (nuevosIntentos, bloqueoHasta);
+                    return BadRequest(new { error = "Demasiados intentos fallidos. Cuenta bloqueada por 10 minutos.", bloqueado = true });
+                }
+
+                _adminAttempts[userId] = (nuevosIntentos, default);
+                return BadRequest(new { error = $"Contraseña maestra incorrecta. Intento {nuevosIntentos} de 3.", intentos = nuevosIntentos });
+            }
+
+            _adminAttempts.Remove(userId);
+            return Ok(new { ok = true });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
 }

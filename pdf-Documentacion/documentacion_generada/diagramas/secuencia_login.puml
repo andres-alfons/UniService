@@ -1,0 +1,43 @@
+@startuml
+skinparam backgroundColor #FEFEFE
+
+title Diagrama de Secuencia - Autenticacion de Usuario (Login JWT)
+
+actor "Usuario" as User
+participant "Navegador\n(React)" as Browser
+participant "API .NET\n(AuthController)" as API
+participant "BCrypt" as BCrypt
+participant "JWT Service" as JWT
+participant "PostgreSQL\n(Supabase)" as DB
+
+User -> Browser : Ingresa correo y contrasena
+Browser -> API : POST /api/auth/login\n{correo, password}
+
+activate API
+API -> DB : SELECT id_usuario, password_hash, nombre, id_rol\nFROM usuarios WHERE correo = @correo
+activate DB
+DB --> API : password_hash (BCrypt), datos usuario
+ deactivate DB
+
+API -> BCrypt : Verify(password, password_hash)
+activate BCrypt
+BCrypt --> API : true (coincide)
+deactivate BCrypt
+
+alt Credenciales validas
+    API -> JWT : GenerarToken(id_usuario, id_rol, correo)
+    activate JWT
+    JWT --> API : token_jwt (expira 24h)
+    deactivate JWT
+
+    API --> Browser : 200 OK\n{token, usuarioId, nombre, rol}
+    Browser -> Browser : Guardar token en localStorage
+    Browser --> User : Redirigir a /home
+else Credenciales invalidas
+    API --> Browser : 401 Unauthorized\n{error: "Credenciales invalidas"}
+    Browser --> User : Mostrar mensaje de error
+end
+
+deactivate API
+
+@enduml

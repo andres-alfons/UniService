@@ -1,0 +1,40 @@
+@startuml
+skinparam backgroundColor #FEFEFE
+
+title Diagrama de Despliegue UML - UniService
+
+node "Cliente / Usuario" as Cliente {
+    artifact "Navegador Web\n(Chrome, Firefox, Edge, Safari)" as Browser
+}
+
+node "Frontend Hosting\n(Vercel / Netlify)" as FrontendHost {
+    artifact "Build estatico\nReact 18 + Vite" as ReactBuild
+}
+
+node "Servidor de Aplicaciones\n(VPS / Azure / AWS)" as BackendHost {
+    node "Docker Container\n(.NET 8 Runtime)" as DockerAPI {
+        artifact "API ASP.NET Core 8" as API
+        artifact "SignalR Hub\n/chathub" as Hub
+    }
+}
+
+node "Base de Datos y Storage" as DataLayer {
+    database "PostgreSQL\n(Supabase Cloud)" as Postgres {
+        artifact "Esquema relacional\nTablas + Indices" as Schema
+        artifact "Procedimientos\nalmacenados" as SP
+    }
+    storage "Supabase Storage\nBucket: imagenes-servicios" as Storage
+}
+
+node "Servicios Externos" as External {
+    artifact "Google OAuth 2.0" as Google
+    artifact "Gmail SMTP\n(MailKit)" as SMTP
+}
+
+' Conexiones
+Cliente --> FrontendHost : HTTPS (443)
+FrontendHost --> BackendHost : REST API + WebSocket\n/api/*, /chathub
+BackendHost --> DataLayer : TCP/SSL (5432)\nNpgsql driver
+BackendHost --> External : HTTPS (443)\nOAuth + SMTP
+
+@enduml

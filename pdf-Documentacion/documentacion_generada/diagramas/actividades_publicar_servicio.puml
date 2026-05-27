@@ -1,0 +1,70 @@
+@startuml
+skinparam backgroundColor #FEFEFE
+skinparam handwritten false
+
+title Diagrama de Actividades - Publicar un Servicio
+
+|Proveedor|
+start
+:Iniciar sesion en UniService;
+:Navegar a "Mi Perfil";
+:Hacer clic en "Publicar Servicio";
+
+|#LightBlue|Frontend React|
+:Renderizar formulario de publicacion;
+
+|Proveedor|
+:Ingresar titulo del servicio;
+:Escribir descripcion detallada;
+:Seleccionar categoria (dropdown);
+:Fijar precio por hora (COP);
+:Seleccionar modalidad (Presencial/Virtual/Mixta);
+:Definir disponibilidad;
+:Opcional: adjuntar hasta 5 imagenes;
+:Hacer clic en "Publicar";
+
+|Frontend React|
+:Validar campos obligatorios;
+:Previsualizar imagenes;
+:POST /api/services (JSON + FormData);
+
+|#LightGreen|Backend .NET|
+:Recibir DTO ServicioDTO;
+:Validar modelo (ModelState);
+:Hashear/validar token JWT;
+:INSERT INTO servicios (estado = -1 'Pendiente');
+:RETURNING id_servicio;
+
+|Supabase Storage|
+:Subir imagenes al bucket\n'imagenes-servicios';
+:Retornar URLs publicas;
+
+|Backend .NET|
+:INSERT INTO servicios_imagenes;
+:Obtener lista de admins;
+:Enviar notificacion por email\n(MAIL Nuevo servicio pendiente);
+
+|Frontend React|
+:Mostrar mensaje:\n"Servicio creado. Pendiente de aprobacion.";
+
+|Proveedor|
+:Visualizar servicio en perfil\ncon estado "Pausado/Pendiente";
+stop
+
+|#LightCoral|Administrador|
+:Recepcion de email de notificacion;
+:Navegar a Admin Dashboard;
+:Revisar servicio pendiente;
+:Decision: Aprobar o Rechazar;
+if (Aprobar?) then (Si)
+    :PUT /api/services/{id}/aprobar;
+    :UPDATE servicios SET disponibilidad = 2;
+    :Enviar email de aprobacion al proveedor;
+else (No)
+    :PUT /api/services/{id}/rechazar;
+    :DELETE FROM servicios;
+    :Enviar email de rechazo con razon;
+endif
+stop
+
+@enduml

@@ -1,0 +1,54 @@
+@startuml
+skinparam packageStyle rectangle
+skinparam linetype ortho
+
+title Diagrama de Casos de Uso - UniService
+
+rectangle "Plataforma UniService" {
+
+    usecase "UC-01\nRegistrar Cuenta" as UC01
+    usecase "UC-02\nIniciar Sesion" as UC02
+    usecase "UC-03\nGestionar Perfil" as UC03
+    usecase "UC-04\nPublicar Servicio" as UC04
+    usecase "UC-05\nBuscar Servicios" as UC05
+    usecase "UC-06\nVer Detalle de Servicio" as UC06
+    usecase "UC-07\nEnviar Solicitud" as UC07
+    usecase "UC-08\nResponder Solicitud" as UC08
+    usecase "UC-09\nComunicar via Chat" as UC09
+    usecase "UC-10\nCalificar Servicio" as UC10
+    usecase "UC-11\nReportar Contenido" as UC11
+    usecase "UC-12\nAprobar Servicio" as UC12
+    usecase "UC-13\nGestionar Reportes" as UC13
+    usecase "UC-14\nModerar Usuario" as UC14
+    usecase "Enviar notificacion\npor email" as UCNotif
+    usecase "Crear chat\nautomatico" as UCChatAuto
+
+    UC07 ..> UCChatAuto : <<include>>
+    UC07 ..> UCNotif : <<include>>
+    UC08 ..> UCNotif : <<include>>
+}
+
+actor "Usuario\n(Cliente/Proveedor)" as Usuario
+actor "Administrador" as Admin
+actor "Sistema de\nNotificaciones" as Sistema
+
+Usuario --> UC01
+Usuario --> UC02
+Usuario --> UC03
+Usuario --> UC04
+Usuario --> UC05
+Usuario --> UC06
+Usuario --> UC07
+Usuario --> UC08
+Usuario --> UC09
+Usuario --> UC10
+Usuario --> UC11
+
+Admin --> UC12
+Admin --> UC13
+Admin --> UC14
+
+Sistema --> UCNotif
+Sistema --> UCChatAuto
+
+@enduml

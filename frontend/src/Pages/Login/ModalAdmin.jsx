@@ -8,6 +8,7 @@ export default function AdminModal({
   adminBloqueado,
   adminShake,
   adminIntentos,
+  adminCargando,
   onConfirmar,
   onCancelar,
 }) {
@@ -112,7 +113,7 @@ export default function AdminModal({
           onKeyDown={(e) =>
             e.key === "Enter" && !adminBloqueado && onConfirmar()
           }
-          disabled={adminBloqueado}
+          disabled={adminBloqueado || adminCargando}
           style={{
             width: "100%",
             background: adminBloqueado
@@ -180,22 +181,25 @@ export default function AdminModal({
           <button
             type="button"
             onClick={onConfirmar}
+            disabled={adminCargando}
             style={{
               width: "100%",
-              background: "linear-gradient(135deg, #EF4444, #DC2626)",
+              background: adminCargando
+                ? "linear-gradient(135deg, #9CA3AF, #6B7280)"
+                : "linear-gradient(135deg, #EF4444, #DC2626)",
               border: "none",
               borderRadius: "10px",
               color: "#fff",
               padding: "13px",
               fontSize: "0.9rem",
               fontWeight: 700,
-              cursor: "pointer",
+              cursor: adminCargando ? "wait" : "pointer",
               marginBottom: "10px",
               fontFamily: "'DM Sans', sans-serif",
-              boxShadow: "0 4px 20px rgba(239,68,68,0.3)",
+              boxShadow: adminCargando ? "none" : "0 4px 20px rgba(239,68,68,0.3)",
             }}
           >
-            Verificar y acceder al panel
+            {adminCargando ? "Verificando..." : "Verificar y acceder al panel"}
           </button>
         ) : (
           // Mensaje mostrado cuando se alcanzó el máximo de intentos
@@ -218,6 +222,7 @@ export default function AdminModal({
         <button
           type="button"
           onClick={onCancelar}
+          disabled={adminCargando}
           style={{
             width: "100%",
             background: "transparent",
@@ -226,7 +231,7 @@ export default function AdminModal({
             color: "rgba(255,255,255,0.45)",
             padding: "10px",
             fontSize: "0.82rem",
-            cursor: "pointer",
+            cursor: adminCargando ? "default" : "pointer",
             fontFamily: "'DM Sans', sans-serif",
           }}
         >

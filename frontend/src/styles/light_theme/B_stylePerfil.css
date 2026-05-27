@@ -13,9 +13,9 @@ html[data-theme="claro"] {
   --teal2: #7fbdd8;
   --teal-dim: rgba(168, 213, 232, 0.15);
   --amarillo: #f0d788;
-  --texto: #1a2a3a;
-  --texto2: #5a7a96;
-  --texto3: #9db0c4;
+  --texto: #0d1b2a;
+  --texto2: #3d5a73;
+  --texto3: #6b8ba8;
   --trans: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

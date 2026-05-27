@@ -10,21 +10,6 @@ import NotificationModal from "./Login/ModalNotificacion";
 import BotonTema from "../Components/B_StyleHome";
 import { apiFetch } from "../utils/apiFetch";
 
-// ══════════════════════════════════════════════════════════════════
-// CREDENCIALES DE ADMINISTRADOR HARDCODEADAS
-// Estas credenciales permiten acceso directo al panel de admin
-// sin pasar por la base de datos. Solo para propósitos de prueba.
-// IMPORTANTE: En producción deben eliminarse y manejarse desde el backend.
-// Formato: { correo: "...", password: "..." }
-// ══════════════════════════════════════════════════════════════════
-const ADMIN_CREDENTIALS = [
-  { correo: "uniservice.soporte@gmail.com", password: "123456789" },
-];
-
-// Contraseña maestra adicional que se pide en el modal de confirmación de admin.
-// Es un segundo factor de seguridad antes de entrar al panel de administración.
-const ADMIN_MASTER_PASSWORD = "admin_2026";
-
 export default function Login() {
   // Hook de React Router para redirigir al usuario entre páginas
   const navigate = useNavigate();
@@ -78,11 +63,11 @@ export default function Login() {
   // ════════════════════════════════
   const [modalAdmin, setModalAdmin] = useState(false); // Si el modal está visible
   const [adminMasterInput, setAdminMasterInput] = useState(""); // Contraseña maestra que escribe el admin
-  const [adminIntentos, setAdminIntentos] = useState(3); // Contador de intentos fallidos (máx 3)
+  const [adminIntentos, setAdminIntentos] = useState(0); // Contador de intentos fallidos (máx 3)
   const [adminBloqueado, setAdminBloqueado] = useState(false); // Si se bloqueó por demasiados intentos
   const [adminError, setAdminError] = useState(""); // Mensaje de error dentro del modal
-  const [adminLoginData, setAdminLoginData] = useState(null); // Datos del usuario admin (reservado para uso futuro)
   const [adminShake, setAdminShake] = useState(false); // Activa animación de "shake" cuando falla
+  const [adminCargando, setAdminCargando] = useState(false); // Deshabilita botón mientras verifica
 
   // ════════════════════════════════
   // ESTADOS GENERALES DE UI
@@ -359,46 +344,63 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
   // Tiene un límite de 3 intentos antes de bloquearse.
   // ════════════════════════════════
 
-  // Cierra el modal y resetea todos sus estados a valores iniciales
   const cerrarModalAdmin = () => {
     setModalAdmin(false);
     setAdminMasterInput("");
     setAdminError("");
     setAdminIntentos(0);
     setAdminBloqueado(false);
+    setAdminCargando(false);
   };
 
-  // Valida la contraseña maestra. Si es correcta redirige al dashboard.
-  // Si es incorrecta, incrementa el contador. Al llegar a 3 bloquea el acceso.
-  const handleAdminConfirmar = () => {
-    if (adminBloqueado) return; // No hace nada si ya está bloqueado
+  const handleAdminConfirmar = async () => {
+    if (adminBloqueado) return;
 
-    if (adminMasterInput === ADMIN_MASTER_PASSWORD) {
-      notificar("Acceso concedido, Comandante", "success");
-      setModalAdmin(false);
+    setAdminCargando(true);
+    try {
+      const { ok, status, data } = await apiFetch("/api/auth/verify-admin-master", {
+        method: "POST",
+        body: JSON.stringify({ masterPassword: adminMasterInput }),
+      });
 
-      // Guarda en localStorage que el usuario está logueado como admin
-      localStorage.setItem("logueado", "true");
-      localStorage.setItem("usuarioRol", "1");
+      if (ok) {
+        notificar("Acceso concedido, Comandante", "success");
+        setModalAdmin(false);
 
-      // Espera 1 segundo para que el usuario vea el mensaje de éxito antes de redirigir
-      setTimeout(() => {
-        navigate("/admin-dashboard", { replace: true });
-      }, 1000);
-    } else {
-      const nuevosIntentos = adminIntentos + 1;
-      setAdminIntentos(nuevosIntentos);
+        localStorage.setItem("logueado", "true");
+        localStorage.setItem("usuarioRol", "1");
 
-      // Activa la animación de shake (temblor) en el modal para indicar error
-      setAdminShake(true);
-      setTimeout(() => setAdminShake(false), 500);
-
-      if (nuevosIntentos >= 3) {
-        setAdminBloqueado(true); // Bloquea el formulario definitivamente
-        setAdminError("DEMASIADOS INTENTOS FALLIDOS. ACCESO DENEGADO.");
+        setTimeout(() => {
+          navigate("/admin-dashboard", { replace: true });
+        }, 1000);
       } else {
-        setAdminError(`Contraseña incorrecta. Intento ${nuevosIntentos} de 3.`);
+        setAdminShake(true);
+        setTimeout(() => setAdminShake(false), 500);
+
+        if (status === 404) {
+          setAdminError("El servidor no pudo procesar la solicitud. Asegúrate de que la API esté actualizada y en ejecución.");
+          return;
+        }
+
+        if (data?.bloqueado || status === 429) {
+          setAdminBloqueado(true);
+          setAdminIntentos(3);
+          setAdminError(data?.error || "Bloqueado por 10 minutos tras demasiados intentos fallidos.");
+        } else {
+          const intentosBackend = data?.intentos || adminIntentos + 1;
+          setAdminIntentos(intentosBackend);
+          if (intentosBackend >= 3) {
+            setAdminBloqueado(true);
+            setAdminError("DEMASIADOS INTENTOS FALLIDOS. ACCESO DENEGADO POR 10 MINUTOS.");
+          } else {
+            setAdminError(data?.error || `Contraseña incorrecta. Intento ${intentosBackend} de 3.`);
+          }
+        }
       }
+    } catch {
+      notificar("Error de conexión con el servidor");
+    } finally {
+      setAdminCargando(false);
     }
   };
 
@@ -449,13 +451,12 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
 
   // ════════════════════════════════
   // LÓGICA DE LOGIN
-  // Tiene dos caminos:
-  //   1. Si el correo/pass coinciden con ADMIN_CREDENTIALS → abre el modal admin (sin ir al backend)
-  //   2. Si no → llama al backend C# para autenticar normalmente
+  // La autenticación se realiza contra el backend para todos los usuarios.
+  // El backend devuelve id_rol=1 para admins, que activa el modal de verificación.
+  // No hay bypass hardcodeado.
   // ════════════════════════════════
   const handleLogin = async () => {
     if (cargandoLogin) return;
-    // Validaciones básicas antes de llamar a la API
     if (!correo || errores.correo) {
       notificar("Ingresa un correo válido");
       return;
@@ -465,21 +466,6 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
       return;
     }
 
-    // BYPASS ADMIN: Busca si las credenciales coinciden con algún admin hardcodeado.
-    // Si encuentra coincidencia, no va al backend: abre el modal directamente.
-    const adminEncontrado = ADMIN_CREDENTIALS.find(
-      (a) => a.correo === correo && a.password === pass,
-    );
-
-    if (adminEncontrado) {
-      localStorage.setItem("usuario", adminEncontrado.correo.split("@")[0]);
-      localStorage.setItem("usuarioRol", 1);
-      setModalAdmin(true);
-      notificar("Cuenta de administrador detectada", "info");
-      return; // Detiene la función aquí, no llega al fetch del backend
-    }
-
-    // FLUJO NORMAL: Si no es un admin hardcodeado, autentica contra la base de datos
     setCargandoLogin(true);
     try {
       const { data } = await apiFetch("/api/auth/login", {
@@ -488,15 +474,12 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
       });
 
       if (data.token) {
-        // Guarda el token JWT y los datos del usuario en localStorage para mantener la sesión
         localStorage.setItem("token", data.token);
         localStorage.setItem("usuarioId", data.user.id);
         localStorage.setItem("usuarioNombre", data.user.nombre || data.user.correo.split("@")[0]);
         localStorage.setItem("usuarioRol", data.user.id_rol);
         localStorage.setItem("logueado", "true");
 
-        // Si el backend indica que es admin (rol 1), abre el modal de verificación
-        // Si es usuario normal (rol 2), redirige directo al home
         if (data.user.id_rol === 1) {
           setModalAdmin(true);
         } else {
@@ -886,6 +869,7 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
         adminBloqueado={adminBloqueado}
         adminShake={adminShake}
         adminIntentos={adminIntentos}
+        adminCargando={adminCargando}
         onConfirmar={handleAdminConfirmar}
         onCancelar={cerrarModalAdmin}
       />

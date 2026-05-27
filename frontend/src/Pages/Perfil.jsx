@@ -91,6 +91,99 @@ const Perfil = () => {
   const mostrarAlerta = (type, title, message) => {
     setModalAlerta({ show: true, type, title, message });
   };
+
+  // Estados para el modal de seguridad
+  const [seguridadSubPaso, setSeguridadSubPaso] = useState(null);
+  const [seguridadCargando, setSeguridadCargando] = useState(false);
+
+  // Formulario de cambio de contraseña
+  const [formPassword, setFormPassword] = useState({
+    actual: "",
+    nueva: "",
+    confirmar: "",
+  });
+
+  // Formulario de cambio de correo
+  const [formCorreo, setFormCorreo] = useState({
+    nuevoCorreo: "",
+    password: "",
+  });
+
+  const resetSeguridadForms = () => {
+    setSeguridadSubPaso(null);
+    setSeguridadCargando(false);
+    setFormPassword({ actual: "", nueva: "", confirmar: "" });
+    setFormCorreo({ nuevoCorreo: "", password: "" });
+  };
+
+  const handleCambiarPassword = async () => {
+    if (!formPassword.actual || !formPassword.nueva || !formPassword.confirmar) {
+      mostrarAlerta("error", "Error", "Todos los campos son requeridos.");
+      return;
+    }
+    if (formPassword.nueva.length < 8) {
+      mostrarAlerta("error", "Error", "La contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
+    if (formPassword.nueva !== formPassword.confirmar) {
+      mostrarAlerta("error", "Error", "Las contraseñas no coinciden.");
+      return;
+    }
+    setSeguridadCargando(true);
+    try {
+      const { ok, data } = await apiFetch("/api/auth/change-password", {
+        method: "POST",
+        body: JSON.stringify({
+          contrasenaActual: formPassword.actual,
+          contrasenaNueva: formPassword.nueva,
+        }),
+      });
+      if (ok) {
+        mostrarAlerta("success", "Hecho", "Contraseña cambiada correctamente.");
+        resetSeguridadForms();
+        setActiveModal(null);
+      } else {
+        mostrarAlerta("error", "Error", data?.error || "No se pudo cambiar la contraseña.");
+      }
+    } catch {
+      mostrarAlerta("error", "Error", "Error de conexión con el servidor.");
+    } finally {
+      setSeguridadCargando(false);
+    }
+  };
+
+  const handleCambiarCorreo = async () => {
+    if (!formCorreo.nuevoCorreo || !formCorreo.password) {
+      mostrarAlerta("error", "Error", "Todos los campos son requeridos.");
+      return;
+    }
+    if (!formCorreo.nuevoCorreo.includes("@")) {
+      mostrarAlerta("error", "Error", "Ingresa un correo electrónico válido.");
+      return;
+    }
+    setSeguridadCargando(true);
+    try {
+      const { ok, data } = await apiFetch("/api/auth/change-email", {
+        method: "POST",
+        body: JSON.stringify({
+          nuevoCorreo: formCorreo.nuevoCorreo,
+          password: formCorreo.password,
+        }),
+      });
+      if (ok) {
+        setUserData((prev) => ({ ...prev, correo: formCorreo.nuevoCorreo }));
+        mostrarAlerta("success", "Hecho", "Correo cambiado correctamente.");
+        resetSeguridadForms();
+        setActiveModal(null);
+      } else {
+        mostrarAlerta("error", "Error", data?.error || "No se pudo cambiar el correo.");
+      }
+    } catch {
+      mostrarAlerta("error", "Error", "Error de conexión con el servidor.");
+    } finally {
+      setSeguridadCargando(false);
+    }
+  };
   const [listaSiguiendo, setListaSiguiendo] = useState([]);
   const [cargandoSiguiendo, setCargandoSiguiendo] = useState(false);
 
@@ -1592,53 +1685,212 @@ const Perfil = () => {
           </div>
         )}
 
-        {/* ══ MODAL: Seguridad (solo perfil propio) — FALTA IMPLEMENTAR FUNCIONALIDAD REAL
-            Los botones actualmente usan prompt() y handleUpdate (placeholder).
-            Pendiente: formularios reales para cambiar contraseña y correo. */}
+        {/* ══ MODAL: Seguridad (solo perfil propio) ══ */}
         {activeModal === "seguridad" && (
           <div
             className="image-menu-overlay active"
-            onClick={() => setActiveModal(null)}
+            onClick={() => {
+              setActiveModal(null);
+              resetSeguridadForms();
+            }}
           >
             <div className="image-menu" onClick={(e) => e.stopPropagation()}>
               <h3 className="image-menu-title">
-                <i className="bi bi-shield-lock-fill"></i> Opciones de Seguridad
-                "FALTA IMPLEMENTAR FUNCIONALIDAD"
+                <i className="bi bi-shield-lock-fill"></i> Seguridad de la Cuenta
               </h3>
-              <div className="image-menu-options">
-                {/* Cada botón usa prompt() para pedir el nuevo valor y llama a handleUpdate */}
 
-                <button
-                  className="image-option"
-                  onClick={() => {
-                    const n = prompt("Nuevo nombre:", userData.nombre);
-                    if (n) handleUpdate("nombre", n);
-                  }}
-                >
-                  <span className="image-option-icon">
-                    <i className="bi bi-key-fill"></i>
-                  </span>
-                  <div className="image-option-text">
-                    <b>Cambiar Contraseña</b>
-                  </div>
-                </button>
+              {!seguridadSubPaso && (
+                <div className="image-menu-options">
+                  <button
+                    className="image-option"
+                    onClick={() => setSeguridadSubPaso("password")}
+                  >
+                    <span className="image-option-icon">
+                      <i className="bi bi-key-fill"></i>
+                    </span>
+                    <div className="image-option-text">
+                      <b>Cambiar Contraseña</b>
+                    </div>
+                  </button>
+                  <button
+                    className="image-option"
+                    onClick={() => setSeguridadSubPaso("correo")}
+                  >
+                    <span className="image-option-icon">
+                      <i className="bi bi-envelope-fill"></i>
+                    </span>
+                    <div className="image-option-text">
+                      <b>Cambiar Correo Electrónico</b>
+                    </div>
+                  </button>
+                </div>
+              )}
 
-                <button
-                  className="image-option"
-                  onClick={() => {
-                    const d = prompt(
-                      "Nueva descripción:",
-                      userData.descripcion,
-                    );
-                    if (d) handleUpdate("descripcion", d);
-                  }}
-                >
-                  <span className="image-option-icon">📧</span>
-                  <div className="image-option-text">
-                    <b>Cambiar Correo Electrónico</b>
+              {seguridadSubPaso === "password" && (
+                <div className="image-menu-options" style={{ padding: "8px 0" }}>
+                  <div style={{ marginBottom: "12px" }}>
+                    <label style={{ display: "block", marginBottom: "4px", fontSize: "0.85rem", opacity: 0.8 }}>
+                      Contraseña actual
+                    </label>
+                    <input
+                      type="password"
+                      value={formPassword.actual}
+                      onChange={(e) => setFormPassword((p) => ({ ...p, actual: e.target.value }))}
+                      placeholder="••••••••"
+                      style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        borderRadius: "8px",
+                        border: "1px solid rgba(255,255,255,0.15)",
+                        background: "rgba(255,255,255,0.05)",
+                        color: "inherit",
+                        fontSize: "0.9rem",
+                      }}
+                    />
                   </div>
-                </button>
-              </div>
+                  <div style={{ marginBottom: "12px" }}>
+                    <label style={{ display: "block", marginBottom: "4px", fontSize: "0.85rem", opacity: 0.8 }}>
+                      Nueva contraseña
+                    </label>
+                    <input
+                      type="password"
+                      value={formPassword.nueva}
+                      onChange={(e) => setFormPassword((p) => ({ ...p, nueva: e.target.value }))}
+                      placeholder="Mínimo 8 caracteres"
+                      style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        borderRadius: "8px",
+                        border: "1px solid rgba(255,255,255,0.15)",
+                        background: "rgba(255,255,255,0.05)",
+                        color: "inherit",
+                        fontSize: "0.9rem",
+                      }}
+                    />
+                  </div>
+                  <div style={{ marginBottom: "16px" }}>
+                    <label style={{ display: "block", marginBottom: "4px", fontSize: "0.85rem", opacity: 0.8 }}>
+                      Confirmar nueva contraseña
+                    </label>
+                    <input
+                      type="password"
+                      value={formPassword.confirmar}
+                      onChange={(e) => setFormPassword((p) => ({ ...p, confirmar: e.target.value }))}
+                      placeholder="Repite la nueva contraseña"
+                      style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        borderRadius: "8px",
+                        border: "1px solid rgba(255,255,255,0.15)",
+                        background: "rgba(255,255,255,0.05)",
+                        color: "inherit",
+                        fontSize: "0.9rem",
+                      }}
+                    />
+                  </div>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <button
+                      className="image-option"
+                      onClick={() => setSeguridadSubPaso(null)}
+                      disabled={seguridadCargando}
+                      style={{ flex: 1, justifyContent: "center" }}
+                    >
+                      <span className="image-option-icon">
+                        <i className="bi bi-arrow-left"></i>
+                      </span>
+                      <div className="image-option-text">
+                        <b>Volver</b>
+                      </div>
+                    </button>
+                    <button
+                      className="image-option"
+                      onClick={handleCambiarPassword}
+                      disabled={seguridadCargando}
+                      style={{ flex: 1, justifyContent: "center" }}
+                    >
+                      <span className="image-option-icon">
+                        <i className="bi bi-check-lg"></i>
+                      </span>
+                      <div className="image-option-text">
+                        <b>{seguridadCargando ? "Guardando..." : "Guardar"}</b>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {seguridadSubPaso === "correo" && (
+                <div className="image-menu-options" style={{ padding: "8px 0" }}>
+                  <div style={{ marginBottom: "12px" }}>
+                    <label style={{ display: "block", marginBottom: "4px", fontSize: "0.85rem", opacity: 0.8 }}>
+                      Nuevo correo electrónico
+                    </label>
+                    <input
+                      type="email"
+                      value={formCorreo.nuevoCorreo}
+                      onChange={(e) => setFormCorreo((c) => ({ ...c, nuevoCorreo: e.target.value }))}
+                      placeholder="nuevo@correo.com"
+                      style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        borderRadius: "8px",
+                        border: "1px solid rgba(255,255,255,0.15)",
+                        background: "rgba(255,255,255,0.05)",
+                        color: "inherit",
+                        fontSize: "0.9rem",
+                      }}
+                    />
+                  </div>
+                  <div style={{ marginBottom: "16px" }}>
+                    <label style={{ display: "block", marginBottom: "4px", fontSize: "0.85rem", opacity: 0.8 }}>
+                      Contraseña actual (para confirmar)
+                    </label>
+                    <input
+                      type="password"
+                      value={formCorreo.password}
+                      onChange={(e) => setFormCorreo((c) => ({ ...c, password: e.target.value }))}
+                      placeholder="••••••••"
+                      style={{
+                        width: "100%",
+                        padding: "10px 12px",
+                        borderRadius: "8px",
+                        border: "1px solid rgba(255,255,255,0.15)",
+                        background: "rgba(255,255,255,0.05)",
+                        color: "inherit",
+                        fontSize: "0.9rem",
+                      }}
+                    />
+                  </div>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <button
+                      className="image-option"
+                      onClick={() => setSeguridadSubPaso(null)}
+                      disabled={seguridadCargando}
+                      style={{ flex: 1, justifyContent: "center" }}
+                    >
+                      <span className="image-option-icon">
+                        <i className="bi bi-arrow-left"></i>
+                      </span>
+                      <div className="image-option-text">
+                        <b>Volver</b>
+                      </div>
+                    </button>
+                    <button
+                      className="image-option"
+                      onClick={handleCambiarCorreo}
+                      disabled={seguridadCargando}
+                      style={{ flex: 1, justifyContent: "center" }}
+                    >
+                      <span className="image-option-icon">
+                        <i className="bi bi-check-lg"></i>
+                      </span>
+                      <div className="image-option-text">
+                        <b>{seguridadCargando ? "Guardando..." : "Guardar"}</b>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
