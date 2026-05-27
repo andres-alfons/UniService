@@ -18,6 +18,7 @@ import {
   colorAvatar,
 } from "./Servicio/utilidades";
 import BotonTema from "../Components/B_StyleHome";
+import StarRating from "../Components/StarRating";
 
 const API = "/api/services";
 const API_USUARIO = "/api/users";
@@ -122,11 +123,8 @@ export default function Servicio() {
       </>
     );
 
-  const {
-    texto: estrellasTexto,
-    prom,
-    num,
-  } = calcularEstrellas(servicio.resenas);
+  // CAMBIO 2: promNum en lugar de texto: estrellasTexto
+  const { promNum, prom, num } = calcularEstrellas(servicio.resenas);
 
   const universidad =
     servicio.universidad === 1 || servicio.universidad === "1"
@@ -286,7 +284,10 @@ export default function Servicio() {
 
               <div className="rating-grande">
                 <div>
-                  <div className="estrellas-grande">{estrellasTexto}</div>
+                  {/* CAMBIO 3: StarRating reemplaza {estrellasTexto} */}
+                  <div className="estrellas-grande">
+                    <StarRating rating={promNum} size={22} />
+                  </div>
                   <div className="texto-rating">
                     <strong>{prom}</strong> de 5.0
                   </div>
@@ -368,8 +369,9 @@ export default function Servicio() {
                             <div className="resena-fecha">{r.fecha || ""}</div>
                           </div>
                         </div>
+                        {/* CAMBIO 4: StarRating reemplaza {"★".repeat(...)} */}
                         <div className="resena-rating">
-                          {"★".repeat(r.estrellas || 5)}
+                          <StarRating rating={r.estrellas || 5} size={14} />
                         </div>
                       </div>
                       <div className="resena-texto">{r.comentario || ""}</div>
@@ -542,13 +544,14 @@ export default function Servicio() {
           </p>
         </div>
       </footer>
+
       {modalReporteServicio && (
-  <ModalReporte
-    onClose={() => setModalReporteServicio(false)}
-    idServicio={parseInt(idServicio)}
-    contexto="servicio"
-  />
-)}
+        <ModalReporte
+          onClose={() => setModalReporteServicio(false)}
+          idServicio={parseInt(idServicio)}
+          contexto="servicio"
+        />
+      )}
     </>
   );
 }
