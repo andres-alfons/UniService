@@ -51,8 +51,8 @@ public class CalificacionesController : ControllerBase
                     comentario = reader["comentario"]?.ToString(),
                     fecha = ((DateTime)reader["fecha_calificacion"]).ToString("dd MMM yyyy"),
                     autor = reader["autor"]?.ToString(),
-                    fecha_modificacion = reader["fecha_modificacion"] != DBNull.Value 
-                        ? ((DateTime)reader["fecha_modificacion"]).ToString("dd MMM yyyy") 
+                    fecha_modificacion = reader["fecha_modificacion"] != DBNull.Value
+                        ? ((DateTime)reader["fecha_modificacion"]).ToString("dd MMM yyyy")
                         : null
                 });
             }
@@ -172,7 +172,7 @@ public class CalificacionesController : ControllerBase
             if (yaCalifico > 0)
             {
                 using var cmdMiCalif = new NpgsqlCommand(@"
-                    SELECT id_calificacion, puntuacion, comentario, fecha_calificacion
+                    SELECT id_calificacion, puntuacion, comentario, fecha_calificacion, fecha_modificacion
                     FROM calificaciones
                     WHERE id_cliente = @id_cliente AND id_servicio = @id_servicio
                     LIMIT 1
@@ -188,8 +188,8 @@ public class CalificacionesController : ControllerBase
                         puntuacion = (byte)reader["puntuacion"],
                         comentario = reader["comentario"]?.ToString(),
                         fecha = ((DateTime)reader["fecha_calificacion"]).ToString("dd MMM yyyy"),
-                        fecha_modificacion = reader["fecha_modificacion"] != DBNull.Value 
-                            ? ((DateTime)reader["fecha_modificacion"]).ToString("dd MMM yyyy") 
+                        fecha_modificacion = reader["fecha_modificacion"] != DBNull.Value
+                            ? ((DateTime)reader["fecha_modificacion"]).ToString("dd MMM yyyy")
                             : null
                     };
                 }
