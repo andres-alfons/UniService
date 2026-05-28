@@ -29,7 +29,7 @@ export default function SeccionBuscar() {
     try {
       const params = new URLSearchParams({
         page: page,
-        pageSize: CANTIDAD_POR_PAGINA,
+        pageSize: CANTIDAD_POR_PAGINA(),
         orden: ord,
       });
 
@@ -46,7 +46,7 @@ export default function SeccionBuscar() {
       } else if (Array.isArray(data)) {
         setResultados(data);
         setTotalResultados(data.length);
-        setTotalPaginas(Math.ceil(data.length / CANTIDAD_POR_PAGINA));
+        setTotalPaginas(Math.ceil(data.length / CANTIDAD_POR_PAGINA()));
       }
 
       setTimeout(() => setFadeClass("fade-enter"), 50);

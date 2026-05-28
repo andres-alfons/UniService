@@ -5,8 +5,8 @@
 /* Botón flotante de chat - MISMO TAMAÑO QUE NOTIFICACIONES (60x60) */
 [data-theme="claro"] .boton-chat-flotante {
   position: relative;
-  width: 60px;
-  height: 60px;
+  width: 66px;
+  height: 66px;
   border-radius: 50%;
   background: #a8d5e8;
   color: white;
@@ -15,7 +15,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 26px;
   transition: all 0.3s ease;
   margin-bottom: 12px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
@@ -24,6 +24,30 @@
 [data-theme="claro"] .boton-chat-flotante:hover {
   background: #a8d5e8;
   transform: scale(1.1);
+}
+
+@media (max-width: 1024px) {
+  [data-theme="claro"] .boton-chat-flotante {
+    width: 55px;
+    height: 55px;
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 768px) {
+  [data-theme="claro"] .boton-chat-flotante {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  [data-theme="claro"] .boton-chat-flotante {
+    width: 42px;
+    height: 42px;
+    font-size: 18px;
+  }
 }
 
 /* Botón de chat en perfil */

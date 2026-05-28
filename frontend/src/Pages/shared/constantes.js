@@ -1,5 +1,7 @@
 // Constantes compartidas: paginación, categorías, modalidades, íconos, colores y APIs
-export const CANTIDAD_POR_PAGINA = 8;
+export function CANTIDAD_POR_PAGINA() {
+  return window.innerWidth < 640 ? 3 : 8;
+}
 
 export const CATEGORIAS = [
   { valor: "", label: "Todas las categorías" },

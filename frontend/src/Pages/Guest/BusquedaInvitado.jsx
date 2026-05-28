@@ -74,8 +74,8 @@ export default function SeccionBuscar({ serviciosTotales }) {
       }
 
       setTotalFiltrados(filtrados.length);
-      const inicio = (page - 1) * CANTIDAD_POR_PAGINA;
-      setResultados(filtrados.slice(inicio, inicio + CANTIDAD_POR_PAGINA));
+      const inicio = (page - 1) * CANTIDAD_POR_PAGINA();
+      setResultados(filtrados.slice(inicio, inicio + CANTIDAD_POR_PAGINA()));
     },
     [serviciosTotales],
   );
@@ -120,7 +120,7 @@ export default function SeccionBuscar({ serviciosTotales }) {
   };
 
   const irPagina = (nuevaPagina) => {
-    const totalPaginas = Math.ceil(totalFiltrados / CANTIDAD_POR_PAGINA);
+    const totalPaginas = Math.ceil(totalFiltrados / CANTIDAD_POR_PAGINA());
     if (nuevaPagina < 1 || nuevaPagina > totalPaginas) return;
 
     setFadeClass("fade-exit");
@@ -132,7 +132,7 @@ export default function SeccionBuscar({ serviciosTotales }) {
     }, 150);
   };
 
-  const totalPaginas = Math.ceil(totalFiltrados / CANTIDAD_POR_PAGINA);
+  const totalPaginas = Math.ceil(totalFiltrados / CANTIDAD_POR_PAGINA());
 
   const generarPaginas = () => {
     const paginas = [];

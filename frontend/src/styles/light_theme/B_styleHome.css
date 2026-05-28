@@ -74,8 +74,7 @@ html[data-theme="claro"] {
   background: linear-gradient(
     135deg,
     var(--texto) 0%,
-    var(--teal2) 50%,
-    var(--amarillo) 100%
+    var(--teal2) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -214,8 +213,8 @@ html[data-theme="claro"] {
   border: 1px solid rgba(239, 68, 68, 0.35);
   border-radius: 8px;
   font-weight: 600;
+  font-size: 0.82rem;
   transition: 0.2s;
-  margin-left: 24px;
   padding: 6px 12px;
 }
 
@@ -239,13 +238,13 @@ html[data-theme="claro"] {
 
 /* Botón principal */
 [data-theme="claro"] .boton-notificaciones {
-  width: 60px;
-  height: 60px;
+  width: 66px;
+  height: 66px;
   border-radius: 50%;
   background: #a8d5e8;
   border: none;
   color: #ffffff;
-  font-size: 24px;
+  font-size: 26px;
   cursor: pointer;
   box-shadow: 0 8px 16px rgba(168, 213, 232, 0.3);
   transition: all 0.3s ease;
@@ -260,6 +259,38 @@ html[data-theme="claro"] {
 [data-theme="claro"] .boton-notificaciones:hover {
   transform: scale(1.1);
   background: #7fbdd8;
+}
+
+@media (max-width: 1024px) {
+  [data-theme="claro"] .boton-notificaciones {
+    width: 55px;
+    height: 55px;
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 768px) {
+  [data-theme="claro"] .boton-notificaciones {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  [data-theme="claro"] .boton-notificaciones {
+    width: 42px;
+    height: 42px;
+    font-size: 18px;
+  }
+  [data-theme="claro"] .badge-notificaciones {
+    min-width: 14px;
+    height: 14px;
+    font-size: 8px;
+    border-radius: 7px;
+    top: -4px;
+    right: -4px;
+  }
 }
 
 [data-theme="claro"] .badge-notificaciones {
@@ -892,7 +923,6 @@ html[data-theme="claro"] {
   width: 100%;
   max-width: 400px;
   height: 500px;
-  margin: 10px;
   position: relative;
 }
 
@@ -1982,21 +2012,33 @@ html[data-theme="claro"] {
   [data-theme="claro"] .navbar-links {
     display: none;
     position: absolute;
-    top: 100%;
+    top: calc(100% + 8px);
     right: 10px;
     width: auto;
-    min-width: 240px;
+    min-width: 192px;
     background: var(--bg);
     flex-direction: column;
-    padding: 16px 20px;
+    padding: 8px 12px;
     border: 1px solid var(--borde);
     border-radius: 12px;
-    gap: 8px;
+    gap: 5px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   }
 
   [data-theme="claro"] .navbar-links.active {
     display: flex;
+  }
+
+  [data-theme="claro"] .navbar-links .nav-link-custom,
+  [data-theme="claro"] .navbar-links .nav-solicitudes-btn,
+  [data-theme="claro"] .navbar-links .nav-iniciar,
+  [data-theme="claro"] .navbar-links .nav-Cerrar {
+    width: 100%;
+    text-align: left;
+  }
+
+  [data-theme="claro"] .navbar-links .nav-Cerrar {
+    transform: translateX(-24px);
   }
 }
 
@@ -2314,13 +2356,13 @@ html[data-theme="claro"] {
 }
 
 [data-theme="claro"] .boton-tema {
-  width: 60px;
-  height: 60px;
+  width: 66px;
+  height: 66px;
   border-radius: 50%;
   background: #f2f3f5;
   border: none;
   color: rgb(182, 181, 181);
-  font-size: 24px;
+  font-size: 26px;
   cursor: pointer;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
   transition: all 0.3s ease;
@@ -2339,9 +2381,9 @@ html[data-theme="claro"] {
 
 @media (max-width: 1024px) {
   [data-theme="claro"] .boton-tema {
-    width: 50px;
-    height: 50px;
-    font-size: 20px;
+    width: 55px;
+    height: 55px;
+    font-size: 22px;
   }
   [data-theme="claro"] .contenedor-tema {
     bottom: 24px;
@@ -2351,9 +2393,9 @@ html[data-theme="claro"] {
 
 @media (max-width: 768px) {
   [data-theme="claro"] .boton-tema {
-    width: 44px;
-    height: 44px;
-    font-size: 18px;
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
   }
   [data-theme="claro"] .contenedor-tema {
     bottom: 20px;
@@ -2363,9 +2405,9 @@ html[data-theme="claro"] {
 
 @media (max-width: 480px) {
   [data-theme="claro"] .boton-tema {
-    width: 38px;
-    height: 38px;
-    font-size: 16px;
+    width: 42px;
+    height: 42px;
+    font-size: 18px;
   }
   [data-theme="claro"] .contenedor-tema {
     bottom: 16px;
@@ -3258,6 +3300,10 @@ html[data-theme="claro"] {
   [data-theme="claro"] #contenedor-tarjetas {
     grid-template-columns: 1fr;
     gap: 14px;
+  }
+  [data-theme="claro"] .card-icono,
+  [data-theme="claro"] .card-icono-imagen {
+    height: 120px;
   }
 }
 
