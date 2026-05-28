@@ -526,6 +526,7 @@ html[data-theme="claro"] {
   font-family: "Poppins", sans-serif;
   letter-spacing: 0.3px;
   text-decoration: none;
+  max-width: 190px;
 }
 
 [data-theme="claro"] .btn-verde {
@@ -535,8 +536,8 @@ html[data-theme="claro"] {
 }
 
 [data-theme="claro"] .btn-verde:hover {
-  background: rgba(127, 215, 212, 1);
-  color: #ebf3ff;
+  background: var(--teal2);
+  color: #070d16;
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(14, 165, 160, 0.35);
 }
@@ -551,9 +552,9 @@ html[data-theme="claro"] {
 
 [data-theme="claro"] .btn-borde {
   background: transparent;
-  background: rgba(191, 191, 191, 0.3); /* Negro semitransparente */
-  color: rgb(0, 0, 0);
-  border: 2px solid var(--borde2);
+  background: rgba(0, 0, 0, 0.3);
+  color: rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(0, 0, 0, 0.451);
   position: relative;
   overflow: hidden;
   transition: color 0.4s ease;
