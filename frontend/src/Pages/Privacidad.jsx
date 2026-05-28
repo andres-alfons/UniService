@@ -4,6 +4,7 @@
 // personales de los usuarios de UniService.
 // ════════════════════════════════════════════════════════════════
 import React from "react";
+import "../styles/styleHome.css";
 import "../styles/stylePrivacy.css";
 import BotonTema from "../Components/B_StyleHome";
 

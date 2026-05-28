@@ -1,75 +1,75 @@
 @startuml
 skinparam backgroundColor #FEFEFE
+skinparam activity {
+  BackgroundColor<<frontend>> LightBlue
+  BackgroundColor<<backend>> LightGreen
+  BackgroundColor<<proveedor>> LightCyan
+}
 
 title Diagrama de Actividades - Solicitar un Servicio
 
 |Cliente|
 start
-:Iniciar sesion en UniService;
-:Navegar a pagina de Inicio;
+:Iniciar sesión en UniService;
+:Navegar a página de Inicio;
 :Aplicar filtros o buscar texto;
-:Seleccionar servicio de interes;
+:Seleccionar servicio de interés;
 
-|#LightBlue|Frontend React|
-:GET /api/services/{id};
-:Renderizar detalle con imagenes,\nprecio, reseñas y calificacion;
+|#LightBlue|Frontend|
+:Consultar detalle del servicio;
+:Renderizar información
+(imágenes, precio, reseñas);
 
 |Cliente|
-:Revisar informacion del proveedor;
+:Revisar información del proveedor;
 :Hacer clic en "Solicitar Servicio";
 
-|Frontend React|
-:Identificar categoria del servicio;
-:Renderizar formulario dinamico\n(campos segun categoria);
+|Frontend|
+:Identificar categoría del servicio;
+:Renderizar formulario dinámico;
 
 |Cliente|
-:Completar campos requeridos\n(tema, descripcion, presupuesto,\nfecha deseada, urgencia, etc.);
-:Adjuntar archivo opcional;
+:Completar campos requeridos
+(tema, descripción, presupuesto,
+fecha deseada, urgencia);
 :Enviar solicitud;
 
-|Frontend React|
-:POST /api/solicitudes;
-:Validar que no exista pendiente;
+|Frontend|
+:Validar datos ingresados;
+:Enviar solicitud al servidor;
 
-|#LightGreen|Backend .NET|
-:Recibir CrearSolicitudDTO;
-:Validar campos requeridos por categoria;
-:INSERT INTO solicitudes (estado = 'Pendiente');
-:Generar mensaje de sistema HTML;
+|#LightGreen|Backend|
+:Validar que no exista
+solicitud pendiente previa;
+:Guardar solicitud en base de datos
+(estado = Pendiente);
+:Obtener datos del proveedor;
+:Crear o recuperar conversación de chat;
+:Generar mensaje de sistema;
+:Notificar al proveedor en tiempo real;
 
-|PostgreSQL|
-:Guardar solicitud y mensaje;
+|Servicio Email|
+:Enviar email al proveedor;
 
-|Backend .NET|
-:Obtener datos de cliente y proveedor;
-:Crear o recuperar chat existente;
-:INSERT INTO mensajes (tipo = 'sistema');
-:Notificar via SignalR al grupo chat_{id};
-
-|#LightYellow|Servicio Email|
-:Enviar email al proveedor\n(MAIL Notificacion de solicitud);
-
-|Frontend React|
-:Mostrar confirmacion:\n"Solicitud enviada correctamente";
-:Redirigir a chat automatico;
+|Frontend|
+:Mostrar confirmación;
+:Redirigir al chat automático;
 
 |Cliente|
 :Visualizar solicitud en "Enviadas";
-:Chatear con proveedor en tiempo real;
+:Chatear con proveedor;
 stop
 
-|Proveedor|
-:Recibir email de notificacion;
-:Recibir mensaje de sistema en chat;
+|#LightCyan|Proveedor|
+:Recibir notificación por email;
+:Recibir mensaje en chat;
 :Visualizar solicitud en "Recibidas";
-:Decision: Aceptar o Rechazar;
-if (Aceptar?) then (Si)
-    :Responder "Aceptada";
-    :UPDATE solicitudes SET estado = 'Aceptada';
+:Decisión: ¿Aceptar?;
+if (Aceptar) then (Sí)
+  :Marcar como "Aceptada";
 else (No)
-    :Responder "Rechazada";
-    :Indicar motivo o contraoferta;
-    :UPDATE solicitudes SET estado = 'Rechazada';
+  :Marcar como "Rechazada";
+  :Indicar motivo o contraoferta;
 endif
 stop
 

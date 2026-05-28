@@ -3,6 +3,7 @@
 // Muestra los términos legales de uso de la plataforma UniService.
 // ════════════════════════════════════════════════════════════════
 import React from "react";
+import "../styles/styleHome.css";
 import "../styles/styleTerms.css";
 import BotonTema from "../Components/B_StyleHome";
 
