@@ -507,6 +507,35 @@ html[data-theme="claro"] {
   color: var(--teal);
 }
 
+/* ═════════════════════════════════
+           BOTÓN FLOTANTE REPORTAR (TEMA CLARO)
+        ════════════════════════════════ */
+[data-theme="claro"] .btn-reportar-flotante {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1001;
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.1);
+}
+[data-theme="claro"] .btn-reportar-flotante:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.35);
+  transform: scale(1.1);
+  box-shadow: 0 6px 24px rgba(239, 68, 68, 0.18);
+}
+
 /* ══════════════════════════════
            PANEL DERECHO
         ═══════════════════════════════ */

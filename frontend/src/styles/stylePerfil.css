@@ -558,6 +558,35 @@ body {
   box-shadow: 0 8px 20px rgba(14, 165, 160, 0.3);
 }
 
+/* ═════════════════════════════════
+           BOTÓN FLOTANTE REPORTAR
+        ════════════════════════════════ */
+.btn-reportar-flotante {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1001;
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.15);
+}
+.btn-reportar-flotante:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.5);
+  transform: scale(1.1);
+  box-shadow: 0 6px 24px rgba(239, 68, 68, 0.25);
+}
+
 /* ══════════════════════════════
            PANEL DERECHO
         ═══════════════════════════════ */

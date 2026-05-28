@@ -7,9 +7,6 @@ import "../styles/stylePerfil.css";
 import StatItem from "./Perfil/ElementoEstadistica";
 import MenuItem from "./Perfil/ElementoMenu";
 import InfoItem from "./Perfil/ElementoInfo";
-import QuickStatCard from "./Perfil/TarjetaRapida";
-import ProgressBar from "./Perfil/BarraProgreso";
-import ActivityItem from "./Perfil/ElementoActividad";
 import BotonTema from "../Components/B_StyleHome";
 import ChatPanel from "./Principal/ChatPanel";
 import ModalReporte from "../Components/ModalReporte";
@@ -64,6 +61,7 @@ const Perfil = () => {
 
   // Lista de servicios publicados por el usuario (solo se carga si es perfil propio)
   const [misServicios, setMisServicios] = useState([]);
+  const [modalServicios, setModalServicios] = useState(false);
   // Almacena el servicio que se está editando (con todos sus campos)
   const [editando, setEditando] = useState(null);
   // Guarda el ID del servicio que se quiere eliminar, para mostrar confirmación
@@ -698,6 +696,14 @@ const Perfil = () => {
     <>
       <Navbar onCerrarSesion={handleCerrarSesion} />
       <BotonTema />
+      <button
+        className="btn-reportar-flotante"
+        onClick={() => setModalReporteAbierto(true)}
+        aria-label="Reportar problema"
+        title="Reportar problema"
+      >
+        <i className="bi bi-bug-fill"></i>
+      </button>
 
       <div className="profile-page-wrapper">
         <div className="dynamic-bg" aria-hidden="true">
@@ -828,51 +834,6 @@ const Perfil = () => {
 
             {/* ══ PANEL DERECHO ══ */}
             <div className="right-panel">
-              {/* El estado verde/rojo refleja el campo "estado" real de la BD */}
-              <section className="menu-section">
-                <div className="section-title">
-                  <i className="bi bi-bar-chart-fill"></i> Estado y Actividad
-                </div>
-                <div className="menu-list">
-                  {esPerfilExterno && (
-                    <div className="menu-item" style={{ cursor: "default" }}>
-                      <div className="menu-icon">
-                        <i
-                          className={`bi bi-circle-fill ${estaConectado ? "text-success" : "text-danger"}`}
-                        ></i>
-                      </div>
-                      <div className="menu-text">
-                        <div className="menu-title">Estado actual</div>
-                        <div className="menu-desc">
-                          {estaConectado ? "Disponible" : "No disponible"}
-                        </div>
-                      </div>
-                      <span
-                        className={`status-tag ${estaConectado ? "online" : "busy"}`}
-                      >
-                        {estaConectado ? "Conectado" : "Desconectado"}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* La sección de actividad solo es visible para el dueño del perfil */}
-                  {!esPerfilExterno && (
-                    <div
-                      className="menu-item"
-                      onClick={() => setActiveModal("actividad")}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <div className="menu-icon">📈</div>
-                      <div className="menu-text">
-                        <div className="menu-title">Mi Actividad</div>
-                        <div className="menu-desc">Revisa tus estadísticas</div>
-                      </div>
-                      <span className="menu-arrow">→</span>
-                    </div>
-                  )}
-                </div>
-              </section>
-
               {/* Información del perfil */}
               <section className="menu-section">
                 <div className="section-title">
@@ -903,17 +864,6 @@ const Perfil = () => {
                         desc="Gestiona tu cuenta"
                         onClick={() => setActiveModal("seguridad")}
                       />
-                      <MenuItem
-                        icon={
-                          <i
-                            className="bi bi-bug-fill"
-                            style={{ color: "#f59e0b" }}
-                          ></i>
-                        }
-                        title="Reportar problema"
-                        desc="Bugs, errores o fallos del sistema"
-                        onClick={() => setModalReporteAbierto(true)}
-                      />
                     </div>
                   )}
 
@@ -940,135 +890,16 @@ const Perfil = () => {
               {!esPerfilExterno && (
                 <section className="menu-section">
                   <div className="section-title">
-                    📦 Mis servicios ({misServicios.length})
+                    <i className="bi bi-box-seam-fill"></i> TODOS MIS SERVICIOS
                   </div>
-
-                  {misServicios.length === 0 ? (
-                    <p
-                      style={{
-                        opacity: 0.5,
-                        fontSize: "0.85rem",
-                        padding: "12px 0",
-                      }}
-                    >
-                      Aún no has publicado ningún servicio.
-                    </p>
-                  ) : (
-                    <div className="menu-list">
-                      {misServicios.map((s) => (
-                        <div
-                          key={s.id_servicio}
-                          className="menu-item"
-                          style={{
-                            cursor: "default",
-                            display: "flex",
-                            alignItems: "center",
-                            padding: "10px",
-                          }}
-                        >
-                          <div className="menu-icon">
-                            <i
-                              className={`bi ${s.icono?.startsWith("bi-") ? s.icono : "bi-pin"}`}
-                            ></i>
-                          </div>
-                          <div
-                            className="menu-text"
-                            style={{ flex: 1, minWidth: 0, marginLeft: "10px" }}
-                          >
-                            <div
-                              className="menu-title"
-                              style={{
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                fontWeight: "bold",
-                              }}
-                            >
-                              {s.titulo}
-                            </div>
-                            <div
-                              className="menu-desc"
-                              style={{ fontSize: "0.85rem", opacity: 0.8 }}
-                            >
-                              ${s.precio_hora}/hr ·{" "}
-                              {s.nombre_categoria || "Sin categoría"}
-                            </div>
-                          </div>
-
-                          <div
-                            style={{
-                              display: "flex",
-                              gap: "8px",
-                              flexShrink: 0,
-                              alignItems: "center",
-                            }}
-                          >
-                            {/* Botón gestionar imágenes */}
-                            <button
-                              className="btn btn-primary"
-                              style={{
-                                width: "36px",
-                                height: "36px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: "0.85rem",
-                                padding: 0,
-                                margin: 0,
-                                lineHeight: 1,
-                                background: "transparent",
-                                borderColor: "rgba(52, 211, 153, 0.4)",
-                                color: "#34d399",
-                              }}
-                              onClick={() => abrirEditorImagenes(s)}
-                              title="Gestionar imágenes"
-                            >
-                              <i className="bi bi-images"></i>
-                            </button>
-                            {/* Botón editar: carga el servicio en el estado "editando" */}
-                            <button
-                              className="btn btn-primary"
-                              style={{
-                                width: "36px",
-                                height: "36px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: "0.85rem",
-                                padding: 0,
-                                margin: 0,
-                                lineHeight: 1,
-                              }}
-                              onClick={() => setEditando({ ...s })}
-                            >
-                              <i className="bi bi-pencil"></i>
-                            </button>
-                            {/* Botón eliminar: guarda el ID y abre el modal de confirmación */}
-                            <button
-                              className="btn btn-primary"
-                              style={{
-                                width: "36px",
-                                height: "36px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: "0.85rem",
-                                padding: 0,
-                                margin: 0,
-                                lineHeight: 1,
-                                background: "transparent",
-                                borderColor: "rgba(177, 52, 52, 0.4)",
-                                color: "#f87171",
-                              }}
-                              onClick={() => setConfirmEliminar(s.id_servicio)}
-                            >
-                              <i className="bi bi-trash"></i>
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <div className="menu-list">
+                    <MenuItem
+                      icon={<i className="bi bi-box-seam-fill"></i>}
+                      title={`Mis servicios (${misServicios.length})`}
+                      desc="Administra tus servicios publicados"
+                      onClick={() => setModalServicios(true)}
+                    />
+                  </div>
                 </section>
               )}
 
@@ -1551,6 +1382,90 @@ const Perfil = () => {
           </div>
         </main>
 
+        {/* ══ MODAL: Mis Servicios ══ */}
+        {modalServicios && (
+          <div
+            className="image-menu-overlay active"
+            onClick={() => setModalServicios(false)}
+          >
+            <div
+              className="image-menu"
+              onClick={(e) => e.stopPropagation()}
+              style={{ maxWidth: "624px", width: "90%" }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "1rem",
+                }}
+              >
+                <h3 className="image-menu-title" style={{ margin: 0 }}>
+                  <i className="bi bi-box-seam-fill"></i> Mis servicios ({misServicios.length})
+                </h3>
+                <button
+                  onClick={() => setModalServicios(false)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: "1.1rem",
+                    color: "inherit",
+                    opacity: 0.6,
+                    padding: "4px 8px",
+                    borderRadius: "6px",
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {misServicios.length === 0 ? (
+                <p style={{ opacity: 0.5, fontSize: "0.85rem", padding: "12px 0" }}>
+                  Aún no has publicado ningún servicio.
+                </p>
+              ) : (
+                <div className="menu-list" style={{ marginTop: "8px" }}>
+                  {misServicios.map((s) => (
+                    <div
+                      key={s.id_servicio}
+                      className="menu-item"
+                      style={{ cursor: "default", display: "flex", alignItems: "center", padding: "10px" }}
+                    >
+                      <div className="menu-icon">
+                        <i className={`bi ${s.icono?.startsWith("bi-") ? s.icono : "bi-pin"}`}></i>
+                      </div>
+                      <div className="menu-text" style={{ flex: 1, minWidth: 0, marginLeft: "10px" }}>
+                        <div className="menu-title" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontWeight: "bold" }}>
+                          {s.titulo}
+                        </div>
+                        <div className="menu-desc" style={{ fontSize: "0.85rem", opacity: 0.8 }}>
+                          ${s.precio_hora}/hr · {s.nombre_categoria || "Sin categoría"}
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", gap: "8px", flexShrink: 0, alignItems: "center" }}>
+                        <button className="btn btn-primary" style={{ width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.85rem", padding: 0, margin: 0, lineHeight: 1, background: "transparent", borderColor: "rgba(52, 211, 153, 0.4)", color: "#34d399" }}
+                          onClick={() => abrirEditorImagenes(s)} title="Gestionar imágenes">
+                          <i className="bi bi-images"></i>
+                        </button>
+                        <button className="btn btn-primary" style={{ width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.85rem", padding: 0, margin: 0, lineHeight: 1 }}
+                          onClick={() => setEditando({ ...s })}>
+                          <i className="bi bi-pencil"></i>
+                        </button>
+                        <button className="btn btn-primary" style={{ width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.85rem", padding: 0, margin: 0, lineHeight: 1, background: "transparent", borderColor: "rgba(177, 52, 52, 0.4)", color: "#f87171" }}
+                          onClick={() => setConfirmEliminar(s.id_servicio)}>
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* ══ MODAL: Editar información del perfil (solo perfil propio) ══ */}
         {activeModal === "info" && (
           <div
@@ -1895,98 +1810,6 @@ const Perfil = () => {
           </div>
         )}
 
-        {/* ══ MODAL: Actividad (solo perfil propio) ══ 
-            Muestra estadísticas, logros y actividad reciente del usuario */}
-        {activeModal === "actividad" && (
-          <div
-            className="activity-overlay active"
-            onClick={() => setActiveModal(null)}
-          >
-            <div
-              className="activity-modal"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="activity-header">
-                <h2 className="activity-title">
-                  <i className="bi bi-bar-chart-fill"></i> Mi Actividad
-                </h2>
-                <button
-                  className="activity-close"
-                  onClick={() => setActiveModal(null)}
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="activity-body">
-                {/* Tarjetas de estadísticas rápidas — valores hardcodeados (demo/placeholder) */}
-                <div className="quick-stats">
-                  <QuickStatCard
-                    icon={<i className="bi bi-pencil-square"></i>}
-                    value="12"
-                    label="Este Mes"
-                  />
-                  <QuickStatCard
-                    icon={<i className="bi bi-check-circle-fill"></i>}
-                    value="45"
-                    label="Completados"
-                  />
-                  <QuickStatCard
-                    icon={<i className="bi bi-star-fill"></i>}
-                    value={reputacionTexto.split("/")[0]}
-                    label="Calificación"
-                  />
-                  <QuickStatCard
-                    icon={<i className="bi bi-stopwatch"></i>}
-                    value="45h"
-                    label="Tiempo Activo"
-                  />
-                </div>
-                <div className="progress-section">
-                  <div className="progress-title">
-                    <i className="bi bi-trophy-fill"></i> Logros y Metas
-                  </div>
-                  <ProgressBar
-                    label="Meta de publicaciones"
-                    value="80%"
-                    color="teal"
-                  />
-                  <ProgressBar
-                    label="Satisfacción del cliente"
-                    value="98%"
-                    color="green"
-                  />
-                  <ProgressBar
-                    label="Tasa de respuesta"
-                    value="95%"
-                    color="yellow"
-                  />
-                </div>
-                <div className="recent-activity">
-                  <div className="recent-title">
-                    <i className="bi bi-clock-history"></i> Actividad Reciente
-                  </div>
-                  <div className="activity-list">
-                    {/* Datos de ejemplo — reemplazar con datos reales del backend cuando esté disponible */}
-                    <ActivityItem
-                      icon={<i className="bi bi-check-circle-fill"></i>}
-                      text="Completaste el servicio 'Diseño de logo'"
-                      time="Hace 2 horas"
-                      badge="+5★"
-                      type="success"
-                    />
-                    <ActivityItem
-                      icon={<i className="bi bi-chat-dots-fill"></i>}
-                      text="Nuevo mensaje de María García"
-                      time="Hace 5 horas"
-                      badge="Nuevo"
-                      type="info"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
         {/* ══ MODAL: Lista de seguidores ══ */}
         {modalSeguidores && (
           <div
