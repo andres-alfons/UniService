@@ -125,17 +125,18 @@ export default function NotificacionesFlotantes({ onToggleChat }) {
     const handler = () => cargarNotificaciones();
     window.addEventListener("solicitud-actualizada", handler);
 
-  // Cargar mensajes no leídos
-  const cargarNoLeidos = () => {
-    if (!usuarioId) return;
-    fetch(`${API_CHAT}/no-leidos/${usuarioId}`)
-      .then((r) => r.json())
-      .then((data) => {
-        console.log("[Notificaciones] Mensajes no leídos:", data.no_leidos);
-        setMensajesNoLeidos(data.no_leidos || 0);
-      })
-      .catch(() => setMensajesNoLeidos(0));
-  };
+    // Cargar mensajes no leídos
+    const cargarNoLeidos = () => {
+      if (!usuarioId) return;
+      fetch(`${API_CHAT}/no-leidos/${usuarioId}`)
+        .then((r) => r.json())
+        .then((data) => {
+          console.log("[Notificaciones] Mensajes no leídos:", data.no_leidos);
+          setMensajesNoLeidos(data.no_leidos || 0);
+        })
+        .catch(() => setMensajesNoLeidos(0));
+    };
+
     cargarNoLeidos();
     const intervalChat = setInterval(cargarNoLeidos, 15000);
 

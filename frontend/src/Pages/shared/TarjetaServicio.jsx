@@ -3,10 +3,11 @@ import { useState } from "react";
 import { formatearFecha } from "../../utils/helpers";
 import { calcularEstrellas, truncar } from "./utilidades";
 import { COLORES_CATEGORIA, ICONOS_POR_NOMBRE_CATEGORIA } from "./constantes";
+import StarRating from "../../Components/StarRating";
 
 export default function TarjetaServicio({ servicio, linkBase = "/servicio?id=" }) {
   const [imagenError, setImagenError] = useState(false);
-  const estrellas = calcularEstrellas(servicio.estrellas);
+  const { promNum } = calcularEstrellas(servicio.estrellas);
   const numReseñas = servicio.num_resenas !== undefined
     ? servicio.num_resenas
     : Array.isArray(servicio.estrellas)
@@ -32,15 +33,13 @@ export default function TarjetaServicio({ servicio, linkBase = "/servicio?id=" }
 
   return (
     <a href={`${linkBase}${servicio.id_servicio}`} className="card-servicio card-3d" aria-label={`Servicio: ${servicio.titulo || "Sin título"} por ${servicio.proveedor || "Proveedor anónimo"}, precio: $${servicio.precio_hora || 0}`}>
-      {/* Imagen de portada o icono de categoría */}
       {portada ? (
         <div className="card-icono card-icono-imagen">
-          <img 
-            src={portada} 
-            alt={`Servicio: ${servicio.titulo || "Sin título"} - ${servicio.nombre_categoria || "Servicio universitario"}`}
+          <img
+            src={portada}
+            alt={servicio.titulo}
             loading="lazy"
-            decoding="async"
-            onError={() => setImagenError(true)} 
+            onError={() => setImagenError(true)}
           />
         </div>
       ) : (
@@ -79,7 +78,7 @@ export default function TarjetaServicio({ servicio, linkBase = "/servicio?id=" }
         <div className="card-footer">
           <div>
             <hr className="card-divider" />
-            <div className="estrellas" aria-label={`${numReseñas} reseñas, ${estrellas.length} de 5 estrellas`}>{estrellas}</div>
+            <StarRating rating={promNum} size={16} />
             <div className="texto-muted">{numReseñas} reseñas</div>
           </div>
           <div className="precio" aria-label={`Precio: $${servicio.precio_hora || 0} por hora`}>${servicio.precio_hora || 0}</div>

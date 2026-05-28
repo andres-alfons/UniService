@@ -18,7 +18,7 @@ import {
   colorAvatar,
 } from "./Servicio/utilidades";
 import BotonTema from "../Components/B_StyleHome";
-import { apiFetch, apiImageUrl } from "../utils/apiFetch";
+import StarRating from "../Components/StarRating";
 
 const API = "/api/services";
 const API_USUARIO = "/api/users";
@@ -55,10 +55,15 @@ export default function Servicio() {
       return;
     }
 
-    apiFetch(`${API}/${idServicio}`)
-      .then(({ ok, data }) => {
-        if (!ok)
-          throw new Error(data?.error || "Servicio no encontrado");
+    fetch(`${API}/${idServicio}`)
+      .then((res) => {
+        if (!res.ok)
+          return res.json().then((err) => {
+            throw new Error(err.error || "Servicio no encontrado");
+          });
+        return res.json();
+      })
+      .then((data) => {
         const s = Array.isArray(data) ? data[0] : data;
         if (!s || !s.id_servicio) {
           setError(true);
@@ -66,12 +71,6 @@ export default function Servicio() {
         }
         console.log("Servicio cargado:", s);
         console.log("Imagenes:", s.imagenes);
-        if (s.imagenes) {
-          s.imagenes = s.imagenes.map(img => ({
-            ...img,
-            url_imagen: apiImageUrl(img.url_imagen)
-          }));
-        }
         setServicio(s);
       })
       .catch((err) => {
@@ -84,8 +83,9 @@ export default function Servicio() {
   const handleCerrarSesion = async () => {
     const id = localStorage.getItem("usuarioId");
     try {
-      await apiFetch(`${API_USUARIO}/${id}`, {
+      await fetch(`${API_USUARIO}/${id}`, {
         method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ estado: 0 }),
       });
     } catch {}
@@ -123,11 +123,8 @@ export default function Servicio() {
       </>
     );
 
-  const {
-    texto: estrellasTexto,
-    prom,
-    num,
-  } = calcularEstrellas(servicio.resenas);
+  // CAMBIO 2: promNum en lugar de texto: estrellasTexto
+  const { promNum, prom, num } = calcularEstrellas(servicio.resenas);
 
   const universidad =
     servicio.universidad === 1 || servicio.universidad === "1"
@@ -196,10 +193,8 @@ export default function Servicio() {
                 !imagenesError[imagenActual] ? (
                   <img
                     src={imagenes[imagenActual].url_imagen}
-                    alt={`Imagen principal del servicio: ${servicio.titulo || "Servicio universitario"}`}
+                    alt={servicio.titulo}
                     className="imagen-servicio-real"
-                    loading="eager"
-                    fetchpriority="high"
                     onError={() => handleImagenError(imagenActual)}
                   />
                 ) : (
@@ -218,10 +213,8 @@ export default function Servicio() {
                       {esUrlValida(img.url_imagen) && !imagenesError[i] ? (
                         <img
                           src={img.url_imagen}
-                          alt={`Miniatura ${i + 1} del servicio: ${servicio.titulo || "Servicio"}`}
+                          alt={`Imagen ${i + 1}`}
                           className="miniatura-img"
-                          loading="lazy"
-                          decoding="async"
                           onError={() => handleImagenError(i)}
                         />
                       ) : (
@@ -291,7 +284,10 @@ export default function Servicio() {
 
               <div className="rating-grande">
                 <div>
-                  <div className="estrellas-grande">{estrellasTexto}</div>
+                  {/* CAMBIO 3: StarRating reemplaza {estrellasTexto} */}
+                  <div className="estrellas-grande">
+                    <StarRating rating={promNum} size={22} />
+                  </div>
                   <div className="texto-rating">
                     <strong>{prom}</strong> de 5.0
                   </div>
@@ -373,8 +369,9 @@ export default function Servicio() {
                             <div className="resena-fecha">{r.fecha || ""}</div>
                           </div>
                         </div>
+                        {/* CAMBIO 4: StarRating reemplaza {"★".repeat(...)} */}
                         <div className="resena-rating">
-                          {"★".repeat(r.estrellas || 5)}
+                          <StarRating rating={r.estrellas || 5} size={14} />
                         </div>
                       </div>
                       <div className="resena-texto">{r.comentario || ""}</div>
@@ -547,13 +544,14 @@ export default function Servicio() {
           </p>
         </div>
       </footer>
+
       {modalReporteServicio && (
-  <ModalReporte
-    onClose={() => setModalReporteServicio(false)}
-    idServicio={parseInt(idServicio)}
-    contexto="servicio"
-  />
-)}
+        <ModalReporte
+          onClose={() => setModalReporteServicio(false)}
+          idServicio={parseInt(idServicio)}
+          contexto="servicio"
+        />
+      )}
     </>
   );
 }

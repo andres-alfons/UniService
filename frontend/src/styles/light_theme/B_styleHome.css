@@ -892,13 +892,35 @@ html[data-theme="claro"] {
   max-width: 400px;
   height: 500px;
   margin: 10px;
+  position: relative;
+}
+
+[data-theme="claro"] .card-servicio::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 1px;
+  background: linear-gradient(135deg, transparent 40%, rgba(14, 165, 160, 0.3) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+[data-theme="claro"] .card-servicio:hover::before {
+  opacity: 1;
 }
 
 /* Contenedor en rejilla */
 [data-theme="claro"] #contenedor-tarjetas {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1px; /* separación entre tarjetas */
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 20px;
+  justify-items: center;
 }
 
 [data-theme="claro"] .card-servicio:hover {
@@ -3007,6 +3029,109 @@ html[data-theme="claro"] {
 [data-theme="claro"] .section-dynamic > .container {
   position: relative;
   z-index: 1;
+}
+
+/* ══════════════════════════════
+   PAGINACIÓN
+   ══════════════════════════════ */
+/* Estos overrides son necesarios porque el reset universal
+   [data-theme="claro"] * { margin:0; padding:0 } en línea 29
+   pisa los valores del tema oscuro al tener la misma especificidad */
+
+[data-theme="claro"] .paginacion-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 32px;
+  padding: 16px 0;
+}
+
+[data-theme="claro"] .btn-pagina {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--borde);
+  background: var(--bg2);
+  color: var(--texto);
+  font-size: 1rem;
+}
+
+[data-theme="claro"] .btn-pagina-arrow {
+  width: 46px;
+  height: 46px;
+  font-size: 1.15rem;
+  background: var(--bg3);
+  border-color: var(--borde2);
+}
+
+[data-theme="claro"] .paginas-numeros {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+[data-theme="claro"] .btn-pagina-numero {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--borde);
+  background: var(--bg2);
+  color: var(--texto2);
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+[data-theme="claro"] .btn-pagina-numero.activo {
+  background: linear-gradient(135deg, var(--teal), var(--teal2));
+  border-color: transparent;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(14, 165, 160, 0.35);
+  transform: translateY(-2px);
+}
+
+[data-theme="claro"] .paginas-separador {
+  color: var(--texto3);
+  font-size: 1rem;
+  padding: 0 4px;
+  letter-spacing: 2px;
+}
+
+[data-theme="claro"] .paginas-info {
+  text-align: center;
+  color: var(--texto3);
+  font-size: 0.82rem;
+  margin-top: 12px;
+  font-weight: 500;
+}
+
+@media (max-width: 640px) {
+  [data-theme="claro"] .paginacion-container {
+    gap: 6px;
+    margin-top: 24px;
+  }
+  [data-theme="claro"] .btn-pagina {
+    width: 38px;
+    height: 38px;
+    font-size: 0.9rem;
+    border-radius: 10px;
+  }
+  [data-theme="claro"] .btn-pagina-arrow {
+    width: 42px;
+    height: 42px;
+  }
+  [data-theme="claro"] .btn-pagina-numero {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    font-size: 0.82rem;
+    border-radius: 8px;
+  }
+  [data-theme="claro"] .paginas-numeros {
+    gap: 4px;
+  }
 }
 
 /* ═══════════════════════════════════════════

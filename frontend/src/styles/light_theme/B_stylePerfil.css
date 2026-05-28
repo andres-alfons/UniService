@@ -461,23 +461,27 @@ html[data-theme="claro"] {
 /* Botones de acción */
 [data-theme="claro"] .action-buttons {
   display: flex;
-  gap: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 [data-theme="claro"] .btn {
   flex: 1;
-  padding: 12px 20px;
-  border-radius: 10px;
-  font-size: 0.85rem;
+  min-width: 0;
+  padding: 11px 14px;
+  border-radius: 12px;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
   transition: var(--trans);
-  border: none;
+  border: 1px solid transparent;
   font-family: "Poppins", sans-serif;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 7px;
+  white-space: nowrap;
+  min-height: 44px;
 }
 
 [data-theme="claro"] .btn-primary {
