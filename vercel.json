@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/sitemap",
+      "destination": "/api/sitemap.js"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "https://uniservice.onrender.com/api/$1"
     },
@@ -17,10 +21,6 @@
       "destination": "https://uniservice.onrender.com/chathub"
     },
     {
-      "source": "/sitemap.xml",
-      "destination": "/sitemap.xml"
-    },
-    {
       "source": "/robots.txt",
       "destination": "/robots.txt"
     },
@@ -35,7 +35,7 @@
   ],
   "headers": [
     {
-      "source": "/sitemap.xml",
+      "source": "/api/sitemap",
       "headers": [
         {
           "key": "Content-Type",

@@ -4,14 +4,13 @@
 User-agent: *
 Allow: /
 
-# Block admin and API areas
+# Block admin and API areas except sitemap
 Disallow: /admin-dashboard
 Disallow: /api/
 Disallow: /chathub
 
-# Don't block resources needed for rendering
-# Allow: /src/
-# Allow: /assets/
+# Allow sitemap endpoint
+Allow: /api/sitemap
 
 # Sitemap location
-Sitemap: https://uni-service-omega.vercel.app/sitemap.xml
+Sitemap: https://uni-service-omega.vercel.app/api/sitemap
