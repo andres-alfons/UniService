@@ -30,22 +30,40 @@ export default function BotonTema() {
 
     const overlay = document.createElement("div");
     overlay.className = "theme-transition-overlay";
+    const dirs = ["left", "right", "down", "up"];
+    const dir = dirs[Math.floor(Math.random() * 4)];
+    overlay.dataset.dir = dir;
+    if (dir === "left" || dir === "right") {
+      overlay.style.left = "-155px";
+      overlay.style.width = "calc(100% + 310px)";
+      overlay.style.height = "100%";
+      overlay.style.top = "0";
+      overlay.style.transform = dir === "left" ? "translateX(-100%)" : "translateX(100%)";
+    } else {
+      overlay.style.top = "-155px";
+      overlay.style.height = "calc(100% + 310px)";
+      overlay.style.width = "100%";
+      overlay.style.left = "0";
+      overlay.style.transform = dir === "down" ? "translateY(-100%)" : "translateY(100%)";
+    }
     if (targetOscuro) {
       overlay.style.setProperty("--overlay-bg1", "#07070f");
       overlay.style.setProperty("--overlay-bg2", "#080816");
-      overlay.style.setProperty("--decor-dot", "rgba(255,255,255,0.08)");
-      overlay.style.setProperty("--decor-blob", "rgba(255,255,255,0.10)");
-      overlay.style.setProperty("--decor-ring", "rgba(255,255,255,0.16)");
-      overlay.style.setProperty("--decor-ring2", "rgba(255,255,255,0.12)");
-      overlay.style.setProperty("--decor-line", "rgba(255,255,255,0.12)");
+      overlay.style.setProperty("--decor-dot", "rgba(14, 165, 160, 0.12)");
+      overlay.style.setProperty("--decor-blob", "rgba(99, 102, 241, 0.12)");
+      overlay.style.setProperty("--decor-ring", "rgba(245, 200, 66, 0.18)");
+      overlay.style.setProperty("--decor-ring2", "rgba(14, 165, 160, 0.15)");
+      overlay.style.setProperty("--decor-line", "rgba(139, 92, 246, 0.14)");
+      overlay.style.setProperty("--decor-text", "rgba(255, 255, 255, 0.45)");
     } else {
       overlay.style.setProperty("--overlay-bg1", "#b8b9be");
       overlay.style.setProperty("--overlay-bg2", "#c0c2c5");
-      overlay.style.setProperty("--decor-dot", "rgba(0,0,0,0.12)");
-      overlay.style.setProperty("--decor-blob", "rgba(0,0,0,0.14)");
-      overlay.style.setProperty("--decor-ring", "rgba(0,0,0,0.20)");
-      overlay.style.setProperty("--decor-ring2", "rgba(0,0,0,0.16)");
-      overlay.style.setProperty("--decor-line", "rgba(0,0,0,0.16)");
+      overlay.style.setProperty("--decor-dot", "rgba(14, 165, 160, 0.25)");
+      overlay.style.setProperty("--decor-blob", "rgba(99, 102, 241, 0.24)");
+      overlay.style.setProperty("--decor-ring", "rgba(245, 200, 66, 0.35)");
+      overlay.style.setProperty("--decor-ring2", "rgba(14, 165, 160, 0.30)");
+      overlay.style.setProperty("--decor-line", "rgba(99, 102, 241, 0.35)");
+      overlay.style.setProperty("--decor-text", "rgba(0, 0, 0, 0.4)");
     }
     // Elementos decorativos
     const grid = document.createElement("div");
@@ -97,6 +115,9 @@ export default function BotonTema() {
     texto.className = "overlay-texto";
     texto.textContent = "CAMBIANDO TEMA";
     overlay.appendChild(texto);
+    const loader = document.createElement("div");
+    loader.className = "overlay-loader";
+    overlay.appendChild(loader);
     document.body.appendChild(overlay);
     overlayRef.current = overlay;
 
@@ -117,7 +138,7 @@ export default function BotonTema() {
       if (overlay.parentNode) overlay.remove();
       overlayRef.current = null;
       setTransicionando(false);
-    }, 3000);
+    }, 5500);
   };
 
   return (

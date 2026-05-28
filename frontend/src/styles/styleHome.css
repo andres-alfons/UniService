@@ -3476,6 +3476,7 @@ html {
   flex: 1;
   font-size: 0.82rem;
   padding: 8px;
+  max-width: 190px;
 }
 
 .btn-completar {
@@ -4762,36 +4763,57 @@ html {
    ═══════════════════════════════════════════ */
 .theme-transition-overlay {
   position: fixed;
-  top: 0;
-  left: -155px;
-  width: calc(100% + 310px);
-  height: 100%;
   z-index: 10000;
   pointer-events: none;
-  transform: translateX(-100%);
   background: linear-gradient(160deg, var(--overlay-bg1) 0%, var(--overlay-bg2) 100%);
   overflow: hidden;
+}
+.theme-transition-overlay[data-dir="left"],
+.theme-transition-overlay[data-dir="right"] {
   -webkit-mask: linear-gradient(to right, transparent 0%, black 155px, black calc(100% - 155px), transparent 100%);
   mask: linear-gradient(to right, transparent 0%, black 155px, black calc(100% - 155px), transparent 100%);
 }
-
-.theme-transition-overlay.animating {
-  animation: themeSweep 3.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+.theme-transition-overlay[data-dir="down"],
+.theme-transition-overlay[data-dir="up"] {
+  -webkit-mask: linear-gradient(to bottom, transparent 0%, black 155px, black calc(100% - 155px), transparent 100%);
+  mask: linear-gradient(to bottom, transparent 0%, black 155px, black calc(100% - 155px), transparent 100%);
+}
+.theme-transition-overlay.animating[data-dir="left"] {
+  animation: themeSweepLeft 5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.theme-transition-overlay.animating[data-dir="right"] {
+  animation: themeSweepRight 5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.theme-transition-overlay.animating[data-dir="down"] {
+  animation: themeSweepDown 5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.theme-transition-overlay.animating[data-dir="up"] {
+  animation: themeSweepUp 5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-@keyframes themeSweep {
-  0% {
-    transform: translateX(-100%);
-  }
-  40% {
-    transform: translateX(0%);
-  }
-  55% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
+@keyframes themeSweepLeft {
+  0% { transform: translateX(-100%); }
+  40% { transform: translateX(0%); }
+  55% { transform: translateX(0%); }
+  100% { transform: translateX(100%); }
+}
+@keyframes themeSweepRight {
+  0% { transform: translateX(100%); }
+  40% { transform: translateX(0%); }
+  55% { transform: translateX(0%); }
+  100% { transform: translateX(-100%); }
+}
+@keyframes themeSweepDown {
+  0% { transform: translateY(-100%); }
+  40% { transform: translateY(0%); }
+  55% { transform: translateY(0%); }
+  100% { transform: translateY(100%); }
+}
+@keyframes themeSweepUp {
+  0% { transform: translateY(100%); }
+  40% { transform: translateY(0%); }
+  55% { transform: translateY(0%); }
+  100% { transform: translateY(-100%); }
 }
 
 /* ── Elementos decorativos sutiles ── */
@@ -5016,16 +5038,51 @@ html {
 .theme-transition-overlay .overlay-texto {
   position: absolute;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
   pointer-events: none;
   font-family: "Poppins", sans-serif;
   font-weight: 200;
   font-size: 2.2rem;
   letter-spacing: 6px;
-  color: var(--decor-line);
+  color: var(--decor-text);
   text-transform: uppercase;
   opacity: 0.7;
+  text-align: center;
+  width: 100%;
+}
+
+.theme-transition-overlay .overlay-loader {
+  position: absolute;
+  top: calc(50% + 50px);
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--decor-text);
+  border-top-color: transparent;
+  border-radius: 50%;
+  opacity: 0.5;
+  animation: overlaySpin 1s linear infinite;
+}
+
+@media (max-width: 480px) {
+  .theme-transition-overlay .overlay-texto {
+    font-size: 1.6rem;
+    letter-spacing: 4px;
+    top: 45%;
+  }
+  .theme-transition-overlay .overlay-loader {
+    top: calc(45% + 45px);
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@keyframes overlaySpin {
+  to { transform: translateX(-50%) rotate(360deg); }
 }
 
 @media (max-width: 480px) {

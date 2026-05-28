@@ -712,6 +712,24 @@ const Perfil = () => {
             <div className="shape shape-2"></div>
             <div className="shape shape-3"></div>
           </div>
+          <div className="dots-container" aria-hidden="true">
+            <div className="dot dot-1"></div>
+            <div className="dot dot-2"></div>
+            <div className="dot dot-3"></div>
+            <div className="dot dot-4"></div>
+            <div className="dot dot-5"></div>
+            <div className="dot dot-6"></div>
+            <div className="dot dot-7"></div>
+            <div className="dot dot-8"></div>
+            <div className="dot dot-9"></div>
+            <div className="dot dot-10"></div>
+            <div className="dot dot-11"></div>
+            <div className="dot dot-12"></div>
+            <div className="dot dot-13"></div>
+            <div className="dot dot-14"></div>
+            <div className="dot dot-15"></div>
+            <div className="dot dot-16"></div>
+          </div>
         </div>
 
         <main id="main-content" className="main-container" role="main">

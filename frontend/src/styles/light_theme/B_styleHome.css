@@ -3585,6 +3585,20 @@ html[data-theme="claro"] {
   font-size: 0.82rem;
   padding: 8px;
 }
+[data-theme="claro"] .solicitud-completada-msg {
+  margin: 8px 0 0;
+  padding: 10px;
+  background: rgba(0, 64, 133, 0.1);
+  border: 1px solid rgba(0, 64, 133, 0.3);
+  border-radius: 8px;
+  color: #4ac7b6;
+  font-size: 0.85rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
 
 /* ═══════════════════════════════════════════
    SECCIÓN SOLICITUDES
