@@ -104,7 +104,7 @@ html[data-theme="claro"] {
   border-radius: 24px;
   overflow: visible;
   animation: aparecer 0.5s ease both;
-  min-height: 520px;
+  min-height: 460px;
   width: 100%; /* ocupa todo el wrapper */
 }
 
@@ -125,7 +125,7 @@ html[data-theme="claro"] {
 [data-theme="claro"] .auth-lateral {
   background: linear-gradient(160deg, #c2d7ff 0%, #ffffff 50%, #eed2ff 100%);
   border-radius: 24px 0 0 24px;
-  padding: 48px 36px;
+  padding: 32px 28px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -165,16 +165,16 @@ html[data-theme="claro"] {
 
 /* Icono grande central */
 [data-theme="claro"] .lateral-icono {
-  width: 90px;
-  height: 90px;
+  width: 70px;
+  height: 70px;
   background: rgba(14, 165, 160, 0.15);
   border: 2px solid rgba(14, 165, 160, 0.4);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 40px;
-  margin: 0 auto 24px;
+  font-size: 32px;
+  margin: 0 auto 16px;
   color: #0ea5a0;
 }
 
@@ -185,11 +185,11 @@ html[data-theme="claro"] {
 
 [data-theme="claro"] .lateral-titulo {
   font-family: "Poppins", sans-serif;
-  font-size: 1.7rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: #0ea5a0;
   line-height: 1.25;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 [data-theme="claro"] .lateral-titulo-service {
@@ -201,7 +201,7 @@ html[data-theme="claro"] {
   font-size: 0.82rem;
   color: #5a7a9a;
   line-height: 1.65;
-  margin-bottom: 28px;
+  margin-bottom: 18px;
 }
 
 /* Chips de categorías decorativos */
@@ -226,7 +226,7 @@ html[data-theme="claro"] {
    COLUMNA DERECHA — formulario
 ════════════════════════════ */
 [data-theme="claro"] .auth-formulario {
-  padding: 44px 40px;
+  padding: 32px 32px;
   display: flex;
   flex-direction: column;
 }
@@ -237,12 +237,12 @@ html[data-theme="claro"] {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  margin-bottom: 28px;
+  margin-bottom: 18px;
 }
 
 [data-theme="claro"] .auth-logo h1 {
   font-family: "DM Serif Display", serif;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 400;
   color: var(--texto);
 }
@@ -266,7 +266,7 @@ html[data-theme="claro"] {
   border-radius: 12px;
   padding: 4px;
   gap: 4px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 [data-theme="claro"] .tab {
@@ -314,7 +314,7 @@ html[data-theme="claro"] {
 /* ── Campos ── */
 [data-theme="claro"] .campo {
   position: relative;
-  margin-bottom: 22px;
+  margin-bottom: 14px;
 }
 
 [data-theme="claro"] .campo-label {
@@ -324,7 +324,7 @@ html[data-theme="claro"] {
   color: var(--texto2);
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  margin-bottom: 7px;
+  margin-bottom: 5px;
 }
 
 [data-theme="claro"] .input-wrap {
@@ -395,7 +395,7 @@ html[data-theme="claro"] {
 /* ── Olvidé contraseña ── */
 [data-theme="claro"] .olvide {
   text-align: right;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 [data-theme="claro"] .olvide a {
@@ -416,11 +416,11 @@ html[data-theme="claro"] {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 11px 13px;
+  padding: 8px 11px;
   background: rgba(14, 165, 160, 0.05);
   border: 1px solid rgba(14, 165, 160, 0.12);
   border-radius: 10px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 [data-theme="claro"] .terminos input[type="checkbox"] {
@@ -506,9 +506,9 @@ html[data-theme="claro"] {
 
 [data-theme="claro"] .botones-login {
   display: grid;
-  gap: 10px;
-  margin-top: 16px;
-  margin-bottom: 20px;
+  gap: 8px;
+  margin-top: 10px;
+  margin-bottom: 12px;
 }
 
 /* ── Pie ── */
@@ -535,21 +535,21 @@ html[data-theme="claro"] {
 ═══════════════════════════════ */
 
 [data-theme="claro"] .auth-pretitle {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--teal);
   font-weight: 600;
   letter-spacing: 1px;
   text-transform: uppercase;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 [data-theme="claro"] .auth-title {
   font-family: "DM Serif Display", serif;
-  font-size: 1.7rem;
+  font-size: 1.4rem;
   font-weight: 400;
   color: var(--texto);
   line-height: 1.3;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   text-shadow: none;
 }
 
@@ -559,7 +559,7 @@ html[data-theme="claro"] {
   width: 40px;
   height: 2px;
   background: var(--teal);
-  margin: 10px auto 0;
+  margin: 6px auto 0;
   opacity: 0.7;
 }
 
@@ -568,7 +568,7 @@ html[data-theme="claro"] {
 }
 
 [data-theme="claro"] .auth-subtitle {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: var(--texto2);
   line-height: 1.6;
   max-width: 320px;

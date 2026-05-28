@@ -15,16 +15,15 @@ export function formatearFecha(fechaISO) {
 
 export function calcularEstrellas(resenas) {
   if (!Array.isArray(resenas) || resenas.length === 0)
-    return { texto: "☆☆☆☆☆", prom: "0.0", num: 0 };
+    return { promNum: 0, prom: "0.0", num: 0 };
 
   const valores = resenas.map(r => typeof r === "object" ? Number(r.estrellas) : Number(r));
-  const prom = valores.reduce((a, b) => a + b, 0) / valores.length;
-  const llenas = Math.round(prom);
+  const promNum = Math.min(5, Math.max(0, valores.reduce((a, b) => a + b, 0) / valores.length));
 
   return {
-    texto: "★".repeat(llenas) + "☆".repeat(5 - llenas),
-    prom:  prom.toFixed(1),
-    num:   valores.length,
+    promNum,                    // número real → úsalo en <StarRating rating={promNum} />
+    prom: promNum.toFixed(1),   // string "4.5" → para mostrar el número
+    num: valores.length,
   };
 }
 

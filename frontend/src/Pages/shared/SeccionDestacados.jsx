@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { calcularEstrellas } from "./utilidades";
 import { ICONOS_POR_NOMBRE_CATEGORIA } from "./constantes";
+import StarRating from "../../Components/StarRating";
 
 export default function SeccionDestacados({ top3, linkBase = "/servicio?id=" }) {
   const [slide, setSlide] = useState(0);
@@ -25,44 +26,45 @@ export default function SeccionDestacados({ top3, linkBase = "/servicio?id=" }) 
 
         <div className="top-cards-3d">
           <div className="top-cards-track" style={{ transform: `translateX(-${slide * 100}%)` }}>
-            {top3.map((s, i) => (
-              <a
-                key={s.id_servicio}
-                href={`${linkBase}${s.id_servicio}`}
-                className={`top-card reveal-scale delay-${i + 1}`}
-              >
-                <div className="top-card-rank">
-                  <span className="rank-number">{i + 1}</span>
-                  <span className="rank-medal"><i className="bi bi-trophy"></i></span>
-                </div>
-                <div className="top-card-content">
-                  <div className="top-card-icon"><i className={`bi ${ICONOS_POR_NOMBRE_CATEGORIA[s.nombre_categoria] || (s.icono?.startsWith("bi-") ? s.icono : "bi-pin")}`}></i></div>
-                  <h5>{s.titulo}</h5>
-                  <p className="top-card-meta">
-                    {s.universidad === 1 || s.universidad === "1"
-                      ? "Universidad Popular del Cesar"
-                      : s.universidad === "No pertenece a ninguna universidad"
-                      ? "Independiente"
-                      : `${s.universidad || "Universidad no especificada"}`}
-                  </p>
-                  <div className="top-card-rating">
-                    <span className="stars estrellas">
-                      {calcularEstrellas(s.estrellas)}
-                    </span>
-                    <span className="rating-text">
-                      {Array.isArray(s.estrellas) ? s.estrellas.length : 0} puntuaciones
-                    </span>
+            {top3.map((s, i) => {
+              const { promNum } = calcularEstrellas(s.estrellas);
+              return (
+                <a
+                  key={s.id_servicio}
+                  href={`${linkBase}${s.id_servicio}`}
+                  className={`top-card reveal-scale delay-${i + 1}`}
+                >
+                  <div className="top-card-rank">
+                    <span className="rank-number">{i + 1}</span>
+                    <span className="rank-medal"><i className="bi bi-trophy"></i></span>
                   </div>
-                  <div className="top-card-footer">
-                    <div className="author">
-                      <div className="top3 top3-verde"><i className="bi bi-person"></i></div>
-                      <span>{s.proveedor || "Anónimo"}</span>
+                  <div className="top-card-content">
+                    <div className="top-card-icon"><i className={`bi ${ICONOS_POR_NOMBRE_CATEGORIA[s.nombre_categoria] || (s.icono?.startsWith("bi-") ? s.icono : "bi-pin")}`}></i></div>
+                    <h5>{s.titulo}</h5>
+                    <p className="top-card-meta">
+                      {s.universidad === 1 || s.universidad === "1"
+                        ? "Universidad Popular del Cesar"
+                        : s.universidad === "No pertenece a ninguna universidad"
+                        ? "Independiente"
+                        : `${s.universidad || "Universidad no especificada"}`}
+                    </p>
+                    <div className="top-card-rating">
+                      <StarRating rating={promNum} size={16} color="#F5A623" />
+                      <span className="rating-text">
+                        {Array.isArray(s.estrellas) ? s.estrellas.length : 0} puntuaciones
+                      </span>
                     </div>
-                    <span className="price">${s.precio_hora || 0}</span>
+                    <div className="top-card-footer">
+                      <div className="author">
+                        <div className="top3 top3-verde"><i className="bi bi-person"></i></div>
+                        <span>{s.proveedor || "Anónimo"}</span>
+                      </div>
+                      <span className="price">${s.precio_hora || 0}</span>
+                    </div>
                   </div>
-                </div>
-              </a>
-            ))}
+                </a>
+              );
+            })}
           </div>
         </div>
 
