@@ -1,36 +1,43 @@
 @startuml
 skinparam packageStyle rectangle
 skinparam linetype ortho
+skinparam defaultTextAlignment center
+skinparam wrapWidth 200
+skinparam usecase {
+  BackgroundColor<<system>> LightYellow
+  BorderColor<<system>> DarkOrange
+}
 
 title Diagrama de Casos de Uso - UniService
 
-rectangle "Plataforma UniService" {
+left to right direction
 
-    usecase "UC-01\nRegistrar Cuenta" as UC01
-    usecase "UC-02\nIniciar Sesion" as UC02
-    usecase "UC-03\nGestionar Perfil" as UC03
-    usecase "UC-04\nPublicar Servicio" as UC04
-    usecase "UC-05\nBuscar Servicios" as UC05
-    usecase "UC-06\nVer Detalle de Servicio" as UC06
-    usecase "UC-07\nEnviar Solicitud" as UC07
-    usecase "UC-08\nResponder Solicitud" as UC08
-    usecase "UC-09\nComunicar via Chat" as UC09
-    usecase "UC-10\nCalificar Servicio" as UC10
-    usecase "UC-11\nReportar Contenido" as UC11
-    usecase "UC-12\nAprobar Servicio" as UC12
-    usecase "UC-13\nGestionar Reportes" as UC13
-    usecase "UC-14\nModerar Usuario" as UC14
-    usecase "Enviar notificacion\npor email" as UCNotif
-    usecase "Crear chat\nautomatico" as UCChatAuto
+actor "Usuario" as Usuario
+actor "Administrador" as Admin
+actor "Sistema" as Sistema
+
+rectangle "Plataforma UniService" {
+    usecase "Registrar\nCuenta" as UC01
+    usecase "Iniciar\nSesión" as UC02
+    usecase "Gestionar\nPerfil" as UC03
+    usecase "Publicar\nServicio" as UC04
+    usecase "Buscar\nServicios" as UC05
+    usecase "Ver Detalle\nde Servicio" as UC06
+    usecase "Enviar\nSolicitud" as UC07
+    usecase "Responder\nSolicitud" as UC08
+    usecase "Comunicar\nvía Chat" as UC09
+    usecase "Calificar\nServicio" as UC10
+    usecase "Reportar\nContenido" as UC11
+    usecase "Aprobar\nServicio" as UC12
+    usecase "Gestionar\nReportes" as UC13
+    usecase "Moderar\nUsuario" as UC14
+    usecase "Enviar notificación\npor email" as UCNotif <<system>>
+    usecase "Crear chat\nautomático" as UCChatAuto <<system>>
 
     UC07 ..> UCChatAuto : <<include>>
     UC07 ..> UCNotif : <<include>>
     UC08 ..> UCNotif : <<include>>
 }
-
-actor "Usuario\n(Cliente/Proveedor)" as Usuario
-actor "Administrador" as Admin
-actor "Sistema de\nNotificaciones" as Sistema
 
 Usuario --> UC01
 Usuario --> UC02

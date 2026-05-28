@@ -3,38 +3,39 @@ skinparam backgroundColor #FEFEFE
 
 title Diagrama de Despliegue UML - UniService
 
+skinparam node {
+  BackgroundColor White
+  BorderColor Black
+}
+
 node "Cliente / Usuario" as Cliente {
-    artifact "Navegador Web\n(Chrome, Firefox, Edge, Safari)" as Browser
+    artifact "Navegador Web" as Browser
 }
 
-node "Frontend Hosting\n(Vercel / Netlify)" as FrontendHost {
-    artifact "Build estatico\nReact 18 + Vite" as ReactBuild
+node "Frontend Hosting\n(Vercel)" as FrontendHost {
+    artifact "Aplicación React\n(Vite Build)" as ReactBuild
 }
 
-node "Servidor de Aplicaciones\n(VPS / Azure / AWS)" as BackendHost {
-    node "Docker Container\n(.NET 8 Runtime)" as DockerAPI {
-        artifact "API ASP.NET Core 8" as API
-        artifact "SignalR Hub\n/chathub" as Hub
+node "Servidor de API\n(Render)" as BackendHost {
+    node "Contenedor .NET 8" as DockerAPI {
+        artifact "API ASP.NET Core" as API
+        artifact "Hub de Chat\n(SignalR)" as Hub
     }
 }
 
-node "Base de Datos y Storage" as DataLayer {
-    database "PostgreSQL\n(Supabase Cloud)" as Postgres {
-        artifact "Esquema relacional\nTablas + Indices" as Schema
-        artifact "Procedimientos\nalmacenados" as SP
-    }
-    storage "Supabase Storage\nBucket: imagenes-servicios" as Storage
+node "Base de Datos y Storage\n(Supabase)" as DataLayer {
+    database "PostgreSQL" as Postgres
+    storage "Storage Bucket\n(Imágenes)" as Storage
 }
 
 node "Servicios Externos" as External {
     artifact "Google OAuth 2.0" as Google
-    artifact "Gmail SMTP\n(MailKit)" as SMTP
+    artifact "Gmail SMTP" as SMTP
 }
 
-' Conexiones
-Cliente --> FrontendHost : HTTPS (443)
-FrontendHost --> BackendHost : REST API + WebSocket\n/api/*, /chathub
-BackendHost --> DataLayer : TCP/SSL (5432)\nNpgsql driver
-BackendHost --> External : HTTPS (443)\nOAuth + SMTP
+Cliente --> FrontendHost : HTTPS
+FrontendHost --> BackendHost : REST + WebSocket
+BackendHost --> DataLayer : Conexión segura
+BackendHost --> External : Autenticación + Email
 
 @enduml
