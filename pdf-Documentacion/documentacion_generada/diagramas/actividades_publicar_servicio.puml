@@ -1,69 +1,67 @@
 @startuml
 skinparam backgroundColor #FEFEFE
 skinparam handwritten false
+skinparam activity {
+  BackgroundColor<<frontend>> LightBlue
+  BackgroundColor<<backend>> LightGreen
+  BackgroundColor<<admin>> LightCoral
+  BackgroundColor<<storage>> LightYellow
+}
 
 title Diagrama de Actividades - Publicar un Servicio
 
 |Proveedor|
 start
-:Iniciar sesion en UniService;
+:Iniciar sesión en UniService;
 :Navegar a "Mi Perfil";
 :Hacer clic en "Publicar Servicio";
 
-|#LightBlue|Frontend React|
-:Renderizar formulario de publicacion;
+|#LightBlue|Frontend|
+:Renderizar formulario de publicación;
 
 |Proveedor|
-:Ingresar titulo del servicio;
-:Escribir descripcion detallada;
-:Seleccionar categoria (dropdown);
-:Fijar precio por hora (COP);
-:Seleccionar modalidad (Presencial/Virtual/Mixta);
-:Definir disponibilidad;
-:Opcional: adjuntar hasta 5 imagenes;
+:Ingresar datos del servicio
+(título, descripción, categoría,
+precio, modalidad, disponibilidad);
+:Adjuntar hasta 5 imágenes;
 :Hacer clic en "Publicar";
 
-|Frontend React|
+|Frontend|
 :Validar campos obligatorios;
-:Previsualizar imagenes;
-:POST /api/services (JSON + FormData);
+:Enviar datos al servidor;
 
-|#LightGreen|Backend .NET|
-:Recibir DTO ServicioDTO;
-:Validar modelo (ModelState);
-:Hashear/validar token JWT;
-:INSERT INTO servicios (estado = -1 'Pendiente');
-:RETURNING id_servicio;
+|#LightGreen|Backend|
+:Validar token de autenticación;
+:Guardar servicio en base de datos
+(estado = Pendiente);
+:Generar identificador del servicio;
 
-|Supabase Storage|
-:Subir imagenes al bucket\n'imagenes-servicios';
-:Retornar URLs publicas;
+|#LightYellow|Almacenamiento|
+:Subir imágenes al bucket;
+:Retornar URLs de acceso;
 
-|Backend .NET|
-:INSERT INTO servicios_imagenes;
-:Obtener lista de admins;
-:Enviar notificacion por email\n(MAIL Nuevo servicio pendiente);
+|Backend|
+:Asociar imágenes al servicio;
+:Notificar a administradores por email;
 
-|Frontend React|
-:Mostrar mensaje:\n"Servicio creado. Pendiente de aprobacion.";
+|Frontend|
+:Mostrar mensaje de confirmación;
 
 |Proveedor|
-:Visualizar servicio en perfil\ncon estado "Pausado/Pendiente";
+:Visualizar servicio en perfil
+con estado "Pendiente";
 stop
 
 |#LightCoral|Administrador|
-:Recepcion de email de notificacion;
-:Navegar a Admin Dashboard;
-:Revisar servicio pendiente;
-:Decision: Aprobar o Rechazar;
-if (Aprobar?) then (Si)
-    :PUT /api/services/{id}/aprobar;
-    :UPDATE servicios SET disponibilidad = 2;
-    :Enviar email de aprobacion al proveedor;
+:Recibir notificación;
+:Revisar servicio en panel admin;
+:Decisión: ¿Aprobar?;
+if (Aprobar) then (Sí)
+  :Cambiar estado a "Activo";
+  :Notificar aprobación al proveedor;
 else (No)
-    :PUT /api/services/{id}/rechazar;
-    :DELETE FROM servicios;
-    :Enviar email de rechazo con razon;
+  :Eliminar servicio;
+  :Notificar rechazo con motivo;
 endif
 stop
 

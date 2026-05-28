@@ -290,7 +290,7 @@ export default function SeccionServiciosPendientes({ onRefresh }) {
                   >
                     <img
                       src={img.url_imagen}
-                      alt={`Imagen de servicio pendiente: ${servicio.titulo || "Sin título"}`}
+                      alt={`Imagen de ${pendientes.find((s) => s.id_servicio === verDetalle)?.titulo || "servicio pendiente"}`}
                       loading="lazy"
                       decoding="async"
                       style={{ width: "100%", height: "100px", objectFit: "cover", display: "block" }}

@@ -1,71 +1,71 @@
 @startuml
 skinparam backgroundColor #FEFEFE
 
-title Diagrama de Secuencia - Creacion de Solicitud de Servicio
+title Diagrama de Secuencia - Creación de Solicitud de Servicio
 
 actor "Cliente" as Cliente
 participant "Frontend\n(React)" as FE
-participant "API .NET\n(SolicitudesController)" as API
-participant "API .NET\n(ServiciosController)" as SVR
-participant "SignalR\n(ChatHub)" as Hub
-participant "MailKit\n(EmailService)" as Mail
-participant "PostgreSQL" as DB
+participant "API\n(Solicitudes)" as API
+participant "API\n(Servicios)" as SVR
+participant "Chat\n(SignalR)" as Hub
+participant "Servicio de\nEmail" as Mail
+participant "Base de Datos" as DB
 
 Cliente -> FE : Selecciona servicio y completa formulario
-FE -> FE : Validar campos por categoria
-Cliente -> FE : Clic en "Enviar Solicitud"
+FE -> FE : Valida campos por categoría
+Cliente -> FE : Confirma envío de solicitud
 
-FE -> API : POST /api/solicitudes\n{CrearSolicitudDTO}
+FE -> API : Envía datos de la solicitud
 activate API
 
-API -> DB : SELECT COUNT(*) FROM solicitudes\nWHERE cliente=@c AND servicio=@s AND estado='Pendiente'
+API -> DB : Verifica que no exista solicitud previa pendiente
 activate DB
-DB --> API : 0 (no existe pendiente)
-deactivate DB
-
-API -> DB : INSERT INTO solicitudes (...)
-activate DB
-DB --> API : id_solicitud generado
-deactivate DB
-
-API -> DB : SELECT nombre, correo FROM usuarios\nWHERE id_usuario = @id_proveedor
-activate DB
-DB --> API : {nombre_proveedor, email_proveedor}
-deactivate DB
-
-API -> DB : SELECT id_chat FROM chats\nWHERE (u1=@min AND u2=@max)
-activate DB
-DB --> API : null (no existe)
-deactivate DB
-
-API -> DB : INSERT INTO chats (u1, u2) RETURNING id_chat
-activate DB
-DB --> API : id_chat
+DB --> API : Confirmación: no existe pendiente
  deactivate DB
 
-API -> DB : INSERT INTO mensajes\n(id_chat, remitente, destinatario, mensaje, tipo='sistema')
+API -> DB : Registra nueva solicitud
 activate DB
-DB --> API : id_mensaje
-deactivate DB
+DB --> API : Confirmación de registro
+ deactivate DB
 
-API -> DB : UPDATE chats SET ultimo_mensaje = NOW()
+API -> DB : Obtiene información del proveedor
 activate DB
-DB --> API : ok
-deactivate DB
+DB --> API : Datos del proveedor
+ deactivate DB
 
-API -> Hub : SendAsync("RecibirMensaje", grupo chat_{id_chat})
+API -> DB : Busca conversación existente
+activate DB
+DB --> API : No existe conversación previa
+ deactivate DB
+
+API -> DB : Crea nueva conversación de chat
+activate DB
+DB --> API : Conversación creada
+ deactivate DB
+
+API -> DB : Registra mensaje de sistema
+activate DB
+DB --> API : Mensaje guardado
+ deactivate DB
+
+API -> DB : Actualiza información del chat
+activate DB
+DB --> API : Confirmación
+ deactivate DB
+
+API -> Hub : Notifica mensaje en tiempo real
 activate Hub
-Hub --> API : ok
-deactivate Hub
+Hub --> API : Notificación enviada
+ deactivate Hub
 
-API -> Mail : EnviarNotificacionSolicitud(email, datos...)
+API -> Mail : Envía email al proveedor
 activate Mail
-Mail --> API : ok
-deactivate Mail
+Mail --> API : Email enviado
+ deactivate Mail
 
-API --> FE : 200 OK\n{message, id_solicitud}
-deactivate API
+API --> FE : Confirma creación de solicitud
+ deactivate API
 
-FE --> Cliente : "Solicitud enviada. Revisa el chat."
+FE --> Cliente : Muestra confirmación y redirige al chat
 
 @enduml

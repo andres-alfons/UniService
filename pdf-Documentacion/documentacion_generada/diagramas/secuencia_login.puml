@@ -1,41 +1,41 @@
 @startuml
 skinparam backgroundColor #FEFEFE
 
-title Diagrama de Secuencia - Autenticacion de Usuario (Login JWT)
+title Diagrama de Secuencia - Autenticación de Usuario
 
 actor "Usuario" as User
 participant "Navegador\n(React)" as Browser
-participant "API .NET\n(AuthController)" as API
-participant "BCrypt" as BCrypt
-participant "JWT Service" as JWT
-participant "PostgreSQL\n(Supabase)" as DB
+participant "API\n(.NET)" as API
+participant "Servicio de\nEncriptación" as BCrypt
+participant "Servicio de\nTokens" as JWT
+participant "Base de Datos" as DB
 
-User -> Browser : Ingresa correo y contrasena
-Browser -> API : POST /api/auth/login\n{correo, password}
+User -> Browser : Ingresa correo y contraseña
+Browser -> API : Solicita autenticación
 
 activate API
-API -> DB : SELECT id_usuario, password_hash, nombre, id_rol\nFROM usuarios WHERE correo = @correo
+API -> DB : Consulta credenciales del usuario
 activate DB
-DB --> API : password_hash (BCrypt), datos usuario
+DB --> API : Retorna datos del usuario
  deactivate DB
 
-API -> BCrypt : Verify(password, password_hash)
+API -> BCrypt : Verifica contraseña ingresada
 activate BCrypt
-BCrypt --> API : true (coincide)
-deactivate BCrypt
+BCrypt --> API : Contraseña válida
+ deactivate BCrypt
 
-alt Credenciales validas
-    API -> JWT : GenerarToken(id_usuario, id_rol, correo)
+alt Credenciales válidas
+    API -> JWT : Genera token de sesión
     activate JWT
-    JWT --> API : token_jwt (expira 24h)
+    JWT --> API : Token generado (expira en 24h)
     deactivate JWT
 
-    API --> Browser : 200 OK\n{token, usuarioId, nombre, rol}
-    Browser -> Browser : Guardar token en localStorage
-    Browser --> User : Redirigir a /home
-else Credenciales invalidas
-    API --> Browser : 401 Unauthorized\n{error: "Credenciales invalidas"}
-    Browser --> User : Mostrar mensaje de error
+    API --> Browser : Confirma autenticación
+    Browser -> Browser : Almacena token localmente
+    Browser --> User : Redirige al inicio de la plataforma
+else Credenciales inválidas
+    API --> Browser : Indica error de autenticación
+    Browser --> User : Muestra mensaje de error
 end
 
 deactivate API

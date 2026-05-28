@@ -1,61 +1,67 @@
 @startuml
 skinparam backgroundColor #FEFEFE
+skinparam activity {
+  BackgroundColor<<frontend>> LightBlue
+  BackgroundColor<<backend>> LightGreen
+  BackgroundColor<<admin>> LightCoral
+}
 
 title Diagrama de Actividades - Proceso de Reporte
 
 |Usuario|
 start
-:Detectar servicio/usuario\ninapropiado o bug;
-:Navegar a detalle del servicio\no perfil del usuario;
+:Detectar contenido inapropiado
+o error del sistema;
+:Navegar al detalle del elemento;
 :Hacer clic en "Reportar";
 
-|#LightBlue|Frontend React|
-:Mostrar modal de reporte;
-:Listar tipos de reporte\n(servicio_fraude, usuario_acoso,\nbug_tecnico, etc.);
+|#LightBlue|Frontend|
+:Mostrar formulario de reporte;
+:Listar tipos de reporte
+(fraude, acoso, bug, etc.);
 
 |Usuario|
 :Seleccionar tipo de reporte;
-:Ingresar titulo y descripcion;
-:Opcional: adjuntar evidencia (URL/texto);
+:Ingresar título y descripción;
+:Adjuntar evidencia (opcional);
 :Enviar reporte;
 
-|Frontend React|
-:POST /api/reportes;
+|Frontend|
 :Validar campos obligatorios;
+:Enviar reporte al servidor;
 
-|#LightGreen|Backend .NET|
-:Recibir datos del reporte;
-:INSERT INTO reportes (estado = 'Pendiente');
-:Obtener admins activos;
+|#LightGreen|Backend|
+:Recibir y validar datos;
+:Guardar reporte en base de datos
+(estado = Pendiente);
+:Obtener administradores activos;
 
 |Servicio Email|
-:Enviar notificacion a admins;
+:Notificar a administradores;
 
-|Frontend React|
-:Mostrar confirmacion al usuario;
+|Frontend|
+:Mostrar confirmación al usuario;
 
 |Usuario|
 :Reporte registrado exitosamente;
 stop
 
 |#LightCoral|Administrador|
-:Recepcion de notificacion;
-:Navegar a Admin Dashboard\n(seccion Reportes);
-:Visualizar lista de reportes\nfiltrados por estado;
-:Seleccionar reporte especifico;
-:Revisar evidencia y contexto;
-:Tomar accion correctiva;
-if (Tipo de accion) then (Usuario Reportado)
-    :Escalar o suspender usuario;
-    :UPDATE reportes SET estado = 'Resuelto';
-elseif (Servicio Reportado) then (Servicio)
-    :Pausar o eliminar servicio;
-    :UPDATE reportes SET estado = 'Resuelto';
-else (Bug/Otro)
-    :Documentar para correccion;
-    :UPDATE reportes SET estado = 'En_revision';
+:Recibir notificación;
+:Revisar reporte en panel admin;
+:Analizar evidencia y contexto;
+:Decisión: ¿Tipo de acción?;
+if (Usuario reportado) then 
+  :Escalar o suspender usuario;
+  :Marcar reporte como "Resuelto";
+elseif (Servicio reportado) then 
+  :Pausar o eliminar servicio;
+  :Marcar reporte como "Resuelto";
+else (Bug / Otro)
+  :Documentar para corrección;
+  :Marcar reporte como "En revisión";
 endif
-:Agregar notas de resolucion;
+:Agregar notas de resolución;
 :Notificar al usuario reportante;
 stop
 
