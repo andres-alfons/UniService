@@ -711,6 +711,33 @@ const Perfil = () => {
             <div className="shape shape-1"></div>
             <div className="shape shape-2"></div>
             <div className="shape shape-3"></div>
+            <div className="shape shape-4"></div>
+            <div className="shape shape-5"></div>
+            <div className="shape shape-6"></div>
+          </div>
+          <div className="floating-glows">
+            <div className="glow glow-1"></div>
+            <div className="glow glow-2"></div>
+            <div className="glow glow-3"></div>
+            <div className="glow glow-4"></div>
+            <div className="glow glow-5"></div>
+          </div>
+          <div className="floating-rings">
+            <div className="ring ring-1"></div>
+            <div className="ring ring-2"></div>
+            <div className="ring ring-3"></div>
+          </div>
+          <div className="floating-particles">
+            <div className="particle particle-1"></div>
+            <div className="particle particle-2"></div>
+            <div className="particle particle-3"></div>
+            <div className="particle particle-4"></div>
+            <div className="particle particle-5"></div>
+          </div>
+          <div className="floating-lines">
+            <div className="float-line float-line-1"></div>
+            <div className="float-line float-line-2"></div>
+            <div className="float-line float-line-3"></div>
           </div>
           <div className="dots-container" aria-hidden="true">
             <div className="dot dot-1"></div>
@@ -729,6 +756,14 @@ const Perfil = () => {
             <div className="dot dot-14"></div>
             <div className="dot dot-15"></div>
             <div className="dot dot-16"></div>
+            <div className="dot dot-17"></div>
+            <div className="dot dot-18"></div>
+            <div className="dot dot-19"></div>
+            <div className="dot dot-20"></div>
+            <div className="dot dot-21"></div>
+            <div className="dot dot-22"></div>
+            <div className="dot dot-23"></div>
+            <div className="dot dot-24"></div>
           </div>
         </div>
 

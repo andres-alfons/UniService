@@ -167,7 +167,7 @@ body {
 .shape-1 {
   width: 400px;
   height: 400px;
-  background: rgba(14, 165, 160, 0.08);
+  background: rgba(14, 165, 160, 0.10);
   top: -100px;
   right: -100px;
   animation-delay: 0s;
@@ -176,7 +176,7 @@ body {
 .shape-2 {
   width: 300px;
   height: 300px;
-  background: rgba(245, 200, 66, 0.06);
+  background: rgba(245, 200, 66, 0.07);
   bottom: -50px;
   left: -50px;
   animation-delay: -7s;
@@ -185,10 +185,144 @@ body {
 .shape-3 {
   width: 250px;
   height: 250px;
-  background: rgba(14, 165, 160, 0.05);
+  background: rgba(14, 165, 160, 0.06);
   top: 50%;
   left: 30%;
   animation-delay: -14s;
+}
+
+.shape-4 {
+  width: 180px;
+  height: 180px;
+  background: rgba(59, 130, 246, 0.07);
+  bottom: 30%;
+  right: 15%;
+  animation-delay: -3s;
+  animation-duration: 25s;
+}
+
+.shape-5 {
+  width: 120px;
+  height: 120px;
+  background: rgba(139, 92, 246, 0.06);
+  top: 15%;
+  left: 5%;
+  animation-delay: -10s;
+  animation-duration: 18s;
+}
+
+.shape-6 {
+  width: 200px;
+  height: 200px;
+  background: rgba(14, 165, 160, 0.05);
+  top: 70%;
+  left: 70%;
+  animation-delay: -5s;
+  animation-duration: 22s;
+}
+
+/* Anillos flotantes */
+.floating-rings {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid;
+  animation: ringFloat 15s ease-in-out infinite;
+}
+
+.ring-1 {
+  width: 300px;
+  height: 300px;
+  border-color: rgba(14, 165, 160, 0.10);
+  top: -5%;
+  right: 20%;
+  animation-delay: 0s;
+}
+
+.ring-2 {
+  width: 200px;
+  height: 200px;
+  border-color: rgba(59, 130, 246, 0.07);
+  bottom: 10%;
+  left: 5%;
+  animation-delay: -5s;
+  animation-duration: 18s;
+}
+
+.ring-3 {
+  width: 150px;
+  height: 150px;
+  border-color: rgba(139, 92, 246, 0.06);
+  top: 40%;
+  left: 60%;
+  animation-delay: -10s;
+  animation-duration: 20s;
+}
+
+/* Partículas flotantes */
+.floating-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--texto);
+  animation: particleDrift 8s ease-in-out infinite;
+}
+
+.particle-1 { width: 2px; height: 2px; top: 10%; left: 20%; opacity: 0.12; animation-delay: 0s; }
+.particle-2 { width: 3px; height: 3px; top: 30%; left: 85%; opacity: 0.10; animation-delay: 1.2s; }
+.particle-3 { width: 2px; height: 2px; top: 50%; left: 5%; opacity: 0.12; animation-delay: 2.5s; }
+.particle-4 { width: 4px; height: 4px; top: 70%; left: 60%; opacity: 0.07; animation-delay: 0.8s; }
+.particle-5 { width: 2px; height: 2px; top: 90%; left: 40%; opacity: 0.12; animation-delay: 3.4s; }
+
+/* Líneas decorativas */
+.floating-lines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.float-line {
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--texto), transparent);
+  animation: lineDrift 20s linear infinite;
+}
+
+.float-line-1 {
+  width: 200px;
+  top: 20%;
+  right: -200px;
+  opacity: 0.05;
+  animation-delay: 0s;
+}
+
+.float-line-2 {
+  width: 150px;
+  top: 45%;
+  right: -150px;
+  opacity: 0.04;
+  animation-delay: 7s;
+  animation-duration: 25s;
+}
+
+.float-line-3 {
+  width: 180px;
+  top: 75%;
+  right: -180px;
+  opacity: 0.05;
+  animation-delay: 14s;
+  animation-duration: 22s;
 }
 
 /* ═══════════════════════════════════
@@ -206,7 +340,7 @@ body {
   height: 3px;
   border-radius: 50%;
   background: var(--texto);
-  opacity: 0.12;
+  opacity: 0.14;
   animation: pulse 4s ease-in-out infinite;
 }
 .dot-1 { top: 6%; left: 8%; animation-delay: 0s; }
@@ -225,6 +359,14 @@ body {
 .dot-14 { top: 30%; left: 80%; animation-delay: 0.4s; width: 2px; height: 2px; }
 .dot-15 { top: 60%; left: 35%; animation-delay: 1.9s; }
 .dot-16 { top: 82%; left: 70%; animation-delay: 0.7s; }
+.dot-17 { top: 5%; left: 45%; animation-delay: 0.3s; width: 2px; height: 2px; }
+.dot-18 { top: 18%; right: 40%; animation-delay: 1.5s; width: 4px; height: 4px; }
+.dot-19 { top: 28%; left: 70%; animation-delay: 0.9s; }
+.dot-20 { top: 45%; right: 45%; animation-delay: 2.1s; width: 2px; height: 2px; }
+.dot-21 { top: 58%; left: 80%; animation-delay: 0.4s; }
+.dot-22 { top: 68%; right: 60%; animation-delay: 1.8s; width: 3px; height: 3px; }
+.dot-23 { top: 85%; left: 50%; animation-delay: 0.1s; width: 2px; height: 2px; }
+.dot-24 { top: 92%; right: 45%; animation-delay: 2.7s; width: 4px; height: 4px; }
 
 @keyframes pulse {
   0%, 100% { opacity: 0.1; transform: scale(1); }
@@ -244,6 +386,116 @@ body {
   }
   75% {
     transform: translate(20px, 30px) scale(1.02);
+  }
+}
+
+@keyframes ringFloat {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(15px, -20px) rotate(90deg);
+  }
+  50% {
+    transform: translate(-10px, 15px) rotate(180deg);
+  }
+  75% {
+    transform: translate(10px, 20px) rotate(270deg);
+  }
+}
+
+@keyframes particleDrift {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.08;
+  }
+  50% {
+    transform: translateY(-60px) scale(1.5);
+    opacity: 0.18;
+  }
+}
+
+@keyframes lineDrift {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-120vw);
+  }
+}
+
+/* Glows azulados lentos */
+.floating-glows {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  animation: glowDrift 30s ease-in-out infinite;
+}
+
+.glow-1 {
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, transparent 70%);
+  top: -150px;
+  left: -150px;
+  animation-delay: 0s;
+}
+
+.glow-2 {
+  width: 550px;
+  height: 550px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.10) 0%, transparent 70%);
+  bottom: -100px;
+  right: -100px;
+  animation-delay: -10s;
+  animation-duration: 35s;
+}
+
+.glow-3 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.07) 0%, transparent 70%);
+  top: 30%;
+  left: 40%;
+  animation-delay: -20s;
+  animation-duration: 40s;
+}
+
+.glow-4 {
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+  top: 60%;
+  left: 5%;
+  animation-delay: -5s;
+  animation-duration: 45s;
+}
+
+.glow-5 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.07) 0%, transparent 70%);
+  top: -5%;
+  right: 30%;
+  animation-delay: -15s;
+  animation-duration: 38s;
+}
+
+@keyframes glowDrift {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(40px, -30px) scale(1.1);
+  }
+  66% {
+    transform: translate(-30px, 20px) scale(0.9);
   }
 }
 

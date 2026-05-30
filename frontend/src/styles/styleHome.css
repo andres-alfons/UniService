@@ -10,28 +10,6 @@
    ═══════════════════════════════════════════ */
 
 /* Skip link — accesibilidad por teclado */
-.skip-link {
-  position: absolute;
-  top: -100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--teal);
-  color: #070d16;
-  padding: 12px 24px;
-  border-radius: 0 0 12px 12px;
-  font-weight: 700;
-  font-size: 0.9rem;
-  z-index: 99999;
-  text-decoration: none;
-  transition: top 0.2s ease;
-}
-
-.skip-link:focus {
-  top: 0;
-  outline: 3px solid var(--amarillo);
-  outline-offset: 0;
-}
-
 /* Focus visible global — solo para navegación por teclado */
 *:focus-visible {
   outline: 2px solid var(--teal);

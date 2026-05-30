@@ -38,6 +38,7 @@ export default function Servicio() {
   const [modal, setModal] = useState({ show: false, type: "", message: "" });
   const [chatPanelAbierto, setChatPanelAbierto] = useState(false);
   const [modalReporteServicio, setModalReporteServicio] = useState(false);
+  const [modalImagen, setModalImagen] = useState(false);
 
   const showModal = (type, message) => {
     setModal({ show: true, type, message });
@@ -169,60 +170,53 @@ export default function Servicio() {
     <>
       <Navbar onCerrarSesion={handleCerrarSesion} />
 
-      <section className="detalle-hero">
-        <div className="container">
-          <div className="breadcrumb">
-            <a href="/home">Inicio</a>
-            <span>›</span>
-            <a href="/home#buscar">Servicios</a>
-            <span>›</span>
-            <span>{servicio.nombre_categoria || "Servicio"}</span>
-          </div>
-        </div>
-      </section>
-
-      <main className="container" style={{ marginBottom: "80px" }}>
+      <main className="container" style={{ marginTop: "32px", marginBottom: "80px" }}>
         <div className="grid-detalle">
           {/* COLUMNA IZQUIERDA: Galeria + Info + Reseñas */}
           <div className="columna-izquierda">
             {/* GALERÍA DE IMÁGENES */}
             <div className="galeria-principal">
               <div className="imagen-grande">
-                {imagenes &&
-                esUrlValida(imagenes[imagenActual]?.url_imagen) &&
+                {imagenes && esUrlValida(imagenes[imagenActual]?.url_imagen) &&
                 !imagenesError[imagenActual] ? (
                   <img
                     src={imagenes[imagenActual].url_imagen}
                     alt={servicio.titulo}
                     className="imagen-servicio-real"
                     onError={() => handleImagenError(imagenActual)}
+                    onClick={() => setModalImagen(true)}
+                    style={{ cursor: "pointer" }}
                   />
                 ) : (
-                  <i className={`bi ${iconosGaleria[0]}`}></i>
+                  <div className="sin-imagenes">
+                    <i className="bi bi-image"></i>
+                    <p>No hay imágenes disponibles</p>
+                  </div>
                 )}
               </div>
+              {imagenes && (
               <div className="galeria-miniaturas">
-                {imagenes &&
-                  imagenes.map((img, i) => (
-                    <button
-                      key={img.id_imagen || i}
-                      type="button"
-                      className={`miniatura${imagenActual === i ? " activa" : ""}`}
-                      onClick={() => setImagenActual(i)}
-                    >
-                      {esUrlValida(img.url_imagen) && !imagenesError[i] ? (
-                        <img
-                          src={img.url_imagen}
-                          alt={`Imagen ${i + 1}`}
-                          className="miniatura-img"
-                          onError={() => handleImagenError(i)}
-                        />
-                      ) : (
-                        <i className={`bi ${iconosGaleria[0]}`}></i>
-                      )}
-                    </button>
-                  ))}
+                {imagenes.map((img, i) => (
+                  <button
+                    key={img.id_imagen || i}
+                    type="button"
+                    className={`miniatura${imagenActual === i ? " activa" : ""}`}
+                    onClick={() => setImagenActual(i)}
+                  >
+                    {esUrlValida(img.url_imagen) && !imagenesError[i] ? (
+                      <img
+                        src={img.url_imagen}
+                        alt={`Imagen ${i + 1}`}
+                        className="miniatura-img"
+                        onError={() => handleImagenError(i)}
+                      />
+                    ) : (
+                      <i className={`bi ${iconosGaleria[0]}`}></i>
+                    )}
+                  </button>
+                ))}
               </div>
+              )}
             </div>
 
             {/* BOTÓN VER EN MAPA (solo arriendo con ubicación) */}
@@ -551,6 +545,12 @@ export default function Servicio() {
           idServicio={parseInt(idServicio)}
           contexto="servicio"
         />
+      )}
+
+      {modalImagen && imagenes && esUrlValida(imagenes[imagenActual]?.url_imagen) && (
+        <div className="modal-imagen-overlay" onClick={() => setModalImagen(false)}>
+          <img src={imagenes[imagenActual].url_imagen} alt={servicio.titulo} />
+        </div>
       )}
     </>
   );

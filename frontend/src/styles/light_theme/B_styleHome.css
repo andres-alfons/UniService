@@ -2470,21 +2470,12 @@ html[data-theme="claro"] {
   right: 0;
   bottom: 0;
   background-image:
-    radial-gradient(circle at 10% 15%, transparent 50px, rgba(180, 180, 190, 0.45) 52px, transparent 65px),
-    radial-gradient(circle at 85% 20%, transparent 80px, rgba(170, 170, 185, 0.4) 82px, transparent 95px),
-    radial-gradient(circle at 50% 80%, transparent 110px, rgba(160, 160, 175, 0.35) 112px, transparent 125px),
-    radial-gradient(circle at 25% 60%, transparent 30px, rgba(190, 190, 200, 0.4) 32px, transparent 45px),
-    radial-gradient(circle at 70% 65%, transparent 60px, rgba(170, 170, 185, 0.35) 62px, transparent 75px),
-    radial-gradient(circle at 5% 45%, transparent 40px, rgba(180, 180, 190, 0.3) 42px, transparent 55px),
-    radial-gradient(circle at 90% 55%, transparent 20px, rgba(190, 190, 200, 0.35) 22px, transparent 35px),
-    radial-gradient(circle at 40% 10%, transparent 70px, rgba(160, 160, 175, 0.3) 72px, transparent 85px);
-  animation: circleFloat 20s ease-in-out infinite alternate;
+    radial-gradient(circle at 50% 50%, transparent 12px, rgba(130, 175, 215, 0.25) 12px, rgba(130, 175, 215, 0.25) 14px, transparent 14px),
+    radial-gradient(circle at 50% 50%, transparent 22px, rgba(90, 145, 195, 0.08) 22px, rgba(90, 145, 195, 0.08) 24px, transparent 24px),
+    radial-gradient(circle at 50% 50%, transparent 7px, rgba(160, 195, 225, 0.18) 7px, rgba(160, 195, 225, 0.18) 8px, transparent 8px);
+  background-size: 120px 120px, 180px 180px, 80px 80px;
+  background-position: 0 0, 60px 60px, 40px 20px;
   pointer-events: none;
-}
-
-@keyframes circleFloat {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(10px, -15px); }
 }
 
 [data-theme="claro"] .section-dynamic > * {
@@ -2989,19 +2980,13 @@ html[data-theme="claro"] {
 
 /* Patrón de nodos/constelación - Publicar */
 [data-theme="claro"] .bg-canvas-nodes {
-  background-image: 
+  background-image:
     radial-gradient(circle at 50% 50%, transparent 12px, rgba(130, 175, 215, 0.25) 12px, rgba(130, 175, 215, 0.25) 14px, transparent 14px),
     radial-gradient(circle at 50% 50%, transparent 22px, rgba(90, 145, 195, 0.08) 22px, rgba(90, 145, 195, 0.08) 24px, transparent 24px),
     radial-gradient(circle at 50% 50%, transparent 7px, rgba(160, 195, 225, 0.18) 7px, rgba(160, 195, 225, 0.18) 8px, transparent 8px);
   background-size: 120px 120px, 180px 180px, 80px 80px;
   background-position: 0 0, 60px 60px, 40px 20px;
   animation: nodeTwinkle 6s ease-in-out infinite alternate;
-}
-
-@keyframes nodeTwinkle {
-  0% { opacity: 0.6; filter: brightness(0.8); }
-  50% { opacity: 1; filter: brightness(1.2); }
-  100% { opacity: 0.8; filter: brightness(1); }
 }
 
 /* Patrón de grid/líneas - Buscar */

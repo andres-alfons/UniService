@@ -11,11 +11,7 @@ import PanelAdmin from "./Pages/PanelAdmin.jsx";
 export default function App() {
   return (     
     <BrowserRouter>     
-      {/* Skip link para accesibilidad por teclado */}
-      <a href="#main-content" className="skip-link">
-        Saltar al contenido principal
-      </a>
-      
+       
       {/* Región live para anuncios de screen reader */}
       <div aria-live="polite" aria-atomic="true" className="sr-only" id="live-region" />
       
