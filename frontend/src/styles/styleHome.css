@@ -157,20 +157,6 @@ h6 {
   line-height: 1.25;
 }
 
-h2 {
-  font-size: 2rem;
-  font-weight: 800;
-  margin-bottom: 8px;
-  background: linear-gradient(
-    135deg,
-    var(--teal) 0%,
-    var(--teal2) 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: fadeInDown 0.8s ease both;
-}
 h5 {
   font-size: 0.97rem;
   font-weight: 700;
@@ -719,6 +705,9 @@ fieldset {
 .hero .container {
   position: relative;
   z-index: 1;
+  margin-left: 0;
+  padding-left: 5.5vw;
+  margin-top: -8.8vh;
 }
 
 .hero h1 {
@@ -733,6 +722,7 @@ fieldset {
 .acento {
   color: var(--teal);
   font-style: italic;
+  text-shadow: none;
 }
 .hero-desc {
   color: var(--texto2);

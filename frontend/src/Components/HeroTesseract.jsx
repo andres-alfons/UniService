@@ -1,8 +1,11 @@
-import { useRef, useMemo } from 'react'
+import { useRef, useMemo, useState, useEffect } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
-function TesseractModel() {
+const COLOR_DARK = '#2dd4bf'
+const COLOR_LIGHT = '#6293ba'
+
+function TesseractModel({ color }) {
   const lineRef = useRef()
 
   const vertices4D = useMemo(() => {
@@ -73,12 +76,12 @@ function TesseractModel() {
 
   return (
     <lineSegments ref={lineRef} geometry={geometry}>
-      <lineBasicMaterial color="#2dd4bf" opacity={0.35} transparent />
+      <lineBasicMaterial color={color} opacity={0.7} transparent />
     </lineSegments>
   )
 }
 
-function VertexDots() {
+function VertexDots({ color }) {
   const vertices4D = useMemo(() => {
     const verts = []
     for (let i = 0; i < 16; i++) {
@@ -129,9 +132,9 @@ function VertexDots() {
   return (
     <points geometry={pointGeo}>
       <pointsMaterial
-        size={0.1}
-        color="#2dd4bf"
-        opacity={0.8}
+        size={0.12}
+        color={color}
+        opacity={1}
         transparent
         sizeAttenuation
       />
@@ -139,7 +142,7 @@ function VertexDots() {
   )
 }
 
-function InfinitySymbol() {
+function InfinitySymbol({ color }) {
   const ref = useRef()
 
   const curve = useMemo(() => {
@@ -169,12 +172,12 @@ function InfinitySymbol() {
 
   return (
     <mesh ref={ref} geometry={geo} scale={0.3}>
-      <meshBasicMaterial color="#2dd4bf" opacity={0.3} transparent />
+      <meshBasicMaterial color={color} opacity={0.9} transparent />
     </mesh>
   )
 }
 
-function InnerCube() {
+function InnerCube({ color }) {
   const groupRef = useRef()
   const lineRef = useRef()
 
@@ -228,13 +231,13 @@ function InnerCube() {
   return (
     <group ref={groupRef}>
       <lineSegments ref={lineRef} geometry={geo}>
-        <lineBasicMaterial color="#2dd4bf" opacity={0.03} transparent />
+        <lineBasicMaterial color={color} opacity={0.15} transparent />
       </lineSegments>
       <points geometry={pointGeo}>
         <pointsMaterial
           size={0.08}
-          color="#2dd4bf"
-          opacity={0.3}
+          color={color}
+          opacity={0.5}
           transparent
           sizeAttenuation
         />
@@ -243,7 +246,7 @@ function InnerCube() {
   )
 }
 
-function Particles() {
+function Particles({ color }) {
   const count = 300
   const positions = useMemo(() => {
     const pos = new Float32Array(count * 3)
@@ -265,7 +268,7 @@ function Particles() {
       </bufferGeometry>
       <pointsMaterial
         size={0.04}
-        color="#2dd4bf"
+        color={color}
         opacity={0.25}
         transparent
         sizeAttenuation
@@ -275,6 +278,22 @@ function Particles() {
 }
 
 export default function HeroTesseract() {
+  const [color, setColor] = useState(COLOR_DARK)
+  const [scale, setScale] = useState(2)
+
+  useEffect(() => {
+    const update = () => {
+      const theme = document.documentElement.getAttribute('data-theme')
+      const isClaro = theme === 'claro'
+      setColor(isClaro ? COLOR_LIGHT : COLOR_DARK)
+      setScale(isClaro ? 2.5 : 2)
+    }
+    update()
+    const obs = new MutationObserver(update)
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+    return () => obs.disconnect()
+  }, [])
+
   return (
     <div className="hero-canvas">
       <Canvas
@@ -283,13 +302,13 @@ export default function HeroTesseract() {
         style={{ background: 'transparent' }}
       >
         <ambientLight />
-        <group position={[3, 0, 0]} scale={2}>
-          <TesseractModel />
-          <VertexDots />
-          <InnerCube />
-          <InfinitySymbol />
+        <group position={[3, 0.3, 0]} scale={scale}>
+          <TesseractModel color={color} />
+          <VertexDots color={color} />
+          <InnerCube color={color} />
+          <InfinitySymbol color={color} />
         </group>
-        <Particles />
+        <Particles color={color} />
       </Canvas>
     </div>
   )
