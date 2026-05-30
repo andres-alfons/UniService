@@ -1,6 +1,11 @@
+import HeroTesseract from '../../Components/HeroTesseract'
+import FloatingIcons from '../../Components/FloatingIcons'
+
 export default function Presentacion({ primaryBtn, secondaryBtn }) {
   return (
     <section className="hero" id="inicio">
+      <HeroTesseract />
+      <FloatingIcons />
       <div className="container">
         <p className="label-seccion">Plataforma Universitaria</p>
         <h1>
