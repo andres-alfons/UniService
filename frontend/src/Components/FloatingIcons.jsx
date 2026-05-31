@@ -14,16 +14,21 @@ const GLOWS = [
 ]
 
 export default function FloatingIcons() {
-  const items = useMemo(() =>
-    ICONS.map((icon) => ({
-      icon,
-      left: Math.random() * 68 - 5,
-      dur: 18.2 + Math.random() * 13,
-      delay: Math.random() * 12,
-      size: 1.2 + Math.random() * 0.8,
-      alpha: 0.048 + Math.random() * 0.052,
-    })),
-  [])
+  const items = useMemo(() => {
+    const result = []
+    for (let i = 0; i < 6; i++) {
+      const icon = ICONS[Math.floor(Math.random() * ICONS.length)]
+      result.push({
+        icon,
+        left: Math.random() * 68 - 5,
+        dur: 14 + Math.random() * 6,
+        delay: i * 4,
+        size: 1.2 + Math.random() * 0.8,
+        alpha: 0.034 + Math.random() * 0.036,
+      })
+    }
+    return result
+  }, [])
 
   return (
     <div className="floating-icons">

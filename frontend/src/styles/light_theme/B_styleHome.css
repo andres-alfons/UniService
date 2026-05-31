@@ -511,7 +511,7 @@ html[data-theme="claro"] {
 }
 @keyframes floatDown {
   0% {
-    transform: translateY(-110vh) rotate(0deg);
+    transform: translateY(0) rotate(0deg);
     opacity: 0;
   }
   8% {
