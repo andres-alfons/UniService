@@ -126,11 +126,11 @@ export default function ModalReporte({
 
   // Estilos
   const overlay = { position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:9999,padding:"16px",overflowY:"auto" };
-  const card = { background:"var(--fondo2,#1e1e2e)",border:"1px solid var(--borde,#333)",borderRadius:"16px",padding:"28px",width:"100%",maxWidth:"500px",color:"var(--texto,#fff)",boxShadow:"0 8px 32px rgba(0,0,0,0.4)",margin:"auto" };
-  const inp = { width:"100%",padding:"10px 12px",borderRadius:"8px",border:"1px solid var(--borde,#444)",background:"var(--fondo,#12121f)",color:"var(--texto,#fff)",fontSize:"0.9rem",boxSizing:"border-box",marginTop:"6px" };
-  const lbl = { fontSize:"0.82rem",color:"var(--texto2,#aaa)",display:"block",marginTop:"14px" };
-  const btnPrimary = { background:"var(--teal,#00b4d8)",color:"#fff",border:"none",borderRadius:"8px",padding:"10px 22px",fontWeight:"600",cursor:enviando?"not-allowed":"pointer",opacity:enviando?0.7:1,fontSize:"0.9rem" };
-  const btnSecondary = { background:"transparent",color:"var(--texto2,#aaa)",border:"1px solid var(--borde,#444)",borderRadius:"8px",padding:"10px 18px",cursor:"pointer",fontSize:"0.9rem" };
+  const card = { background:"var(--card)",border:"1px solid var(--borde)",borderRadius:"16px",padding:"28px",width:"100%",maxWidth:"500px",color:"var(--texto)",boxShadow:"0 8px 32px rgba(0,0,0,0.4)",margin:"auto" };
+  const inp = { width:"100%",padding:"10px 12px",borderRadius:"8px",border:"1px solid var(--borde)",background:"var(--bg2)",color:"var(--texto)",fontSize:"0.9rem",boxSizing:"border-box",marginTop:"6px" };
+  const lbl = { fontSize:"0.82rem",color:"var(--texto2)",display:"block",marginTop:"14px" };
+  const btnPrimary = { background:"var(--teal)",color:"#fff",border:"none",borderRadius:"8px",padding:"10px 22px",fontWeight:"600",cursor:enviando?"not-allowed":"pointer",opacity:enviando?0.7:1,fontSize:"0.9rem" };
+  const btnSecondary = { background:"transparent",color:"var(--texto2)",border:"1px solid var(--borde)",borderRadius:"8px",padding:"10px 18px",cursor:"pointer",fontSize:"0.9rem" };
 
   return (
     <div style={overlay} onClick={(e) => e.target === e.currentTarget && onClose()} role="dialog" aria-modal="true" aria-labelledby="modal-reporte-title" ref={modalRef}>
@@ -139,7 +139,7 @@ export default function ModalReporte({
           <div style={{ textAlign:"center", padding:"20px 0" }}>
             <div style={{ fontSize:"2.5rem", marginBottom:"12px" }} aria-hidden="true">✅</div>
             <h3 id="modal-reporte-title" style={{ marginBottom:"8px" }}>Reporte enviado</h3>
-            <p style={{ color:"var(--texto2,#aaa)", fontSize:"0.9rem" }}>
+            <p style={{ color:"var(--texto2)", fontSize:"0.9rem" }}>
               Nuestro equipo lo revisará pronto. Puedes ver el estado en tu perfil → "Mis reportes".
             </p>
             <button style={{ ...btnPrimary, marginTop:"20px" }} onClick={onClose}>Cerrar</button>
@@ -148,7 +148,7 @@ export default function ModalReporte({
           <>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"18px" }}>
               <h3 id="modal-reporte-title" style={{ margin:0, fontSize:"1.1rem" }}>
-                <i className="bi bi-flag-fill" style={{ color:"var(--teal,#00b4d8)", marginRight:"8px" }} aria-hidden="true" />
+                <i className="bi bi-flag-fill" style={{ color:"var(--teal)", marginRight:"8px" }} aria-hidden="true" />
                 {titulo_modal}
               </h3>
               <button onClick={onClose} style={{ background:"none",border:"none",color:"var(--texto2)",fontSize:"1.3rem",cursor:"pointer" }} aria-label="Cerrar modal">×</button>
@@ -171,9 +171,9 @@ export default function ModalReporte({
             <input type="file" id="img-reporte" ref={fileInputRef} onChange={handleImagenes} accept="image/jpeg,image/png,image/webp" multiple style={{ display:"none" }} />
 
             {imagenes.length < 3 && (
-              <button type="button" onClick={() => fileInputRef.current?.click()} style={{ display:"flex",alignItems:"center",justifyContent:"center",gap:"8px",width:"100%",marginTop:"8px",padding:"14px",borderRadius:"10px",border:"2px dashed var(--borde,#444)",background:"var(--fondo,#12121f)",color:"var(--texto2,#aaa)",cursor:"pointer",fontSize:"0.9rem" }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor="var(--teal,#00b4d8)"; e.currentTarget.style.color="var(--teal,#00b4d8)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor="var(--borde,#444)"; e.currentTarget.style.color="var(--texto2,#aaa)"; }}>
+              <button type="button" onClick={() => fileInputRef.current?.click()} style={{ display:"flex",alignItems:"center",justifyContent:"center",gap:"8px",width:"100%",marginTop:"8px",padding:"14px",borderRadius:"10px",border:"2px dashed var(--borde)",background:"var(--bg2)",color:"var(--texto2)",cursor:"pointer",fontSize:"0.9rem" }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor="var(--teal)"; e.currentTarget.style.color="var(--teal)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor="var(--borde)"; e.currentTarget.style.color="var(--texto2)"; }}>
                 <i className="bi bi-paperclip" style={{ fontSize:"1.1rem" }} />
                 <span>Adjuntar imágenes</span>
               </button>
@@ -182,7 +182,7 @@ export default function ModalReporte({
             {previews.length > 0 && (
               <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"8px", marginTop:"10px" }}>
                 {previews.map((p, i) => (
-                  <div key={i} style={{ position:"relative",aspectRatio:"1",borderRadius:"8px",overflow:"hidden",border:"2px solid var(--borde,#444)" }}>
+                  <div key={i} style={{ position:"relative",aspectRatio:"1",borderRadius:"8px",overflow:"hidden",border:"2px solid var(--borde)" }}>
                     <img src={p.preview} alt={`Evidencia ${i+1} del reporte`} loading="lazy" decoding="async" style={{ width:"100%",height:"100%",objectFit:"cover" }} />
                     <button type="button" onClick={() => eliminarImagen(i)} style={{ position:"absolute",top:"4px",right:"4px",background:"rgba(239,68,68,0.9)",border:"none",color:"#fff",width:"22px",height:"22px",borderRadius:"50%",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"0.7rem" }}>
                       <i className="bi bi-x-lg" />

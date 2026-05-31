@@ -1446,33 +1446,9 @@ const Perfil = () => {
               onClick={(e) => e.stopPropagation()}
               style={{ maxWidth: "624px", width: "90%" }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "1rem",
-                }}
-              >
-                <h3 className="image-menu-title" style={{ margin: 0 }}>
-                  <i className="bi bi-box-seam-fill"></i> Mis servicios ({misServicios.length})
-                </h3>
-                <button
-                  onClick={() => setModalServicios(false)}
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    fontSize: "1.1rem",
-                    color: "inherit",
-                    opacity: 0.6,
-                    padding: "4px 8px",
-                    borderRadius: "6px",
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
+              <h3 className="image-menu-title">
+                <i className="bi bi-box-seam-fill"></i> Mis servicios ({misServicios.length})
+              </h3>
 
               {misServicios.length === 0 ? (
                 <p style={{ opacity: 0.5, fontSize: "0.85rem", padding: "12px 0" }}>
@@ -1497,7 +1473,7 @@ const Perfil = () => {
                           ${s.precio_hora}/hr · {s.nombre_categoria || "Sin categoría"}
                         </div>
                       </div>
-                      <div style={{ display: "flex", gap: "8px", flexShrink: 0, alignItems: "center" }}>
+                      <div className="servicio-actions">
                         <button className="btn btn-primary" style={{ width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.85rem", padding: 0, margin: 0, lineHeight: 1, background: "transparent", borderColor: "rgba(52, 211, 153, 0.4)", color: "#34d399" }}
                           onClick={() => abrirEditorImagenes(s)} title="Gestionar imágenes">
                           <i className="bi bi-images"></i>
@@ -1874,35 +1850,10 @@ const Perfil = () => {
               onClick={(e) => e.stopPropagation()}
               style={{ maxWidth: "420px", width: "90%" }}
             >
-              {/* Header */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: "1rem",
-                }}
-              >
-                <h3 className="image-menu-title" style={{ margin: 0 }}>
-                  <i className="bi bi-people-fill"></i> Seguidores (
-                  {listaSeguidores.length})
-                </h3>
-                <button
-                  onClick={() => setModalSeguidores(false)}
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    fontSize: "1.1rem",
-                    color: "inherit",
-                    opacity: 0.6,
-                    padding: "4px 8px",
-                    borderRadius: "6px",
-                  }}
-                >
-                  <i className="bi bi-x-lg"></i>
-                </button>
-              </div>
+              <h3 className="image-menu-title">
+                <i className="bi bi-people-fill"></i> Seguidores (
+                {listaSeguidores.length})
+              </h3>
 
               {/* Cuerpo */}
               <div
@@ -2001,35 +1952,10 @@ const Perfil = () => {
               onClick={(e) => e.stopPropagation()}
               style={{ maxWidth: "420px", width: "90%" }}
             >
-              {/* Header */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: "1rem",
-                }}
-              >
-                <h3 className="image-menu-title" style={{ margin: 0 }}>
-                  <i className="bi bi-person-check-fill"></i> Siguiendo (
-                  {listaSiguiendo.length})
-                </h3>
-                <button
-                  onClick={() => setModalSiguiendo(false)}
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    fontSize: "1.1rem",
-                    color: "inherit",
-                    opacity: 0.6,
-                    padding: "4px 8px",
-                    borderRadius: "6px",
-                  }}
-                >
-                  <i className="bi bi-x-lg"></i>
-                </button>
-              </div>
+              <h3 className="image-menu-title">
+                <i className="bi bi-person-check-fill"></i> Siguiendo (
+                {listaSiguiendo.length})
+              </h3>
 
               {/* Cuerpo */}
               <div
