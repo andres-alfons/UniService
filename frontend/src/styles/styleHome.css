@@ -607,6 +607,9 @@ fieldset {
   display: flex;
   align-items: center;
 }
+@media (max-width: 640px) {
+  .hero { min-height: 70vh; padding: 40px 0 40px; align-items: flex-start; }
+}
 /* Canvas 3D de fondo */
 .hero-canvas {
   position: absolute;
@@ -687,6 +690,9 @@ fieldset {
   padding-left: 5.5vw;
   margin-top: -8.8vh;
 }
+@media (max-width: 640px) {
+  .hero .container { margin-top: 0; }
+}
 
 .hero h1 {
   font-family: "DM Serif Display", serif;
@@ -695,6 +701,9 @@ fieldset {
   margin-bottom: 20px;
   animation: fadeUp 0.7s ease both;
   line-height: 1.15;
+}
+@media (max-width: 640px) {
+  .hero h1 { margin-top: 264px; font-size: 2rem !important; text-shadow: none; }
 }
 
 .acento {
@@ -710,11 +719,19 @@ fieldset {
   animation: fadeUp 0.7s 0.1s ease both;
   line-height: 1.7;
 }
+@media (max-width: 640px) {
+  .hero-desc { display: none; }
+}
 .hero-btns {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
   animation: fadeUp 0.7s 0.2s ease both;
+}
+@media (max-width: 640px) {
+  .hero-btns { margin-top: 10px; flex-direction: column; }
+  .hero-btns .btn { width: 70% !important; display: flex; padding: 10px 20px; font-size: 0.9rem; text-align: center; justify-content: center; }
+  .hero-btns .btn-verde { width: 70% !important; }
 }
 
 /* ══════════════════════════════
@@ -1049,6 +1066,9 @@ fieldset {
   border: 1px solid rgba(14, 165, 160, 0.3);
   border-radius: 8px;
   animation: slideInLeft 0.6s ease both;
+}
+@media (max-width: 640px) {
+  .label-seccion { display: none; }
 }
 
 @keyframes slideInLeft {
@@ -3790,7 +3810,7 @@ html {
 @media (max-width: 640px) {
   .paginacion-container {
     gap: 6px;
-    margin-top: 24px;
+    margin-top: 20px;
   }
 
   .btn-pagina {

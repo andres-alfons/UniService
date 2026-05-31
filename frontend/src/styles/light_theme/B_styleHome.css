@@ -464,6 +464,9 @@ html[data-theme="claro"] {
   display: flex;
   align-items: center;
 }
+@media (max-width: 640px) {
+  [data-theme="claro"] .hero { min-height: 80vh; padding: 40px 0 40px; align-items: flex-start; }
+}
 /* Canvas 3D de fondo */
 [data-theme="claro"] .hero-canvas {
   position: absolute;
@@ -546,6 +549,9 @@ html[data-theme="claro"] {
   padding-left: 5.5vw;
   margin-top: -8.8vh;
 }
+@media (max-width: 640px) {
+  [data-theme="claro"] .hero .container { margin-top: 0; }
+}
 
 [data-theme="claro"] .hero h1 {
   font-family: "DM Serif Display", serif;
@@ -555,6 +561,9 @@ html[data-theme="claro"] {
   animation: fadeUp 0.7s ease both;
   line-height: 1.15;
   color: #2d2d4e;
+}
+@media (max-width: 640px) {
+  [data-theme="claro"] .hero h1 { margin-top: 280px; font-size: 2rem !important; text-shadow: none; }
 }
 
 [data-theme="claro"] .acento {
@@ -567,8 +576,9 @@ html[data-theme="claro"] {
   font-size: 1rem;
   max-width: 520px;
   margin-bottom: 36px;
-  animation: fadeUp 0.7s 0.1s ease both;
-  line-height: 1.7;
+}
+@media (max-width: 640px) {
+  [data-theme="claro"] .hero-desc { display: none; }
 }
 [data-theme="claro"] .hero-btns {
   display: flex;
@@ -576,10 +586,15 @@ html[data-theme="claro"] {
   flex-wrap: wrap;
   animation: fadeUp 0.7s 0.2s ease both;
 }
+@media (max-width: 640px) {
+  [data-theme="claro"] .hero-btns { margin-top: 30px; flex-direction: column; }
+  [data-theme="claro"] .hero-btns .btn { width: 70% !important; display: flex; padding: 10px 20px; font-size: 0.9rem; text-align: center; justify-content: center; }
+  [data-theme="claro"] .hero-btns .btn-verde { width: 70% !important; }
+}
 
 /* ══════════════════════════════
    BOTONES
-══════════════════════════════ */
+   ══════════════════════════════ */
 [data-theme="claro"] .btn {
   display: inline-flex;
   align-items: center;
@@ -895,6 +910,9 @@ html[data-theme="claro"] {
   border: 1px solid rgba(152, 210, 236, 0.5);
   border-radius: 8px;
   animation: slideInLeft 0.6s ease both;
+}
+@media (max-width: 640px) {
+  [data-theme="claro"] .label-seccion { display: none; }
 }
 
 @keyframes slideInLeft {
@@ -3155,7 +3173,7 @@ html[data-theme="claro"] {
 @media (max-width: 640px) {
   [data-theme="claro"] .paginacion-container {
     gap: 6px;
-    margin-top: 24px;
+  margin-top: 80px;
   }
   [data-theme="claro"] .btn-pagina {
     width: 38px;

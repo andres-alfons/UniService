@@ -247,11 +247,11 @@ function InnerCube({ color }) {
 }
 
 function Particles({ color }) {
-  const count = 300
+  const count = 1000
   const positions = useMemo(() => {
     const pos = new Float32Array(count * 3)
     for (let i = 0; i < count * 3; i++) {
-      pos[i] = (Math.random() - 0.5) * 40
+      pos[i] = (Math.random() - 0.5) * 60
     }
     return pos
   }, [])
@@ -267,9 +267,9 @@ function Particles({ color }) {
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.04}
+        size={0.08}
         color={color}
-        opacity={0.25}
+        opacity={0.6}
         transparent
         sizeAttenuation
       />
@@ -280,18 +280,47 @@ function Particles({ color }) {
 export default function HeroTesseract() {
   const [color, setColor] = useState(COLOR_DARK)
   const [scale, setScale] = useState(2)
+  const [posX, setPosX] = useState(3)
+  const [posY, setPosY] = useState(0.3)
 
   useEffect(() => {
     const update = () => {
       const theme = document.documentElement.getAttribute('data-theme')
       const isClaro = theme === 'claro'
+      const w = window.innerWidth
+
+      let s, x, y
+      if (w < 640) {
+        s = isClaro ? 1.2 : 1
+        x = 0
+        y = 1.6
+      } else if (w < 900) {
+        s = isClaro ? 1.6 : 1.3
+        x = 0.8
+        y = 1.5
+      } else if (w < 1200) {
+        s = isClaro ? 2 : 1.6
+        x = 1.8
+        y = 0.8
+      } else {
+        s = isClaro ? 2.3 : 2
+        x = 3
+        y = 0.3
+      }
+
       setColor(isClaro ? COLOR_LIGHT : COLOR_DARK)
-      setScale(isClaro ? 2.5 : 2)
+      setScale(s)
+      setPosX(x)
+      setPosY(y)
     }
     update()
+    window.addEventListener('resize', update)
     const obs = new MutationObserver(update)
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
-    return () => obs.disconnect()
+    return () => {
+      window.removeEventListener('resize', update)
+      obs.disconnect()
+    }
   }, [])
 
   return (
@@ -302,7 +331,7 @@ export default function HeroTesseract() {
         style={{ background: 'transparent' }}
       >
         <ambientLight />
-        <group position={[3, 0.3, 0]} scale={scale}>
+        <group position={[posX, posY, 0]} scale={scale}>
           <TesseractModel color={color} />
           <VertexDots color={color} />
           <InnerCube color={color} />
