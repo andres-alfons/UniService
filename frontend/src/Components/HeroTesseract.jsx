@@ -144,6 +144,8 @@ function VertexDots({ color }) {
 
 function InfinitySymbol({ color }) {
   const ref = useRef()
+  const streakRef = useRef()
+  const streakRef2 = useRef()
 
   const curve = useMemo(() => {
     const pts = []
@@ -161,19 +163,40 @@ function InfinitySymbol({ color }) {
   }, [])
 
   const geo = useMemo(() =>
-    new THREE.TubeGeometry(curve, 64, 0.04, 8, true),
+    new THREE.TubeGeometry(curve, 64, 0.016, 6, true),
   [curve])
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime()
     ref.current.rotation.x = t * 0.15
     ref.current.rotation.z = t * 0.1
+    if (streakRef.current) {
+      const progress = (t * 0.112) % 1
+      const pos = curve.getPointAt(progress)
+      streakRef.current.position.copy(pos)
+    }
+    if (streakRef2.current) {
+      const progress2 = ((0.5 - t * 0.112) % 1 + 1) % 1
+      const pos2 = curve.getPointAt(progress2)
+      streakRef2.current.position.copy(pos2)
+    }
   })
 
   return (
-    <mesh ref={ref} geometry={geo} scale={0.3}>
-      <meshBasicMaterial color={color} opacity={0.9} transparent />
-    </mesh>
+    <group ref={ref} scale={0.3}>
+      <mesh geometry={geo}>
+        <meshBasicMaterial color={color} opacity={0.9} transparent />
+      </mesh>
+      <mesh ref={streakRef}>
+        <sphereGeometry args={[0.0357, 12, 12]} />
+        <meshBasicMaterial color={color} opacity={0.6} transparent />
+      </mesh>
+      <mesh ref={streakRef2}>
+        <sphereGeometry args={[0.0357, 12, 12]} />
+        <meshBasicMaterial color={color} opacity={0.6} transparent />
+      </mesh>
+      <pointLight intensity={3} distance={1} color={color} decay={1} />
+    </group>
   )
 }
 
