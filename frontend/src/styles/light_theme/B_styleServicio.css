@@ -1011,3 +1011,26 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+[data-theme="claro"] .btn-ver-mapa {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--teal);
+  color: #000000;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 16px 0;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(14, 165, 160, 0.3);
+}
+
+[data-theme="claro"] .btn-ver-mapa:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(14, 165, 160, 0.4);
+}
