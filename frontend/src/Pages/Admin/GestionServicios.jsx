@@ -382,7 +382,9 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
               <p style={{ color: "var(--texto2)", textAlign: "center", padding: "30px" }}>Este servicio no tiene imágenes.</p>
             ) : (
               <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", justifyContent: "center", maxHeight: "60vh", overflowY: "auto", padding: "8px" }}>
-                {imagenesData.map((img) => (
+                {imagenesData.map((img) => {
+                  const servicioActual = servicios.find((s) => s.id_servicio === imagenesServicio);
+                  return (
                   <div
                     key={img.id_imagen}
                     style={{
@@ -396,7 +398,7 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
                   >
                     <img
                       src={img.url_imagen}
-                      alt={`Imagen del servicio: ${servicio.titulo || "Sin título"}`}
+                      alt={`Imagen del servicio: ${servicioActual?.titulo || "Sin título"}`}
                       loading="lazy"
                       decoding="async"
                       style={{ width: "100%", height: "120px", objectFit: "cover", display: "block" }}
@@ -442,7 +444,8 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
                       ✕
                     </button>
                   </div>
-                ))}
+                );
+              })}
               </div>
             )}
           </div>

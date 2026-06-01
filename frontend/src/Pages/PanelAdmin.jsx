@@ -18,9 +18,20 @@ export default function HomeAdmin() {
   useEffect(() => {
     document.body.classList.add("admin-page");
     document.body.classList.remove("login-page");
+    // Forzar modo oscuro en admin para evitar conflictos con tema claro
+    const temaAnterior = localStorage.getItem("tema");
     localStorage.removeItem("tema");
+    document.documentElement.setAttribute("data-theme", "oscuro");
     return () => {
       document.body.classList.remove("admin-page");
+      // Restaurar tema anterior al salir de admin
+      if (temaAnterior) {
+        localStorage.setItem("tema", temaAnterior);
+        document.documentElement.setAttribute("data-theme", temaAnterior);
+      } else {
+        localStorage.removeItem("tema");
+        document.documentElement.setAttribute("data-theme", "oscuro");
+      }
     };
   }, []);
 
