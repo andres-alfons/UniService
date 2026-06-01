@@ -395,6 +395,7 @@ public class ServicesController : ControllerBase
                 c.nombre_categoria,
                 u.nombre AS proveedor,
                 u.universidad,
+                u.avatar,
                 s.ubicacion_lat,
                 s.ubicacion_lng,
                 s.direccion
@@ -430,6 +431,7 @@ public class ServicesController : ControllerBase
                 disponibilidad = MapDisponibilidad(reader["disponibilidad"]),
                 nombre_categoria = reader["nombre_categoria"]?.ToString() ?? "",
                 proveedor = reader["proveedor"]?.ToString() ?? "Proveedor anónimo",
+                avatar = reader["avatar"]?.ToString() ?? "",
                 universidad = reader["universidad"]?.ToString() ?? "",
                 ubicacion_lat = reader["ubicacion_lat"] != DBNull.Value ? Convert.ToDecimal(reader["ubicacion_lat"]) : (decimal?)null,
                 ubicacion_lng = reader["ubicacion_lng"] != DBNull.Value ? Convert.ToDecimal(reader["ubicacion_lng"]) : (decimal?)null,

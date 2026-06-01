@@ -17,6 +17,7 @@ import {
   mostrarDisponibilidad,
   colorAvatar,
 } from "./Servicio/utilidades";
+import { apiImageUrl } from "../utils/apiFetch";
 import BotonTema from "../Components/B_StyleHome";
 import StarRating from "../Components/StarRating";
 
@@ -413,8 +414,17 @@ export default function Servicio() {
                   <div className="card-proveedor-header">
                     <div
                       className={`avatar-grande ${colorAvatar(servicio.proveedor)}`}
+                      style={{ overflow: 'hidden', position: 'relative' }}
                     >
-                      {iniciales(servicio.proveedor)}
+                      <img
+                        src={apiImageUrl(servicio.avatar) || "/img/default_avatar.png"}
+                        alt={servicio.proveedor}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = "/img/default_avatar.png";
+                        }}
+                      />
                     </div>
                     <div className="card-proveedor-info">
                       <div className="nombre-proveedor">
