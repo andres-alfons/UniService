@@ -612,8 +612,11 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
         <div className="cs-ring r6"></div>
         <div className="cs-ring r7"></div>
         <div className="cs-core"></div>
-        {[...Array(20)].map((_, i) => (
+        {[...Array(30)].map((_, i) => (
           <div key={i} className="cs-dot" />
+        ))}
+        {[...Array(35)].map((_, i) => (
+          <div key={i} className="cs-star" />
         ))}
       </div>
 
