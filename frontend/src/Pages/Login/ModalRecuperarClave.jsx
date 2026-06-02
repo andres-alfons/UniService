@@ -33,7 +33,7 @@ export default function ResetPasswordModal({
             </p>
             <input
               type="email"
-              className="input-codigo"
+              className="input-codigo input-correo-reset"
               style={{
                 letterSpacing: "normal",
                 fontSize: "0.9rem",

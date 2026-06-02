@@ -1,14 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Npgsql;
-using Microsoft.IdentityModel.Tokens;
-using System.Data;
+﻿using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Google.Apis.Auth;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 using UniserviceAPI.DTOs;
 using UniserviceAPI.Services;
 using UniServiceAPI.Models;
-using Google.Apis.Auth;
 
 [ApiController]
 [Route("api/auth")]
@@ -29,6 +30,7 @@ public class AuthController : ControllerBase
     // =========================
     // ENVIAR CÓDIGO
     // =========================
+    [AllowAnonymous]
     [HttpPost("send-code")]
     public async Task<IActionResult> EnviarCodigo([FromBody] EmailDTO data)
     {
@@ -51,6 +53,7 @@ public class AuthController : ControllerBase
     // =========================
     // VERIFICAR CÓDIGO
     // =========================
+    [AllowAnonymous]
     [HttpPost("verify-code")]
     public IActionResult VerificarCodigo([FromBody] VerificarCodigoDTO data)
     {
@@ -67,6 +70,7 @@ public class AuthController : ControllerBase
     // =========================
     // REGISTER (BLOQUEADO SI NO VERIFICÓ)
     // =========================
+    [AllowAnonymous]
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDTO dto)
     {
@@ -123,6 +127,7 @@ public class AuthController : ControllerBase
     // =========================
     // LOGIN
     // =========================
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDTO dto)
     {
@@ -132,8 +137,9 @@ public class AuthController : ControllerBase
 
             int id, idRol;
             string nombreUser, correoUser;
+            bool estado = true;
 
-            var cmd = new NpgsqlCommand("SELECT id_usuario, id_rol, nombre, correo, password_hash FROM usuarios WHERE correo = @correo", conn);
+            var cmd = new NpgsqlCommand("SELECT id_usuario, id_rol, nombre, correo, password_hash, estado FROM usuarios WHERE correo = @correo", conn);
             cmd.Parameters.AddWithValue("@correo", dto.correo);
 
             using (var reader = await cmd.ExecuteReaderAsync())
@@ -150,7 +156,11 @@ public class AuthController : ControllerBase
                 idRol = reader["id_rol"] != DBNull.Value ? Convert.ToInt32(reader["id_rol"]) : 2;
                 nombreUser = reader["nombre"]?.ToString();
                 correoUser = reader["correo"]?.ToString();
+                estado = reader["estado"] != DBNull.Value && (bool)reader["estado"];
             }
+
+            if (!estado)
+                return Unauthorized(new { error = "Tu cuenta ha sido suspendida. Contacta al administrador." });
 
             var updateAct = new NpgsqlCommand("UPDATE usuarios SET ultima_actividad = NOW() WHERE id_usuario = @id", conn);
             updateAct.Parameters.AddWithValue("@id", id);
@@ -186,6 +196,7 @@ public class AuthController : ControllerBase
     // =========================
     // LOGOUT (actualizar ultima_actividad)
     // =========================
+    [AllowAnonymous]
     [HttpPost("logout")]
     public async Task<IActionResult> Logout([FromBody] LogoutDTO dto)
     {
@@ -203,6 +214,7 @@ public class AuthController : ControllerBase
     // =========================
     // GOOGLE LOGIN
     // =========================
+    [AllowAnonymous]
     [HttpPost("google-login")]
     public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDTO dto)
     {
@@ -236,8 +248,9 @@ public class AuthController : ControllerBase
 
                 int id, idRol;
                 string nombreFinal = nombre;
+                bool estado = true;
 
-                var selectCmd = new NpgsqlCommand("SELECT id_usuario, id_rol, nombre FROM usuarios WHERE correo = @correo", conn);
+                var selectCmd = new NpgsqlCommand("SELECT id_usuario, id_rol, nombre, estado FROM usuarios WHERE correo = @correo", conn);
                 selectCmd.Parameters.AddWithValue("@correo", correo);
                 
                 using (var reader = await selectCmd.ExecuteReaderAsync())
@@ -247,6 +260,7 @@ public class AuthController : ControllerBase
                         id = (int)reader["id_usuario"];
                         idRol = reader["id_rol"] != DBNull.Value ? Convert.ToInt32(reader["id_rol"]) : 2;
                         nombreFinal = reader["nombre"]?.ToString() ?? nombre;
+                        estado = reader["estado"] != DBNull.Value && (bool)reader["estado"];
                     }
                     else
                     {
@@ -264,6 +278,9 @@ public class AuthController : ControllerBase
                         idRol = 2;
                     }
                 }
+
+                if (!estado)
+                    return Unauthorized(new { error = "Tu cuenta ha sido suspendida. Contacta al administrador." });
 
                 var updateActGoogle = new NpgsqlCommand("UPDATE usuarios SET ultima_actividad = NOW() WHERE id_usuario = @id", conn);
                 updateActGoogle.Parameters.AddWithValue("@id", id);
@@ -309,6 +326,7 @@ public class AuthController : ControllerBase
     // =========================
     // FORGOT PASSWORD (ENVÍA CÓDIGO DE RECUPERACIÓN)
     // =========================
+    [AllowAnonymous]
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromBody] EmailDTO data)
     {
@@ -346,6 +364,7 @@ public class AuthController : ControllerBase
     // =========================
     // RESET PASSWORD (GUARDA NUEVA CONTRASEÑA)
     // =========================
+    [AllowAnonymous]
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO dto)
     {

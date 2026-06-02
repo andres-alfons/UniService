@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import ChatList from "./ChatList";
 import ChatWindow from "./ChatWindow";
 import { API_CHAT } from "../shared/constantes";
+import { apiFetch } from "../../utils/apiFetch";
 import {
   iniciarSignalR,
   on,
@@ -18,8 +19,8 @@ export default function ChatPanel({ abierto, onCerrar, targetUsuario = null }) {
 
   const cargarChats = useCallback(() => {
     if (!usuarioId) return;
-    return fetch(`${API_CHAT}/mis-chats/${usuarioId}`)
-      .then((r) => r.json())
+    return apiFetch(`${API_CHAT}/mis-chats/${usuarioId}`)
+      .then((r) => r.data)
       .then((data) => {
         const chatsData = Array.isArray(data) ? data : [];
         setChats(chatsData);
@@ -86,15 +87,14 @@ export default function ChatPanel({ abierto, onCerrar, targetUsuario = null }) {
         } else {
           console.log("[ChatPanel] Creando nuevo chat...");
           setCargando(true);
-          fetch(`${API_CHAT}/iniciar`, {
+          apiFetch(`${API_CHAT}/iniciar`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               id_usuario1: parseInt(usuarioId),
               id_usuario2: targetId,
             }),
           })
-            .then((r) => r.json())
+            .then((r) => r.data)
             .then((data) => {
               console.log("[ChatPanel] Respuesta del servidor:", data);
               if (data.id_chat) {
