@@ -1118,3 +1118,12 @@ html[data-theme="claro"] {
   color: var(--teal2);
   text-decoration: underline;
 }
+
+/* ════════════════════════════════
+   TRANSICIÓN DE LOGIN — LOADER
+   Tema claro: mismo estilo
+   ════════════════════════════════ */
+
+[data-theme="claro"] .loader-text {
+  color: var(--teal);
+}
