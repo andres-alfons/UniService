@@ -57,7 +57,19 @@ export default function Servicio() {
       return;
     }
 
-    fetch(`${API}/${idServicio}`)
+    const token = localStorage.getItem("token");
+
+    const opcionesFetch = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token ? `Bearer ${token}` : undefined,
+      },
+    }
+
+    
+
+    fetch(`${API}/${idServicio}`, opcionesFetch)
       .then((res) => {
         if (!res.ok)
           return res.json().then((err) => {

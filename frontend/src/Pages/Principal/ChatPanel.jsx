@@ -16,9 +16,18 @@ export default function ChatPanel({ abierto, onCerrar, targetUsuario = null }) {
   const usuarioId = localStorage.getItem("usuarioId");
   const targetProcessed = useRef(false);
 
+  const token = localStorage.getItem("token");
+
   const cargarChats = useCallback(() => {
     if (!usuarioId) return;
-    return fetch(`${API_CHAT}/mis-chats/${usuarioId}`)
+    return fetch(`${API_CHAT}/mis-chats/${usuarioId}`, {
+      method: "GET",
+      headers: { 
+        "Content-Type": "application/json",
+        ...(token && { "Authorization": `Bearer ${token}` }),
+      },
+     }
+    )
       .then((r) => r.json())
       .then((data) => {
         const chatsData = Array.isArray(data) ? data : [];
@@ -29,7 +38,7 @@ export default function ChatPanel({ abierto, onCerrar, targetUsuario = null }) {
         console.error("Error cargando chats:", err);
         return [];
       });
-  }, [usuarioId]);
+  }, [usuarioId, token]);
 
   useEffect(() => {
     if (abierto && usuarioId) {
@@ -88,7 +97,10 @@ export default function ChatPanel({ abierto, onCerrar, targetUsuario = null }) {
           setCargando(true);
           fetch(`${API_CHAT}/iniciar`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+              "Content-Type": "application/json",
+              ...(token && { "Authorization": `Bearer ${token}` }),
+            },
             body: JSON.stringify({
               id_usuario1: parseInt(usuarioId),
               id_usuario2: targetId,
@@ -121,7 +133,7 @@ export default function ChatPanel({ abierto, onCerrar, targetUsuario = null }) {
       targetProcessed.current = false;
       setChatSeleccionado(null);
     }
-  }, [abierto, targetUsuario, usuarioId, cargarChats]);
+  }, [abierto, targetUsuario, usuarioId, cargarChats, token]);
 
   if (!abierto) {
     window.dispatchEvent(new CustomEvent("chat-cerrado"));
