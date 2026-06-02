@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Badge, formatFecha } from "./UtilidadesAdmin";
+import { apiFetch } from "../../utils/apiFetch";
 
 const API = "/api";
 
@@ -15,8 +16,7 @@ export default function SeccionUsuarios({ onRefresh }) {
   const cargarUsuarios = async () => {
     setCargando(true);
     try {
-      const res = await fetch(`${API}/users`);
-      const data = await res.json();
+      const { data } = await apiFetch(`${API}/users`);
       const normalizados = (Array.isArray(data) ? data : []).map((u) => ({
         id_usuario: u.id,
         nombre: u.nombre,
@@ -45,9 +45,8 @@ export default function SeccionUsuarios({ onRefresh }) {
       onConfirm: async () => {
         setAccionandoId(id);
         try {
-          await fetch(`${API}/users/${id}`, {
+          await apiFetch(`${API}/users/${id}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ estado: false }),
           });
           setUsuarios((prev) =>
@@ -77,9 +76,8 @@ export default function SeccionUsuarios({ onRefresh }) {
       onConfirm: async () => {
         setAccionandoId(id);
         try {
-          await fetch(`${API}/users/${id}`, {
+          await apiFetch(`${API}/users/${id}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ estado: true }),
           });
           setUsuarios((prev) =>
@@ -109,7 +107,7 @@ export default function SeccionUsuarios({ onRefresh }) {
       onConfirm: async () => {
         setAccionandoId(id);
         try {
-          await fetch(`${API}/users/${id}`, { method: "DELETE" });
+          await apiFetch(`${API}/users/${id}`, { method: "DELETE" });
           setUsuarios((prev) => prev.filter((u) => u.id_usuario !== id));
           if (window.registrarLogAdmin) {
             window.registrarLogAdmin("Eliminó usuario", `${usuario?.nombre} (ID: ${id})`);
@@ -135,7 +133,7 @@ export default function SeccionUsuarios({ onRefresh }) {
     const nombreAnterior = usuario?.nombre;
     setAccionandoId(id);
     try {
-      await fetch(`${API}/users/${id}`, {
+      await apiFetch(`${API}/users/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nombre: editNombre }),

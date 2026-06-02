@@ -1,6 +1,7 @@
 // Panel de control — Dashboard principal del panel de administración
 import { useState, useEffect } from "react";
 import StatCard from "./TarjetaEstadistica";
+import { apiFetch } from "../../utils/apiFetch";
 
 const API = "/api";
 
@@ -17,15 +18,15 @@ export default function SeccionDashboard({ refreshKey }) {
   useEffect(() => {
     const cargar = async () => {
       try {
-        const [usersRes, servicesRes, solicitudesRes] = await Promise.all([
-          fetch(`${API}/users`).catch(() => ({ json: () => [] })),
-          fetch(`${API}/services`).catch(() => ({ json: () => [] })),
-          fetch(`${API}/solicitudes/enviadas/0`).catch(() => ({ json: () => [] })),
+        const [usersData, servicesData, solicitudesData] = await Promise.all([
+          apiFetch(`${API}/users`).then(r => r.data).catch(() => []),
+          apiFetch(`${API}/services`).then(r => r.data).catch(() => []),
+          apiFetch(`${API}/solicitudes/enviadas/0`).then(r => r.data).catch(() => []),
         ]);
 
-        const users = await usersRes.json();
-        const services = await servicesRes.json();
-        const solicitudes = await solicitudesRes.json();
+        const users = Array.isArray(usersData) ? usersData : [];
+        const services = Array.isArray(servicesData) ? servicesData : [];
+        const solicitudes = Array.isArray(solicitudesData) ? solicitudesData : [];
 
         const usersArr = Array.isArray(users) ? users : [];
         const servicesArr = Array.isArray(services) ? services : [];

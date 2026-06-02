@@ -43,8 +43,11 @@ public class UsersController : ControllerBase
                 return Unauthorized(new { message = "Contraseña incorrecta" });
 
             int id = (int)reader["id_usuario"];
-            // Capturamos el id_rol (1 o 2)
             int idRol = reader["id_rol"] != DBNull.Value ? Convert.ToInt32(reader["id_rol"]) : 2;
+
+            bool estado = reader["estado"] != DBNull.Value && (bool)reader["estado"];
+            if (!estado)
+                return Unauthorized(new { message = "Tu cuenta ha sido suspendida. Contacta al administrador." });
 
             // Actualizar ultima_actividad al hacer login
             var updateAct = new NpgsqlCommand("UPDATE usuarios SET ultima_actividad = NOW() WHERE id_usuario = @id", conn);

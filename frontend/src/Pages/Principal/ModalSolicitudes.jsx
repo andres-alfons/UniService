@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import TarjetaSolicitud from "./TarjetaSolicitud";
 import ModalRechazo from "./ModalRechazo";
 import { API_SOLICITUD } from "../shared/constantes";
+import { apiFetch } from "../../utils/apiFetch";
 
 export default function ModalSolicitudes({ abierto, onCerrar }) {
   const [tab, setTab] = useState("enviadas");
@@ -21,8 +22,8 @@ export default function ModalSolicitudes({ abierto, onCerrar }) {
       if (!id) return;
 
       Promise.all([
-        fetch(`${API_SOLICITUD}/enviadas/${id}`).then((r) => r.json()),
-        fetch(`${API_SOLICITUD}/recibidas/${id}`).then((r) => r.json()),
+        apiFetch(`${API_SOLICITUD}/enviadas/${id}`).then((r) => r.data),
+        apiFetch(`${API_SOLICITUD}/recibidas/${id}`).then((r) => r.data),
       ])
         .then(([env, rec]) => {
           setEnviadas(Array.isArray(env) ? env : []);
@@ -43,29 +44,27 @@ export default function ModalSolicitudes({ abierto, onCerrar }) {
   }, [abierto, onCerrar, rechazando]);
 
   const responder = async (id_solicitud, accion, motivo_rechazo = "", contraoferta = null) => {
-    await fetch(`${API_SOLICITUD}/responder`, {
+    await apiFetch(`${API_SOLICITUD}/responder`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id_solicitud, accion, motivo_rechazo, contraoferta }),
     });
 
     window.dispatchEvent(new CustomEvent("solicitud-actualizada"));
 
-    const res = await fetch(`${API_SOLICITUD}/recibidas/${id}`);
-    setRecibidas(await res.json());
+    const { data } = await apiFetch(`${API_SOLICITUD}/recibidas/${id}`);
+    setRecibidas(data || []);
   };
 
   const completar = async (id_solicitud) => {
-    const res = await fetch(`${API_SOLICITUD}/completar`, {
+    const { ok } = await apiFetch(`${API_SOLICITUD}/completar`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id_solicitud }),
     });
 
-    if (res.ok) {
+    if (ok) {
       window.dispatchEvent(new CustomEvent("solicitud-actualizada"));
-      const resActualizada = await fetch(`${API_SOLICITUD}/recibidas/${id}`);
-      setRecibidas(await resActualizada.json());
+      const { data } = await apiFetch(`${API_SOLICITUD}/recibidas/${id}`);
+      setRecibidas(data || []);
     }
   };
 

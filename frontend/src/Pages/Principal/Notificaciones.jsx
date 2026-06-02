@@ -6,6 +6,7 @@
 
 import { useState, useEffect } from "react";
 import { API_SOLICITUD, API_CHAT } from "../shared/constantes";
+import { apiFetch } from "../../utils/apiFetch";
 
 // Componente que renderiza el botón de campana y el panel desplegable
 export default function NotificacionesFlotantes({ onToggleChat }) {
@@ -49,8 +50,8 @@ export default function NotificacionesFlotantes({ onToggleChat }) {
       const leidas = obtenerLeidas();
 
       Promise.all([
-        fetch(`${API_SOLICITUD}/recibidas/${usuarioId}`).then((r) => r.json()),
-        fetch(`${API_SOLICITUD}/enviadas/${usuarioId}`).then((r) => r.json()),
+        apiFetch(`${API_SOLICITUD}/recibidas/${usuarioId}`).then((r) => r.data),
+        apiFetch(`${API_SOLICITUD}/enviadas/${usuarioId}`).then((r) => r.data),
       ])
         .then(([recibidas, enviadas]) => {
           const recibidasArr = Array.isArray(recibidas) ? recibidas : [];
@@ -128,11 +129,11 @@ export default function NotificacionesFlotantes({ onToggleChat }) {
     // Cargar mensajes no leídos
     const cargarNoLeidos = () => {
       if (!usuarioId) return;
-      fetch(`${API_CHAT}/no-leidos/${usuarioId}`)
-        .then((r) => r.json())
+      apiFetch(`${API_CHAT}/no-leidos/${usuarioId}`)
+        .then((r) => r.data)
         .then((data) => {
-          console.log("[Notificaciones] Mensajes no leídos:", data.no_leidos);
-          setMensajesNoLeidos(data.no_leidos || 0);
+          console.log("[Notificaciones] Mensajes no leídos:", data?.no_leidos);
+          setMensajesNoLeidos(data?.no_leidos || 0);
         })
         .catch(() => setMensajesNoLeidos(0));
     };

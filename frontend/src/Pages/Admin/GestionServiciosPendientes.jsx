@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { formatFecha } from "./UtilidadesAdmin";
+import { apiFetch } from "../../utils/apiFetch";
 
 const API = "/api";
 
@@ -16,8 +17,7 @@ export default function SeccionServiciosPendientes({ onRefresh }) {
   const cargarPendientes = async () => {
     setCargando(true);
     try {
-      const res = await fetch(`${API}/services/admin/all`);
-      const data = await res.json();
+      const { data } = await apiFetch(`${API}/services/admin/all`);
       const servicios = Array.isArray(data) ? data : [];
       const filtrados = servicios.filter(
         (s) => s.disponibilidad === "Pausado"
@@ -44,8 +44,7 @@ export default function SeccionServiciosPendientes({ onRefresh }) {
     setCargandoImagenes(true);
     setImagenesDetalle([]);
     try {
-      const res = await fetch(`${API}/services/${id}`);
-      const data = await res.json();
+      const { data } = await apiFetch(`${API}/services/${id}`);
       setImagenesDetalle(data.imagenes || []);
     } catch {
       setImagenesDetalle([]);
@@ -63,7 +62,7 @@ export default function SeccionServiciosPendientes({ onRefresh }) {
       onConfirm: async () => {
         setAccionandoId(id);
         try {
-          await fetch(`${API}/services/${id}/aprobar`, { method: "PUT" });
+          await apiFetch(`${API}/services/${id}/aprobar`, { method: "PUT" });
           setPendientes((prev) => prev.filter((s) => s.id_servicio !== id));
           if (window.registrarLogAdmin) {
             window.registrarLogAdmin("Aprobó servicio", `${servicio?.titulo} (ID: ${id})`);
@@ -89,9 +88,8 @@ export default function SeccionServiciosPendientes({ onRefresh }) {
     onConfirm: async (razon) => {
       setAccionandoId(id);
       try {
-        await fetch(`${API}/services/${id}/rechazar`, {
+        await apiFetch(`${API}/services/${id}/rechazar`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ razon }),
         });
         setPendientes((prev) => prev.filter((s) => s.id_servicio !== id));

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import ChatMessage from "./ChatMessage";
 import { API_CHAT } from "../shared/constantes";
 import { enviarMensaje, unirseChat, salirChat, on, enviarEscribiendo } from "../../Services/SignalRService";
-import { apiImageUrl } from "../../utils/apiFetch";
+import { apiFetch, apiImageUrl } from "../../utils/apiFetch";
 
 export default function ChatWindow({ chat, usuarioId, usuariosOnline }) {
   const [mensajes, setMensajes] = useState([]);
@@ -19,8 +19,8 @@ export default function ChatWindow({ chat, usuarioId, usuariosOnline }) {
     setMensajes([]);
     setEscribiendo(false);
 
-    fetch(`${API_CHAT}/${chat.id_chat}/mensajes`)
-      .then((r) => r.json())
+    apiFetch(`${API_CHAT}/${chat.id_chat}/mensajes`)
+      .then((r) => r.data)
       .then((data) => {
         setMensajes(Array.isArray(data) ? data : []);
         setCargando(false);
@@ -28,9 +28,8 @@ export default function ChatWindow({ chat, usuarioId, usuariosOnline }) {
       .catch(() => setCargando(false));
 
     // Marcar mensajes como leídos y refrescar contador global
-    fetch(`${API_CHAT}/mensajes/${chat.id_chat}/leido`, {
+    apiFetch(`${API_CHAT}/mensajes/${chat.id_chat}/leido`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id_destinatario: parseInt(usuarioId) }),
     }).then(() => {
       // Disparar evento para que Notificaciones actualice el badge
@@ -126,9 +125,8 @@ export default function ChatWindow({ chat, usuarioId, usuariosOnline }) {
     setMensajes((prev) => [...prev, msgOptimista]);
 
     try {
-      const res = await fetch(`${API_CHAT}/mensaje`, {
+      const { data } = await apiFetch(`${API_CHAT}/mensaje`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id_chat: chat.id_chat,
           id_remitente: parseInt(usuarioId),
@@ -136,8 +134,6 @@ export default function ChatWindow({ chat, usuarioId, usuariosOnline }) {
           mensaje: texto,
         }),
       });
-
-      const data = await res.json();
       if (data.id_mensaje) {
         setMensajes((prev) =>
           prev.map((m) =>

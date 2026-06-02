@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { apiFetch } from "../../utils/apiFetch";
 
 const API = "/api";
 
@@ -12,8 +13,7 @@ export default function SeccionCategorias({ onRefresh }) {
   const cargarCategorias = async () => {
     setCargando(true);
     try {
-      const res = await fetch(`${API}/services`);
-      const servicios = await res.json();
+      const { data: servicios } = await apiFetch(`${API}/services`);
       const serviciosArr = Array.isArray(servicios) ? servicios : [];
 
       const mapa = {};

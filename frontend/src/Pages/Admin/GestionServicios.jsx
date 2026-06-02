@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { formatFecha } from "./UtilidadesAdmin";
+import { apiFetch } from "../../utils/apiFetch";
 
 const API = "/api";
 
@@ -18,8 +19,7 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
   const cargarServicios = async () => {
     setCargando(true);
     try {
-      const res = await fetch(`${API}/services/admin/all`);
-      const data = await res.json();
+      const { data } = await apiFetch(`${API}/services/admin/all`);
       const normalizados = (Array.isArray(data) ? data : []).map((s) => ({
         id_servicio: s.id_servicio,
         id_proveedor: s.id_proveedor,
@@ -56,7 +56,7 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
         setAccionandoId(id);
         const idProveedor = servicio?.id_proveedor ?? 0;
         try {
-          await fetch(`${API}/services/${id}?id_proveedor=${idProveedor}`, {
+          await apiFetch(`${API}/services/${id}?id_proveedor=${idProveedor}`, {
             method: "DELETE",
           });
           setServicios((prev) => prev.filter((s) => s.id_servicio !== id));
@@ -78,7 +78,7 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
     const estaPausado = servicio?.disponibilidad === "Pausado";
     setAccionandoId(id);
     try {
-      await fetch(`${API}/services/${id}/pausar`, { method: "PUT" });
+      await apiFetch(`${API}/services/${id}/pausar`, { method: "PUT" });
       setServicios((prev) =>
         prev.map((s) =>
           s.id_servicio === id
@@ -110,9 +110,8 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
     const tituloAnterior = servicio?.titulo;
     setAccionandoId(id);
     try {
-      await fetch(`${API}/services/${id}`, {
+      await apiFetch(`${API}/services/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           titulo: editTitulo,
           id_proveedor: servicio?.id_proveedor,
@@ -148,8 +147,7 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
     setImagenesCargando(true);
     setImagenesData([]);
     try {
-      const res = await fetch(`${API}/services/${id}`);
-      const data = await res.json();
+      const { data } = await apiFetch(`${API}/services/${id}`);
       setImagenesData(data.imagenes || []);
       console.log("Imagenes del servicio:", data.imagenes);
     } catch (err) {
@@ -167,7 +165,7 @@ export default function SeccionServiciosAdmin({ onRefresh }) {
       onConfirm: async () => {
         setAccionandoId(idImagen);
         try {
-          await fetch(`${API}/services/${idServicio}/imagenes/${idImagen}`, {
+          await apiFetch(`${API}/services/${idServicio}/imagenes/${idImagen}`, {
             method: "DELETE",
           });
           setImagenesData((prev) => prev.filter((img) => img.id_imagen !== idImagen));
