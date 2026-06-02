@@ -1228,7 +1228,7 @@ input::placeholder {
   border-radius: 20px;
   padding: 40px 32px;
   text-align: center;
-  width: 360px;
+  width: 500px;
   max-width: 90vw;
   animation: fadeIn 0.3s ease;
 }
@@ -1269,6 +1269,10 @@ input::placeholder {
 .input-codigo:focus {
   border-color: var(--teal) !important;
   letter-spacing: 8px;
+}
+
+.input-correo-reset::placeholder {
+  font-size: 0.75rem !important;
 }
 
 .btn-reenviar {
