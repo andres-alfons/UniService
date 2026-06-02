@@ -75,6 +75,8 @@ export default function Login() {
   const [errores, setErrores] = useState({}); // Objeto con mensajes de error por campo (ej: { correo: "Inválido" })
   const [cargandoLogin, setCargandoLogin] = useState(false); // Evita doble clic en login
   const [cargandoRegistro, setCargandoRegistro] = useState(false); // Evita doble clic en registro
+  const [transitionState, setTransitionState] = useState(null); // null | 'loading' — oculta el login y muestra loader
+
   const [modal, setModal] = useState({
     // Modal genérico para mostrar mensajes al usuario
     visible: false,
@@ -474,12 +476,17 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
       return;
     }
 
+    const inicio = Date.now();
+    setTransitionState("loading");
     setCargandoLogin(true);
     try {
       const { data } = await apiFetch("/api/auth/login", {
         method: "POST",
         body: JSON.stringify({ correo, password: pass }),
       });
+
+      const transcurrido = Date.now() - inicio;
+      const espera = Math.max(0, 4000 - transcurrido);
 
       if (data.token) {
         localStorage.setItem("token", data.token);
@@ -488,15 +495,22 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
         localStorage.setItem("usuarioRol", data.user.id_rol);
         localStorage.setItem("logueado", "true");
 
+        await new Promise((r) => setTimeout(r, espera));
+
         if (data.user.id_rol === 1) {
+          setTransitionState(null);
           setModalAdmin(true);
         } else {
           navigate("/home", { replace: true });
         }
       } else {
+        await new Promise((r) => setTimeout(r, Math.min(espera, 1500)));
+        setTransitionState(null);
         notificar(data.error || "Credenciales incorrectas");
       }
     } catch {
+      await new Promise((r) => setTimeout(r, 1500));
+      setTransitionState(null);
       notificar("Error de conexión con el servidor");
     } finally {
       setCargandoLogin(false);
@@ -577,7 +591,7 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
   // ════════════════════════════════
   return (
     <>
-      <BotonTema />
+      {transitionState !== "loading" ? <BotonTema /> : null}
       {/* Radios ocultos que controlan qué tab está activa mediante CSS puro */}
       <input
         type="radio"
@@ -588,7 +602,36 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
       />
       <input type="radio" className="tab-radio" name="tab" id="r-reg" />
 
-      <main id="main-content" className="auth-wrapper" role="main">
+      {/* ── Escena 3D Tesseract / Portal Cósmico de fondo ── */}
+      <div className="cosmos-scene" aria-hidden="true">
+        <div className="cs-ring r1"></div>
+        <div className="cs-ring r2"></div>
+        <div className="cs-ring r3"></div>
+        <div className="cs-ring r4"></div>
+        <div className="cs-ring r5"></div>
+        <div className="cs-ring r6"></div>
+        <div className="cs-ring r7"></div>
+        <div className="cs-core"></div>
+        {[...Array(30)].map((_, i) => (
+          <div key={i} className="cs-dot" />
+        ))}
+        {[...Array(35)].map((_, i) => (
+          <div key={i} className="cs-star" />
+        ))}
+      </div>
+
+      {transitionState === "loading" ? (
+        <div className="login-loader" role="status" aria-label="Iniciando sesión">
+          <div className="loader-ring"></div>
+          <span className="loader-text">Entrando…</span>
+        </div>
+      ) : null}
+
+      <main
+        id="main-content"
+        className={`auth-wrapper ${transitionState === "loading" ? "auth-hidden" : ""}`}
+        role="main"
+      >
         <div className="auth-box" role="region" aria-label="Autenticación">
           {/* ── COLUMNA IZQUIERDA: Logo y descripción de la plataforma ── */}
           <div className="auth-lateral">
@@ -654,10 +697,6 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
               <h1 className="auth-title">
                 Accede a la <span>plataforma</span>
               </h1>
-              <p className="auth-subtitle">
-                Convierte tu conocimiento en oportunidades y encuentra ayuda
-                cuando la necesites.
-              </p>
             </div>
 
             {/* Tabs que alternan entre "Iniciar sesión" y "Registrarse" usando CSS */}

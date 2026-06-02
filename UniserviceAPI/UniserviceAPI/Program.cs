@@ -10,6 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -98,7 +100,17 @@ builder.Services.AddCors(options =>
         });
 });
 
-builder.Services.AddControllers()
+builder.Services.AddControllers
+    (options =>
+    {
+        //creamos una politica de ocultacion global de los endenpoints que el usuario solo acceda al iniciar sesion
+        var policy = new AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .Build();
+
+        options.Filters.Add(new AuthorizeFilter(policy));
+
+    })
     .ConfigureApiBehaviorOptions(options =>
     {
         options.InvalidModelStateResponseFactory = context =>
@@ -155,6 +167,16 @@ builder.Services.AddSwaggerGen(options =>
             },
             new string[] {}
         }
+    });
+    // === OCULTAR AUTOMÁTICAMENTE LO PROTEGIDO EN EL SWAGGER ===
+    options.DocInclusionPredicate((docName, apiDesc) =>
+    {
+        // Revisamos si el endpoint o el controlador tienen el atributo [AllowAnonymous]
+        var hasAllowAnonymous = apiDesc.ActionDescriptor.EndpointMetadata
+            .Any(em => em is Microsoft.AspNetCore.Authorization.AllowAnonymousAttribute);
+
+        // Si tiene [AllowAnonymous], se muestra en Swagger. Si no lo tiene (es privado), se oculta.
+        return hasAllowAnonymous;
     });
 });
 

@@ -45,7 +45,7 @@ html[data-theme="claro"] {
 
 [data-theme="claro"] body.login-page {
   font-family: "Poppins", sans-serif;
-  background-color: var(--bg);
+  background-color: #e8f0fe;
   color: var(--texto);
   width: 100%;
   min-height: 100vh;
@@ -57,30 +57,121 @@ html[data-theme="claro"] {
   overflow-y: auto;
 }
 
-/* Imagen de fondo del body — FIX ZOOM */
-[data-theme="claro"] body.login-page::before {
-  content: "";
-  position: fixed; /* fixed en lugar de absolute para evitar zoom al hacer scroll */
-  inset: 0;
-  background-image: url(../../img/FOTO-FACHADA-SABANAS112.jpg);
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  opacity: 0.15;
-  z-index: 0;
-  transform: scale(1); /* evita herencia de transforms que causan zoom */
+/* ═══════════════════════════════════════════
+   ESCENA 3D — TESSERACT / PORTAL CÓSMICO
+   Tema claro — tonos más azulados/violetas
+   ═══════════════════════════════════════════ */
+
+[data-theme="claro"] .cosmos-scene {
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(14, 165, 160, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 80%, rgba(245, 200, 66, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(130, 100, 220, 0.04) 0%, transparent 50%),
+    linear-gradient(135deg, #e8f0fe 0%, #ffffff 40%, #f0f4ff 70%, #e0eaf8 100%);
 }
 
-[data-theme="claro"] body.login-page::after {
-  content: "";
-  position: fixed; /* fixed para que coincida con ::before */
-  inset: 0;
+[data-theme="claro"] .cosmos-scene::before {
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0deg,
+    rgba(14, 165, 160, 0.06) 40deg,
+    transparent 80deg,
+    rgba(245, 200, 66, 0.035) 120deg,
+    transparent 160deg,
+    rgba(14, 165, 160, 0.05) 200deg,
+    transparent 240deg,
+    rgba(130, 100, 220, 0.03) 280deg,
+    transparent 320deg,
+    rgba(14, 165, 160, 0.06) 360deg
+  );
+}
+
+[data-theme="claro"] .cosmos-scene::after {
   background: radial-gradient(
     ellipse at 50% 50%,
-    rgba(7, 13, 22, 0.4) 0%,
-    rgba(7, 13, 22, 0.88) 100%
+    transparent 25%,
+    rgba(232, 240, 254, 0.4) 70%,
+    rgba(232, 240, 254, 0.8) 100%
   );
-  z-index: 0;
+}
+
+/* ── Anillos — tema claro, más vibrantes sobre fondo blanco ── */
+
+[data-theme="claro"] .r1 {
+  border-color: rgba(14, 165, 160, 0.25);
+  box-shadow: 0 0 50px rgba(14, 165, 160, 0.08), inset 0 0 50px rgba(14, 165, 160, 0.03);
+}
+[data-theme="claro"] .r1::before {
+  border-color: rgba(14, 165, 160, 0.1);
+}
+
+[data-theme="claro"] .r2 {
+  border-color: rgba(245, 200, 66, 0.2);
+  box-shadow: 0 0 40px rgba(245, 200, 66, 0.07), inset 0 0 40px rgba(245, 200, 66, 0.02);
+}
+[data-theme="claro"] .r2::before {
+  border-color: rgba(245, 200, 66, 0.08);
+}
+
+[data-theme="claro"] .r3 {
+  border-color: rgba(130, 100, 220, 0.2);
+  box-shadow: 0 0 60px rgba(130, 100, 220, 0.07), inset 0 0 60px rgba(130, 100, 220, 0.03);
+}
+[data-theme="claro"] .r3::before {
+  border-color: rgba(14, 165, 160, 0.08);
+}
+
+[data-theme="claro"] .r4 {
+  border-color: rgba(245, 200, 66, 0.22);
+  box-shadow: 0 0 40px rgba(245, 200, 66, 0.08), inset 0 0 40px rgba(245, 200, 66, 0.03);
+}
+[data-theme="claro"] .r4::before {
+  border-color: rgba(14, 165, 160, 0.08);
+}
+
+[data-theme="claro"] .r5 {
+  border-color: rgba(14, 165, 160, 0.3);
+  box-shadow: 0 0 60px rgba(14, 165, 160, 0.1), inset 0 0 60px rgba(14, 165, 160, 0.04);
+}
+[data-theme="claro"] .r5::before {
+  border-color: rgba(245, 200, 66, 0.08);
+}
+
+[data-theme="claro"] .r6 {
+  border-color: rgba(245, 200, 66, 0.28);
+  box-shadow: 0 0 50px rgba(245, 200, 66, 0.09), inset 0 0 50px rgba(245, 200, 66, 0.03);
+}
+[data-theme="claro"] .r6::before {
+  border-color: rgba(14, 165, 160, 0.1);
+}
+
+[data-theme="claro"] .r7 {
+  border-color: rgba(130, 100, 220, 0.35);
+  box-shadow: 0 0 70px rgba(130, 100, 220, 0.1), inset 0 0 70px rgba(130, 100, 220, 0.04);
+}
+[data-theme="claro"] .r7::before {
+  border-color: rgba(245, 200, 66, 0.12);
+  box-shadow: 0 0 40px rgba(245, 200, 66, 0.04);
+}
+
+[data-theme="claro"] .cs-core {
+  background: radial-gradient(circle, rgba(14, 165, 160, 0.9) 0%, rgba(14, 165, 160, 0.2) 40%, transparent 70%);
+  box-shadow:
+    0 0 50px 15px rgba(14, 165, 160, 0.15),
+    0 0 100px 30px rgba(14, 165, 160, 0.06);
+}
+
+[data-theme="claro"] .cs-dot {
+  background: rgba(14, 165, 160, 0.6);
+  box-shadow: 0 0 6px rgba(14, 165, 160, 0.3);
+}
+[data-theme="claro"] .cs-dot::after {
+  background: rgba(245, 200, 66, 0.35);
+  box-shadow: 0 0 3px rgba(245, 200, 66, 0.15);
+}
+
+[data-theme="claro"] .cs-star {
+  background: rgba(14, 165, 160, 0.6);
 }
 
 /* ── Wrapper — FIX CENTRADO ── */
@@ -895,7 +986,7 @@ html[data-theme="claro"] {
   border-radius: 20px;
   padding: 40px 32px;
   text-align: center;
-  width: 360px;
+  width: 500px;
   max-width: 90vw;
   animation: fadeIn 0.3s ease;
 }
@@ -1030,4 +1121,17 @@ html[data-theme="claro"] {
 [data-theme="claro"] .btn-olvide:hover {
   color: var(--teal2);
   text-decoration: underline;
+}
+
+/* ════════════════════════════════
+   TRANSICIÓN DE LOGIN — LOADER
+   Tema claro: mismo estilo
+   ════════════════════════════════ */
+
+[data-theme="claro"] .loader-text {
+  color: #0ea5a0;
+}
+[data-theme="claro"] .loader-ring {
+  border-color: rgba(14, 165, 160, 0.25);
+  border-top-color: #0ea5a0;
 }
