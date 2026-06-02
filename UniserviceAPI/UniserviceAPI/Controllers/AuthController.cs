@@ -137,8 +137,9 @@ public class AuthController : ControllerBase
 
             int id, idRol;
             string nombreUser, correoUser;
+            bool estado = true;
 
-            var cmd = new NpgsqlCommand("SELECT id_usuario, id_rol, nombre, correo, password_hash FROM usuarios WHERE correo = @correo", conn);
+            var cmd = new NpgsqlCommand("SELECT id_usuario, id_rol, nombre, correo, password_hash, estado FROM usuarios WHERE correo = @correo", conn);
             cmd.Parameters.AddWithValue("@correo", dto.correo);
 
             using (var reader = await cmd.ExecuteReaderAsync())
@@ -155,7 +156,11 @@ public class AuthController : ControllerBase
                 idRol = reader["id_rol"] != DBNull.Value ? Convert.ToInt32(reader["id_rol"]) : 2;
                 nombreUser = reader["nombre"]?.ToString();
                 correoUser = reader["correo"]?.ToString();
+                estado = reader["estado"] != DBNull.Value && (bool)reader["estado"];
             }
+
+            if (!estado)
+                return Unauthorized(new { error = "Tu cuenta ha sido suspendida. Contacta al administrador." });
 
             var updateAct = new NpgsqlCommand("UPDATE usuarios SET ultima_actividad = NOW() WHERE id_usuario = @id", conn);
             updateAct.Parameters.AddWithValue("@id", id);
