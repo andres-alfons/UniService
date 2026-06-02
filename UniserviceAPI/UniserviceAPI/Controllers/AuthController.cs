@@ -1,14 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Npgsql;
-using Microsoft.IdentityModel.Tokens;
-using System.Data;
+﻿using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Google.Apis.Auth;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 using UniserviceAPI.DTOs;
 using UniserviceAPI.Services;
 using UniServiceAPI.Models;
-using Google.Apis.Auth;
 
 [ApiController]
 [Route("api/auth")]
@@ -29,6 +30,7 @@ public class AuthController : ControllerBase
     // =========================
     // ENVIAR CÓDIGO
     // =========================
+    [AllowAnonymous]
     [HttpPost("send-code")]
     public async Task<IActionResult> EnviarCodigo([FromBody] EmailDTO data)
     {
@@ -51,6 +53,7 @@ public class AuthController : ControllerBase
     // =========================
     // VERIFICAR CÓDIGO
     // =========================
+    [AllowAnonymous]
     [HttpPost("verify-code")]
     public IActionResult VerificarCodigo([FromBody] VerificarCodigoDTO data)
     {
@@ -67,6 +70,7 @@ public class AuthController : ControllerBase
     // =========================
     // REGISTER (BLOQUEADO SI NO VERIFICÓ)
     // =========================
+    [AllowAnonymous]
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDTO dto)
     {
@@ -123,6 +127,7 @@ public class AuthController : ControllerBase
     // =========================
     // LOGIN
     // =========================
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDTO dto)
     {
@@ -186,6 +191,7 @@ public class AuthController : ControllerBase
     // =========================
     // LOGOUT (actualizar ultima_actividad)
     // =========================
+    [AllowAnonymous]
     [HttpPost("logout")]
     public async Task<IActionResult> Logout([FromBody] LogoutDTO dto)
     {
@@ -203,6 +209,7 @@ public class AuthController : ControllerBase
     // =========================
     // GOOGLE LOGIN
     // =========================
+    [AllowAnonymous]
     [HttpPost("google-login")]
     public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDTO dto)
     {
@@ -309,6 +316,7 @@ public class AuthController : ControllerBase
     // =========================
     // FORGOT PASSWORD (ENVÍA CÓDIGO DE RECUPERACIÓN)
     // =========================
+    [AllowAnonymous]
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromBody] EmailDTO data)
     {
@@ -346,6 +354,7 @@ public class AuthController : ControllerBase
     // =========================
     // RESET PASSWORD (GUARDA NUEVA CONTRASEÑA)
     // =========================
+    [AllowAnonymous]
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO dto)
     {

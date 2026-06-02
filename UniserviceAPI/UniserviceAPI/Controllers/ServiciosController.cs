@@ -1,13 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Npgsql;
-using Microsoft.Extensions.Configuration;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Npgsql;
 using UniserviceAPI.DTOs;
 using UniserviceAPI.Services;
-using System.Linq;
-using Microsoft.AspNetCore.Http.Features;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -83,6 +84,7 @@ public class ServicesController : ControllerBase
     // Soporta: ?page=1&pageSize=8&categoria=1&busqueda=texto&orden=recientes
     // También mantiene compatibilidad: sin parámetros = devuelve todos (legacy)
     // =========================
+    [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GetAll(
         [FromQuery] int page = 0,
