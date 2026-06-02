@@ -588,6 +588,21 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
       />
       <input type="radio" className="tab-radio" name="tab" id="r-reg" />
 
+      {/* ── Escena 3D Tesseract / Portal Cósmico de fondo ── */}
+      <div className="cosmos-scene" aria-hidden="true">
+        <div className="cs-ring r1"></div>
+        <div className="cs-ring r2"></div>
+        <div className="cs-ring r3"></div>
+        <div className="cs-ring r4"></div>
+        <div className="cs-ring r5"></div>
+        <div className="cs-ring r6"></div>
+        <div className="cs-ring r7"></div>
+        <div className="cs-core"></div>
+        {[...Array(20)].map((_, i) => (
+          <div key={i} className="cs-dot" />
+        ))}
+      </div>
+
       <main id="main-content" className="auth-wrapper" role="main">
         <div className="auth-box" role="region" aria-label="Autenticación">
           {/* ── COLUMNA IZQUIERDA: Logo y descripción de la plataforma ── */}
@@ -654,10 +669,6 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
               <h1 className="auth-title">
                 Accede a la <span>plataforma</span>
               </h1>
-              <p className="auth-subtitle">
-                Convierte tu conocimiento en oportunidades y encuentra ayuda
-                cuando la necesites.
-              </p>
             </div>
 
             {/* Tabs que alternan entre "Iniciar sesión" y "Registrarse" usando CSS */}
