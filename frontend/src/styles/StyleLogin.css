@@ -131,7 +131,10 @@ body.login-page::after {
    COLUMNA IZQUIERDA — decorativa
 ════════════════════════════ */
 .auth-lateral {
-  background: linear-gradient(160deg, #0c2340 0%, #0a3d5c 50%, #0d2e4a 100%);
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(14, 165, 160, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(245, 200, 66, 0.06) 0%, transparent 50%),
+    linear-gradient(160deg, #0a1e35 0%, #0c2f4a 30%, #0a3d5c 55%, #0d2e4a 100%);
   border-radius: 24px 0 0 24px;
   padding: 32px 28px;
   display: flex;
@@ -141,9 +144,112 @@ body.login-page::after {
   text-align: center;
   position: relative;
   overflow: hidden;
+  border-right: 1px solid rgba(14, 165, 160, 0.06);
 }
 
-/* Círculos decorativos de fondo */
+/* ── Iconos flotantes temáticos ── */
+
+.auth-lateral .icon-float {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.25;
+  font-size: 1.6rem;
+  color: #0ea5a0;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.auth-lateral .icon-float:hover {
+  opacity: 0.25;
+  transform: scale(1.3);
+}
+
+.fi-1 { top: 5%; left: 8%; animation: drift-icon 14s ease-in-out infinite; color: #0ea5a0; }
+.fi-2 { top: 14%; right: 12%; animation: drift-icon 17s ease-in-out infinite 1.5s; color: #f5c842; }
+.fi-3 { top: 38%; left: 3%; animation: drift-icon 19s ease-in-out infinite 0.8s; color: rgba(14,165,160,0.7); }
+.fi-4 { top: 40%; right: 6%; animation: drift-icon 15s ease-in-out infinite 2.2s; color: #f5c842; }
+.fi-5 { bottom: 20%; left: 6%; animation: drift-icon 18s ease-in-out infinite 3s; color: #0ea5a0; }
+.fi-6 { bottom: 6%; right: 8%; animation: drift-icon 16s ease-in-out infinite 1s; color: rgba(14,165,160,0.6); }
+.fi-7 { top: 22%; left: 28%; animation: drift-icon 20s ease-in-out infinite 0.3s; font-size: 1.3rem; color: rgba(245,200,66,0.5); }
+.fi-8 { bottom: 38%; right: 3%; animation: drift-icon 13s ease-in-out infinite 2.8s; font-size: 1.2rem; color: rgba(14,165,160,0.5); }
+.fi-9 { bottom: 10%; left: 38%; animation: drift-icon 22s ease-in-out infinite 1.8s; font-size: 1rem; color: #f5c842; }
+
+@keyframes drift-icon {
+  0%   { transform: translate(0, 0) rotate(0deg) scale(1); }
+  20%  { transform: translate(12px, -14px) rotate(5deg) scale(1.05); }
+  40%  { transform: translate(-8px, 8px) rotate(-3deg) scale(0.97); }
+  60%  { transform: translate(18px, 4px) rotate(4deg) scale(1.03); }
+  80%  { transform: translate(-6px, -10px) rotate(-2deg) scale(0.98); }
+  100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+}
+
+/* ── Orbes de luz ── */
+
+.auth-lateral .glow-orb {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 50%;
+  filter: blur(50px);
+  opacity: 0.35;
+}
+
+.auth-lateral .go-1 {
+  width: 140px; height: 140px;
+  top: -20px; left: -30px;
+  background: radial-gradient(circle, rgba(14,165,160,0.5) 0%, rgba(14,165,160,0) 70%);
+  animation: morph-orb 12s ease-in-out infinite;
+}
+
+.auth-lateral .go-2 {
+  width: 180px; height: 180px;
+  bottom: -40px; right: -40px;
+  background: radial-gradient(circle, rgba(245,200,66,0.3) 0%, rgba(245,200,66,0) 70%);
+  animation: morph-orb 15s ease-in-out infinite 2s;
+}
+
+.auth-lateral .go-3 {
+  width: 120px; height: 120px;
+  top: 40%; left: 20%;
+  background: radial-gradient(circle, rgba(14,165,160,0.3) 0%, rgba(14,165,160,0) 70%);
+  animation: morph-orb 18s ease-in-out infinite 4s;
+}
+
+@keyframes morph-orb {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(15px, -20px) scale(1.15); }
+  50% { transform: translate(-10px, 12px) scale(0.9); }
+  75% { transform: translate(20px, 5px) scale(1.1); }
+}
+
+/* ── Partículas destello ── */
+
+.auth-lateral .sparkle {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  opacity: 0;
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+.auth-lateral .s1 { top: 8%; left: 45%; background: #0ea5a0; animation-delay: 0s; }
+.auth-lateral .s2 { top: 28%; right: 20%; background: #f5c842; animation-delay: 0.5s; }
+.auth-lateral .s3 { top: 65%; left: 12%; background: #fff; animation-delay: 1s; }
+.auth-lateral .s4 { top: 75%; right: 28%; background: #0ea5a0; animation-delay: 1.5s; }
+.auth-lateral .s5 { top: 15%; left: 60%; background: #f5c842; animation-delay: 2s; }
+.auth-lateral .s6 { top: 45%; right: 15%; background: #fff; animation-delay: 0.3s; }
+.auth-lateral .s7 { bottom: 28%; left: 18%; background: #0ea5a0; animation-delay: 1.2s; }
+.auth-lateral .s8 { bottom: 15%; right: 35%; background: #f5c842; animation-delay: 2.5s; }
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 0.7; transform: scale(1.3); }
+}
+
+/* ── Círculos decorativos de fondo ── */
 .auth-lateral::before {
   content: "";
   position: absolute;
@@ -151,8 +257,9 @@ body.login-page::after {
   left: -60px;
   width: 220px;
   height: 220px;
-  background: rgba(14, 165, 160, 0.1);
+  background: radial-gradient(circle, rgba(14, 165, 160, 0.12) 0%, transparent 70%);
   border-radius: 50%;
+  animation: lateral-float 8s ease-in-out infinite;
 }
 
 .auth-lateral::after {
@@ -162,8 +269,15 @@ body.login-page::after {
   right: -80px;
   width: 280px;
   height: 280px;
-  background: rgba(14, 165, 160, 0.07);
+  background: radial-gradient(circle, rgba(14, 165, 160, 0.09) 0%, transparent 70%);
   border-radius: 50%;
+  animation: lateral-float 10s ease-in-out infinite reverse;
+}
+
+@keyframes lateral-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(10px, -10px) scale(1.05); }
+  66% { transform: translate(-5px, 8px) scale(0.97); }
 }
 
 .lateral-contenido {
@@ -173,42 +287,57 @@ body.login-page::after {
 
 /* Icono grande central */
 .lateral-icono {
-  width: 70px;
-  height: 70px;
-  background: rgba(14, 165, 160, 0.15);
-  border: 2px solid rgba(14, 165, 160, 0.4);
+  width: 76px;
+  height: 76px;
+  background: rgba(14, 165, 160, 0.12);
+  border: 2px solid rgba(14, 165, 160, 0.35);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 32px;
-  margin: 0 auto 16px;
+  margin: 0 auto 18px;
+  box-shadow: 0 0 30px rgba(14, 165, 160, 0.08), inset 0 0 30px rgba(14, 165, 160, 0.04);
+  transition: box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+.lateral-icono:hover {
+  box-shadow: 0 0 50px rgba(14, 165, 160, 0.15), inset 0 0 30px rgba(14, 165, 160, 0.06);
+  border-color: rgba(14, 165, 160, 0.55);
 }
 
 .lateral-icono-img {
   width: 100%;
   height: auto;
+  transition: transform 0.4s ease;
+}
+
+.lateral-icono:hover .lateral-icono-img {
+  transform: scale(1.08);
 }
 
 .lateral-titulo {
   font-family: "Poppins", sans-serif;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #0ea5a0;
   line-height: 1.25;
   margin-bottom: 8px;
+  text-shadow: 0 0 40px rgba(14, 165, 160, 0.06);
 }
 
 .lateral-titulo-service {
   color: #f5c842;
   font-weight: 700;
+  text-shadow: 0 0 30px rgba(245, 200, 66, 0.08);
 }
 
 .lateral-desc {
   font-size: 0.82rem;
-  color: var(--texto2);
+  color: rgba(255, 255, 255, 0.55);
   line-height: 1.65;
   margin-bottom: 18px;
+  max-width: 260px;
 }
 
 /* Chips de categorías decorativos */
@@ -220,13 +349,23 @@ body.login-page::after {
 }
 
 .lateral-chip {
-  padding: 5px 12px;
+  padding: 5px 14px;
   border-radius: 20px;
   font-size: 0.72rem;
   font-weight: 500;
-  background: rgba(14, 165, 160, 0.1);
-  border: 1px solid rgba(14, 165, 160, 0.2);
-  color: var(--teal2);
+  background: rgba(14, 165, 160, 0.08);
+  border: 1px solid rgba(14, 165, 160, 0.18);
+  color: rgba(14, 165, 160, 0.75);
+  cursor: default;
+  transition: all 0.3s ease;
+}
+
+.lateral-chip:hover {
+  background: rgba(14, 165, 160, 0.16);
+  border-color: rgba(14, 165, 160, 0.35);
+  color: #0ea5a0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(14, 165, 160, 0.1);
 }
 
 /* ════════════════════════════
@@ -526,6 +665,47 @@ input::placeholder {
 
 .btn-secundario:active {
   transform: translateY(0);
+}
+
+/* Google button — icono a la izquierda, texto centrado */
+.btn-google {
+  position: relative;
+  padding-left: 48px;
+  padding-right: 20px;
+  margin-bottom: 6px;
+}
+
+.btn-google i {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+}
+
+.btn-google span {
+  flex: 1;
+  text-align: center;
+}
+
+.btn-google:hover {
+  background: rgba(14, 165, 160, 0.25);
+  color: #fff;
+}
+
+.btn-google:hover i {
+  opacity: 0;
+}
+
+.btn-google:hover::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23EA4335' d='M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z'/%3E%3Cpath fill='%234285F4' d='M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z'/%3E%3Cpath fill='%2334A853' d='M10.54 28.59A14.5 14.5 0 0 1 9.5 24c0-1.59.28-3.14.76-4.59l-7.98-6.19A23.99 23.99 0 0 0 0 24c0 3.77.87 7.35 2.56 10.56l7.98-5.97z'/%3E%3Cpath fill='%23FBBC05' d='M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 5.97C6.51 42.62 14.62 48 24 48z'/%3E%3C/svg%3E") no-repeat center/contain;
 }
 
 .botones-login {
@@ -881,9 +1061,11 @@ input[type="email"].input-verified {
   display: flex;
   align-items: center;
   text-align: center;
-  margin: 10px 0;
+  margin: 16px 0 14px;
   color: var(--texto3);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
 .separator::before,
@@ -891,42 +1073,12 @@ input[type="email"].input-verified {
   content: "";
   flex: 1;
   height: 1px;
-  background: var(--borde);
+  background: linear-gradient(90deg, transparent, var(--borde), transparent);
 }
 
 .separator span {
-  padding: 0 12px;
+  padding: 0 14px;
+  opacity: 0.7;
 }
 
-/* ════════════════════════════
-   GOOGLE LOGIN BUTTON FIX
-   ════════════════════════════ */
-.auth-formulario .g_id_signin,
-.auth-formulario .g_id_signin iframe,
-.auth-formulario div[id^="g_id_"] {
-  width: 100% !important;
-  max-width: 100% !important;
-}
 
-.auth-formulario .g_id_signin > div {
-  width: 100% !important;
-}
-
-/* Evitar que los estilos globales de input afecten al botón de Google */
-.auth-formulario button[class*="google"],
-.auth-formulario div[class*="google"] {
-  all: unset;
-}
-
-/* Contenedor del botón de Google */
-.google-login-wrapper {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  margin: 0 auto;
-}
-
-.google-login-wrapper > div,
-.google-login-wrapper iframe {
-  border-radius: 10px !important;
-}

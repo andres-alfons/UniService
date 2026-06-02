@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "../styles/StyleLogin.css";
 import { useNavigate } from "react-router-dom";
-import { GoogleLogin } from "@react-oauth/google";
+import { useGoogleLogin } from "@react-oauth/google";
 import logoIcon from "../img/logo_color_noBG.png";
 import AdminModal from "./Login/ModalAdmin";
 import ResetPasswordModal from "./Login/ModalRecuperarClave";
@@ -449,6 +449,14 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
     notificar("Error al iniciar sesión con Google");
   };
 
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      await handleGoogleSuccess({ credential: tokenResponse.id_token });
+    },
+    onError: handleGoogleError,
+    scope: "openid profile email",
+  });
+
   // ════════════════════════════════
   // LÓGICA DE LOGIN
   // La autenticación se realiza contra el backend para todos los usuarios.
@@ -584,6 +592,26 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
         <div className="auth-box" role="region" aria-label="Autenticación">
           {/* ── COLUMNA IZQUIERDA: Logo y descripción de la plataforma ── */}
           <div className="auth-lateral">
+            <i className="bi bi-book icon-float fi-1"></i>
+            <i className="bi bi-code-slash icon-float fi-2"></i>
+            <i className="bi bi-pencil icon-float fi-3"></i>
+            <i className="bi bi-palette icon-float fi-4"></i>
+            <i className="bi bi-box icon-float fi-5"></i>
+            <i className="bi bi-house icon-float fi-6"></i>
+            <i className="bi bi-mortarboard icon-float fi-7"></i>
+            <i className="bi bi-lightbulb icon-float fi-8"></i>
+            <i className="bi bi-star icon-float fi-9"></i>
+            <div className="glow-orb go-1"></div>
+            <div className="glow-orb go-2"></div>
+            <div className="glow-orb go-3"></div>
+            <div className="sparkle s1"></div>
+            <div className="sparkle s2"></div>
+            <div className="sparkle s3"></div>
+            <div className="sparkle s4"></div>
+            <div className="sparkle s5"></div>
+            <div className="sparkle s6"></div>
+            <div className="sparkle s7"></div>
+            <div className="sparkle s8"></div>
             <div className="lateral-contenido">
               <div className="lateral-icono">
                 <img
@@ -713,15 +741,10 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
                 <span>o continúa con</span>
               </div>
 
-              <div className="google-login-wrapper">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleError}
-                  text="continue_with"
-                  locale="es"
-                  width="100%"
-                />
-              </div>
+              <button className="btn-secundario btn-google" onClick={() => googleLogin()}>
+                <i className="bi bi-google"></i>
+                <span>Continuar con Google</span>
+              </button>
 
               <p className="pie">
                 ¿No tienes cuenta?{" "}
