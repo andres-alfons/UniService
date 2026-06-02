@@ -59,8 +59,7 @@
 
 <h3>Infraestructura</h3>
 <ul>
-  <li>La base de datos en desarrollo corre en un contenedor Docker aislado.</li>
-  <li>En produccion se utiliza <strong>Supabase PostgreSQL</strong> con conexion SSL/TLS.</li>
+  <li>La base de datos utiliza <strong>Supabase PostgreSQL</strong> con conexion SSL/TLS.</li>
   <li>Las variables sensibles (JWT Key, credenciales de BD, claves de API) residen en archivos <code>.env</code> que no se incluyen en el repositorio.</li>
 </ul>
 

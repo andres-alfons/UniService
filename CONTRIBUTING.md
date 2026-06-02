@@ -13,7 +13,7 @@
 <ul>
   <li><strong>.NET 8 SDK</strong></li>
   <li><strong>Node.js</strong> (v18 o superior)</li>
-  <li><strong>Docker & Docker Compose</strong> (Para la base de datos SQL Server)</li>
+
   <li><strong>Git</strong></li>
   <li><strong>Visual Studio 2022</strong> (recomendado) o cualquier editor con soporte C#</li>
 </ul>
@@ -27,9 +27,6 @@
     <pre><code>cd frontend
 npm install</code></pre>
   </li>
-  <li><strong>Iniciar base de datos:</strong>
-    <pre><code>docker compose up -d</code></pre>
-  </li>
   <li><strong>Configurar variables de entorno:</strong> Copiar <code>.env.example</code> a <code>.env</code> en la raiz de <code>UniserviceAPI/</code> y completar los valores (conexion a BD, JWT, Google OAuth, email, Supabase).</li>
 </ol>
 
@@ -38,13 +35,12 @@ npm install</code></pre>
 <h2>Flujo de Trabajo y Desarrollo</h2>
 
 <h3>Ejecucion</h3>
-<p>El proyecto se compone de tres partes que se inician por separado:</p>
+<p>El proyecto se compone de dos partes que se inician por separado:</p>
 <ul>
-  <li><strong>Base de datos:</strong> <code>docker compose up -d</code> (SQL Server 2025)</li>
   <li><strong>Frontend:</strong> <code>cd frontend && npm run dev</code> (puerto 5173)</li>
   <li><strong>API:</strong> Abrir <code>UniserviceAPI/UniserviceAPI.sln</code> en Visual Studio y presionar F5, o ejecutar <code>dotnet run --project UniserviceAPI/UniserviceAPI</code> (puerto 5165)</li>
 </ul>
-<p>El comando <code>npm run dev</code> en la raiz inicia la DB y el frontend simultaneamente.</p>
+<p>El comando <code>npm run dev</code> en la raiz inicia el frontend. La base de datos se conecta directamente a la instancia configurada en las variables de entorno.</p>
 
 <hr />
 
@@ -65,7 +61,7 @@ npm install</code></pre>
   </tr>
   <tr>
     <td><strong>Base de Datos</strong></td>
-    <td>SQL Server 2025 (desarrollo via Docker), PostgreSQL + Supabase (produccion)</td>
+    <td>PostgreSQL + Supabase</td>
   </tr>
   <tr>
     <td><strong>Servicios</strong></td>
@@ -146,7 +142,6 @@ Proyecto/
 │   └── vite.config.js
 │
 ├── database/                   # Migraciones SQL (numeradas 01, 02, ...)
-├── docker-compose.yml          # Contenedor SQL Server + import automatico
 ├── README.md
 ├── SECURITY.md
 ├── CONTRIBUTING.md

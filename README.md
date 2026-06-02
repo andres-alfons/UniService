@@ -16,8 +16,7 @@
 <img src="https://img.shields.io/badge/.NET-512BD4?style=flat-square&logo=dotnet&logoColor=white" alt=".NET"/>
 <img src="https://img.shields.io/badge/C%23-239120?style=flat-square&logo=csharp&logoColor=white" alt="C#"/>
 <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL"/>
-<img src="https://img.shields.io/badge/SQL_Server-CC2927?style=flat-square&logo=microsoftsqlserver&logoColor=white" alt="SQL Server"/>
-<img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white" alt="Docker"/>
+<img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL"/>
 <br><br>
 
 ---
@@ -46,8 +45,8 @@
 <ul>
   <li><strong>Frontend:</strong> Desarrollado con <strong>React 18</strong> y <strong>Vite</strong> para una interfaz de usuario agil y reactiva. Se enfoca en componentes modulares y estilos limpios para una experiencia joven. Incluye Bootstrap Icons y SignalR para chat en tiempo real.</li>
   <li><strong>Backend:</strong> API construida con <strong>.NET 8 (ASP.NET Core)</strong> que gestiona la logica de autenticacion con JWT y Google OAuth, envio de correos mediante <strong>MailKit</strong> y almacenamiento en <strong>Supabase Storage</strong>.</li>
-  <li><strong>Base de Datos:</strong> En desarrollo se usa <strong>SQL Server 2025</strong> via Docker; en produccion <strong>PostgreSQL</strong> en Supabase, garantizando integridad transaccional y perfiles verificados.</li>
-  <li><strong>Infraestructura:</strong> Contenedores con <strong>Docker</strong> para la base de datos y mapeo automatico de migraciones SQL.</li>
+  <li><strong>Base de Datos:</strong> <strong>PostgreSQL</strong> en Supabase, garantizando integridad transaccional y perfiles verificados.</li>
+  <li><strong>Base de Datos:</strong> <strong>PostgreSQL</strong> en Supabase, garantizando integridad transaccional y perfiles verificados.</li>
 </ul>
 
 <hr />
@@ -60,7 +59,7 @@
 <h2 align="center">Ejecucion y Puesta en marcha</h2>
 <p>Para poner en marcha el ecosistema completo de desarrollo:</p>
 <br>
-<p>1. Iniciar la base de datos y el frontend (desde la raiz):</p>
+<p>1. Iniciar el frontend (desde la raiz):</p>
 <pre><code>npm run dev</code></pre>
 <p>2. Iniciar la API desde Visual Studio (abrir <code>UniserviceAPI/UniserviceAPI.sln</code> y presionar F5) o con:</p>
 <pre><code>dotnet run --project UniserviceAPI/UniserviceAPI</code></pre>
