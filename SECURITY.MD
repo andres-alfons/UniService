@@ -1,59 +1,74 @@
-<h1 align="center">Política de Seguridad: UniService 🛡️</h1>
+<h1 align="center">Politicas de Seguridad de UniService</h1>
 
-<p align="center">
-  <strong>Comprometidos con la protección de la comunidad estudiantil de Valledupar.</strong><br>
-  La seguridad de los datos de nuestros compañeros es nuestra prioridad.
-</p>
+<h2>Versiones Soportadas</h2>
 
-<hr />
+<p>Actualmente se brinda soporte de seguridad a la siguiente version:</p>
 
-<h2>🚨 Reportar una Vulnerabilidad</h2>
-<p>
-  Si descubres un fallo de seguridad en <strong>UniService</strong> (especialmente en el sistema de autenticación, manejo de JWT o base de datos), te pedimos que lo reportes de manera responsable:
-</p>
-
-<ul>
-  <li><strong>No abras un Issue público:</strong> Evita exponer la vulnerabilidad antes de que podamos corregirla.</li>
-  <li><strong>Canal oficial:</strong> Abre un <strong>GitHub Security Advisory</strong> directamente en este repositorio.</li>
-</ul>
-
-<h3>Información necesaria para el reporte:</h3>
-<ul>
-  <li>Una descripción clara de la vulnerabilidad encontrada.</li>
-  <li>Pasos detallados para reproducir el fallo (especificando si es en el Backend o Frontend).</li>
-  <li>Impacto potencial (ej. acceso a datos de otros estudiantes, bypass de códigos de correo).</li>
-  <li>Sugerencia de corrección (si cuentas con una solución técnica).</li>
-</ul>
-
-<p><em>Nos comprometemos a acusar recibo en menos de <strong>48 horas</strong> y a presentar un plan de mitigación en un plazo máximo de <strong>7 días</strong>.</em></p>
-
-<hr />
-
-<h2>✅ Versiones Soportadas</h2>
 <table>
   <tr>
-    <th>Versión</th>
-    <th>Estado de Soporte</th>
+    <th>Version</th>
+    <th>Soporte</th>
   </tr>
   <tr>
-    <td><strong>1.x (Actual)</strong></td>
-    <td>✅ Soportada (Actualizaciones críticas)</td>
+    <td>1.2.x</td>
+    <td>Activo</td>
   </tr>
   <tr>
-    <td>0.x (Beta/Legacy)</td>
-    <td>❌ No soportada</td>
+    <td>< 1.2</td>
+    <td>Sin soporte</td>
   </tr>
 </table>
 
 <hr />
 
-<h2>🔍 Alcance (Scope)</h2>
-<p>Esta política de seguridad aplica exclusivamente a:</p>
+<h2>Reporte de Vulnerabilidades</h2>
+
+<p>Si descubres una vulnerabilidad de seguridad en UniService, por favor reportala a traves de:</p>
+<ol>
+  <li><strong>GitHub Issues:</strong> Crea un issue en el repositorio con el label <code>security</code>. Si la vulnerabilidad es critica y no debe ser publica, omite este paso y usa el correo electronico.</li>
+  <li><strong>Correo Electronico:</strong> Envia un correo al equipo de desarrollo describiendo el hallazgo, los pasos para reproducirlo y el impacto potencial.</li>
+</ol>
+
+<p>Esperamos recibir tu reporte y te garantizamos que:</p>
 <ul>
-  <li>El código fuente contenido en este repositorio oficial de <strong>UniService</strong>.</li>
-  <li>La lógica de los controladores del <code>backend/</code>.</li>
-  <li>La seguridad de la comunicación entre la aplicación y <strong>SQL Server</strong>.</li>
-  <li>El sistema de envío de correos y validación de tokens.</li>
+  <li>Recibiras una confirmacion de recepcion dentro de las 48 horas habiles.</li>
+  <li>Evaluaremos el reporte y te comunicaremos una estimacion del tiempo de correccion.</li>
+  <li>Te mantendremos informado del progreso de la resolucion.</li>
+</ul>
+
+<p>Si el reporte es aceptado, trabajaremos en una correccion y publicaremos un aviso de seguridad. Agradecemos tu contribucion a mantener UniService seguro para la comunidad estudiantil.</p>
+
+<hr />
+
+<h2>Practicas de Seguridad Actuales</h2>
+
+<h3>Autenticacion y Autorizacion</h3>
+<ul>
+  <li>Las contrasenas se alamacenan usando <strong>BCrypt</strong> con factor de costo configurable.</li>
+  <li>La autenticacion se maneja con <strong>JWT Bearer tokens</strong> con expiracion por tiempo limitado.</li>
+  <li>Soporte de inicio de sesion via <strong>Google OAuth 2.0</strong>.</li>
+  <li>El token JWT se almacena en <code>localStorage</code> del navegador.</li>
+</ul>
+
+<h3>Comunicaciones</h3>
+<ul>
+  <li>Las credenciales de SMTP y conexion a base de datos se gestionan mediante variables de entorno.</li>
+  <li>El envio de correos electronicos se realiza a traves de <strong>MailKit</strong> con conexion TLS.</li>
+  <li>La API se comunica con la base de datos a traves de conexiones seguras configuradas en la cadena de conexion.</li>
+</ul>
+
+<h3>Infraestructura</h3>
+<ul>
+  <li>La base de datos en desarrollo corre en un contenedor Docker aislado.</li>
+  <li>En produccion se utiliza <strong>Supabase PostgreSQL</strong> con conexion SSL/TLS.</li>
+  <li>Las variables sensibles (JWT Key, credenciales de BD, claves de API) residen en archivos <code>.env</code> que no se incluyen en el repositorio.</li>
+</ul>
+
+<h3>Buenas Practicas</h3>
+<ul>
+  <li>No se exponen secretos ni claves en el codigo fuente.</li>
+  <li>Los archivos <code>.env</code> estan incluidos en <code>.gitignore</code>.</li>
+  <li>Se sigue el principio de privilegio minimo en las consultas a la base de datos.</li>
 </ul>
 
 <hr />

@@ -1,151 +1,157 @@
-<h1 align="center">Contribuyendo a UniService 🎓</h1>
+<h1 align="center">Contribuyendo a UniService</h1>
 
 <p align="center">
   <strong>Conectando el talento estudiantil en Valledupar, Cesar.</strong><br>
-  Gracias por tu interés en colaborar. Este documento define los estándares para mantener la calidad y el propósito de UniService.
+  Gracias por tu interes en colaborar. Este documento define los estandares para mantener la calidad y el proposito de UniService.
 </p>
 
 <hr />
 
-<h2>🛠️ Configuración del Entorno</h2>
+<h2>Configuracion del Entorno</h2>
 
 <h3>Requisitos Previos</h3>
 <ul>
+  <li><strong>.NET 8 SDK</strong></li>
   <li><strong>Node.js</strong> (v18 o superior)</li>
   <li><strong>Docker & Docker Compose</strong> (Para la base de datos SQL Server)</li>
   <li><strong>Git</strong></li>
+  <li><strong>Visual Studio 2022</strong> (recomendado) o cualquier editor con soporte C#</li>
 </ul>
 
-<h3>Instalación Rápida</h3>
+<h3>Instalacion Rapida</h3>
 <ol>
-  <li><strong>Fork</strong> del repositorio y clonación local:
+  <li><strong>Fork</strong> del repositorio y clonacion local:
     <pre><code>git clone https://github.com/TU_USUARIO/Proyecto.git</code></pre>
   </li>
-  <li><strong>Instalación masiva:</strong> Desde la raíz del proyecto, instala todas las dependencias (Backend y Frontend) con el script automatizado:
-    <pre><code>npm run install-all</code></pre>
+  <li><strong>Dependencias del frontend:</strong>
+    <pre><code>cd frontend
+npm install</code></pre>
   </li>
+  <li><strong>Iniciar base de datos:</strong>
+    <pre><code>docker compose up -d</code></pre>
+  </li>
+  <li><strong>Configurar variables de entorno:</strong> Copiar <code>.env.example</code> a <code>.env</code> en la raiz de <code>UniserviceAPI/</code> y completar los valores (conexion a BD, JWT, Google OAuth, email, Supabase).</li>
 </ol>
 
 <hr />
 
-<h2>💻 Flujo de Trabajo y Desarrollo</h2>
+<h2>Flujo de Trabajo y Desarrollo</h2>
 
-<h3>Ejecución con un solo comando</h3>
-<p>Contamos con un script en la raíz que lanza simultáneamente el servidor <strong>Backend</strong> (Nodemon) y el <strong>Frontend</strong> (Vite):</p>
-<pre><code>npm run dev</code></pre>
-
-<h3>Orquestación de Infraestructura</h3>
-<p>Si necesitas levantar la base de datos MSSQL y los servicios en contenedores:</p>
-<pre><code>docker-compose up --build</code></pre>
+<h3>Ejecucion</h3>
+<p>El proyecto se compone de tres partes que se inician por separado:</p>
+<ul>
+  <li><strong>Base de datos:</strong> <code>docker compose up -d</code> (SQL Server 2025)</li>
+  <li><strong>Frontend:</strong> <code>cd frontend && npm run dev</code> (puerto 5173)</li>
+  <li><strong>API:</strong> Abrir <code>UniserviceAPI/UniserviceAPI.sln</code> en Visual Studio y presionar F5, o ejecutar <code>dotnet run --project UniserviceAPI/UniserviceAPI</code> (puerto 5165)</li>
+</ul>
+<p>El comando <code>npm run dev</code> en la raiz inicia la DB y el frontend simultaneamente.</p>
 
 <hr />
 
-<h2>📦 Stack Tecnológico</h2>
+<h2>Stack Tecnologico</h2>
 
 <table>
   <tr>
     <th>Capa</th>
-    <th>Tecnologías Principales</th>
+    <th>Tecnologias Principales</th>
   </tr>
   <tr>
     <td><strong>Backend</strong></td>
-    <td>Express 5.2.1, MSSQL, JWT, Bcryptjs, Nodemailer</td>
+    <td>.NET 8 (ASP.NET Core), Entity Framework Core 8, Npgsql, JWT Bearer, BCrypt, MailKit, SignalR</td>
   </tr>
   <tr>
     <td><strong>Frontend</strong></td>
-    <td>React 18.3.1, Vite, React Router Dom 7.1.4, Axios</td>
+    <td>React 18, Vite, React Router DOM 7, Bootstrap Icons, SignalR (@microsoft/signalr)</td>
   </tr>
   <tr>
-    <td><strong>Visualización</strong></td>
-    <td>Chart.js, React Datepicker</td>
+    <td><strong>Base de Datos</strong></td>
+    <td>SQL Server 2025 (desarrollo via Docker), PostgreSQL + Supabase (produccion)</td>
+  </tr>
+  <tr>
+    <td><strong>Servicios</strong></td>
+    <td>Supabase Storage (imagenes), Google OAuth, MailKit SMTP</td>
   </tr>
 </table>
 
 <hr />
 
-<h2>📏 Estándares de Código</h2>
+<h2>Estandares de Codigo</h2>
 
 <ul>
-  <li><strong>Controladores:</strong> Añade lógica de negocio en <code>backend/src/controllers/</code>.</li>
+  <li><strong>Controladores:</strong> Anade logica de API en <code>UniserviceAPI/UniserviceAPI/Controllers/</code>.</li>
   <li><strong>Componentes:</strong> Crea componentes reutilizables en <code>frontend/src/Components/</code>.</li>
-  <li><strong>Assets:</strong> Guarda imágenes y plantillas de correo en <code>backend/src/assets/</code>.</li>
+  <li><strong>Paginas:</strong> Las vistas principales van en <code>frontend/src/Pages/</code>, organizadas por rol (<code>Principal/</code>, <code>Guest/</code>, <code>Admin/</code>, <code>shared/</code>).</li>
+  <li><strong>Estilos:</strong> CSS plano en <code>frontend/src/styles/</code>. Tema claro en <code>frontend/src/styles/light_theme/</code>.</li>
+  <li><strong>Llamadas API:</strong> Usar <code>fetch()</code> nativo. No se usa axios.</li>
+  <li><strong>Sin TypeScript:</strong> El proyecto usa JavaScript/JSX plano, sin ESLint ni Prettier.</li>
 </ul>
 
 <h3>Convenciones de Git</h3>
 <p>Utilizamos <strong>Conventional Commits</strong> para un historial limpio:</p>
 <ul>
   <li><code>feat:</code> Nueva funcionalidad.</li>
-  <li><code>fix:</code> Corrección de errores.</li>
-  <li><code>docs:</code> Cambios en documentación.</li>
+  <li><code>fix:</code> Correccion de errores.</li>
+  <li><code>docs:</code> Cambios en documentacion.</li>
   <li><code>style:</code> Ajustes visuales (CSS/Layout).</li>
 </ul>
 
 <hr />
 
-<h2>📧 Plantillas de Correo y Seguridad</h2>
-<p>Al trabajar con el sistema de autenticación de <strong>UniService</strong>:</p>
+<h2>Correo y Seguridad</h2>
+<p>Al trabajar con el sistema de autenticacion de <strong>UniService</strong>:</p>
 <ol>
-  <li>Modifica el HTML en <code>backend/src/assets/email.html</code>.</li>
-  <li>Usa el marcador <code>{{codigo}}</code> para la inyección de códigos dinámicos.</li>
-  <li>Las imágenes deben referenciarse mediante <strong>CID</strong> (<code>cid:logo_uniservice</code>).</li>
+  <li>La configuracion SMTP se define en las variables de entorno (<code>EmailSettings__*</code>).</li>
+  <li>Las contrasenas se alamacenan con <strong>BCrypt</strong>.</li>
+  <li>La autenticacion usa <strong>JWT Bearer tokens</strong> con expiracion configurable.</li>
+  <li>El inicio de sesion con Google usa OAuth 2.0.</li>
 </ol>
 
 <hr />
 
-<h2>🚀 Pull Requests (PRs)</h2>
+<h2>Pull Requests (PRs)</h2>
 <ul>
   <li>Describe los cambios realizados y su impacto funcional.</li>
-  <li>Adjunta capturas de pantalla si hay cambios en la interfaz (React).</li>
-  <li>Se requiere al menos <strong>una aprobación</strong> de los mantenedores principales.</li>
+  <li>Adjunta capturas de pantalla si hay cambios en la interfaz.</li>
+  <li>Se requiere al menos <strong>una aprobacion</strong> de los mantenedores principales.</li>
 </ul>
 
----
+<hr />
 
-<h2 id="-estructura-del-repositorio">📂 Estructura del Repositorio</h2>
+<h2>Estructura del Repositorio</h2>
 
-```bash
-UniService/
-├── backend/                         # Lógica del servidor
-│   │
-│   └── UniserviceAPI/               # Proyecto principal del backend
-│       ├── Controllers/             # Endpoints de la API
-│       ├── Data/                    # Acceso a datos y persistencia
-│       ├── DTOs/                    # Objetos de transferencia de datos
-│       ├── Models/                  # Entidades y modelos del sistema
-│       ├── UniserviceAPI.sln        # Archivo de solución de Visual Studio
-│       ├── Properties/              # Configuraciones de lanzamiento
-│       ├── Services/                # Lógica de negocio
-│       ├── wwwroot/                 # Carpeta pública para archivos estáticos
-│       ├── appsettings.json         # Configuración y secretos
-│       ├── Program.cs               # Configuración del pipeline y servicios
-│       └── UniserviceAPI.csproj     # Archivo de proyecto de C#
+<pre>
+Proyecto/
+├── UniserviceAPI/              # Proyecto .NET 8 (Backend)
+│   └── UniserviceAPI/
+│       ├── Controllers/        # Endpoints de la API
+│       ├── Data/               # DbContext y configuracion EF Core
+│       ├── DTOs/               # Objetos de transferencia de datos
+│       ├── Models/             # Entidades del sistema
+│       ├── Services/           # Logica de negocio
+│       ├── Hubs/               # SignalR hubs (chat en tiempo real)
+│       ├── wwwroot/            # Archivos estaticos
+│       ├── Program.cs          # Configuracion del pipeline
+│       └── UniserviceAPI.csproj
 │
-├── frontend/                        # Aplicación cliente
-│   ├── public/                      # Assets estáticos del navegador
-│   │
-│   ├── src/                         # Código fuente de React
-│   │   ├── Components/              # Componentes de interfaz reutilizables
-│   │   ├── Pages/                   # Vistas principales de la aplicación
-│   │   ├── styles/                  # Hojas de estilo CSS
-│   │   ├── utils/                   # Funciones auxiliares y constantes
-│   │   ├── App.jsx                  # Enrutador principal
-│   │   └── main.jsx                 # Punto de entrada de React
-│   │
-│   ├── .env.example                 # Plantilla de variables de entorno
-│   ├── index.html                   # Punto de entrada HTML
-│   ├── MIGRACION_JSX.md             # Documentación de migración técnica
-│   ├── package.json                 # Gestión de dependencias y scripts
-│   └── vite.config.js               # Configuración de Vite
+├── frontend/                   # Aplicacion React + Vite
+│   ├── src/
+│   │   ├── Components/         # Componentes reutilizables
+│   │   ├── Pages/              # Vistas principales
+│   │   ├── styles/             # Hojas de estilo CSS
+│   │   ├── utils/              # Funciones auxiliares
+│   │   ├── App.jsx             # Enrutador principal
+│   │   └── main.jsx            # Punto de entrada
+│   ├── index.html
+│   ├── package.json
+│   └── vite.config.js
 │
-├── database/                        # Scripts y respaldos de SQL
-├── docker-compose.yml               # Orquestación de contenedores
-├── README.md                        # Guía general del proyecto
-├── SECURITY.md                      # Políticas de seguridad
-├── CONTRIBUTING.md                  # Guía de contribución
-└── CODE_OF_CONDUCT.md               # Código de conducta
-```
-
-
+├── database/                   # Migraciones SQL (numeradas 01, 02, ...)
+├── docker-compose.yml          # Contenedor SQL Server + import automatico
+├── README.md
+├── SECURITY.md
+├── CONTRIBUTING.md
+└── CODE_OF_CONDUCT.md
+</pre>
 
 <p align="center">
   <sub><strong>UniService</strong> - Construido por estudiantes para transformar la vida universitaria.</sub>
