@@ -1158,6 +1158,9 @@ input::placeholder {
 
 /* ── Responsive — una columna en móvil ── */
 @media (max-width: 680px) {
+  .cosmos-scene {
+    display: none;
+  }
   .auth-box {
     grid-template-columns: 1fr;
     max-width: 420px;
