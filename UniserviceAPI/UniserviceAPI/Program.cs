@@ -219,9 +219,17 @@ app.UseResponseCompression();
 
 app.UseStaticFiles();
 
-// A. EL CORS debe ir antes de cualquier middleware que maneje rutas o seguridad
-app.UseCors("AllowReact");
 
+
+// A. EL CORS debe ir antes de cualquier middleware que maneje rutas o seguridad
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups";
+    context.Response.Headers["Cross-Origin-Embedder-Policy"] = "unsafe-none";
+    await next();
+});
+
+app.UseCors("AllowReact");
 // B. El orden de estos es vital para el funcionamiento de los controladores
 app.UseRouting();
 

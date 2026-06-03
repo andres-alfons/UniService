@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "../styles/StyleLogin.css";
 import { useNavigate } from "react-router-dom";
-import { useGoogleLogin } from "@react-oauth/google";
+import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
 import logoIcon from "../img/logo_color_noBG.png";
 import AdminModal from "./Login/ModalAdmin";
 import ResetPasswordModal from "./Login/ModalRecuperarClave";
@@ -197,9 +197,9 @@ export default function Login() {
       return;
     }
     try {
-const { data } = await apiFetch("/api/Auth/verify-code", {
-      method: "POST",
-      body: JSON.stringify({ correo: correoReg, codigo: codigoInput }),
+      const { data } = await apiFetch("/api/Auth/verify-code", {
+        method: "POST",
+        body: JSON.stringify({ correo: correoReg, codigo: codigoInput }),
       });
       if (data.valido) {
         setCorreoVerificado(true); // Habilita el botón de crear cuenta
@@ -227,13 +227,10 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
     }
     setResetCargando(true);
     try {
-      const { ok, data } = await apiFetch(
-        "/api/Auth/forgot-password",
-        {
-          method: "POST",
-          body: JSON.stringify({ correo: resetCorreo }),
-        },
-      );
+      const { ok, data } = await apiFetch("/api/Auth/forgot-password", {
+        method: "POST",
+        body: JSON.stringify({ correo: resetCorreo }),
+      });
       if (ok) {
         setResetPaso("codigo");
       } else {
@@ -298,17 +295,14 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
     }
     setResetCargando(true);
     try {
-      const { ok, data } = await apiFetch(
-        "/api/Auth/reset-password",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            correo: resetCorreo,
-            codigo: resetCodigo,
-            nuevaPassword: resetPass,
-          }),
-        },
-      );
+      const { ok, data } = await apiFetch("/api/Auth/reset-password", {
+        method: "POST",
+        body: JSON.stringify({
+          correo: resetCorreo,
+          codigo: resetCodigo,
+          nuevaPassword: resetPass,
+        }),
+      });
       if (data?.ok) {
         notificar(
           "Contraseña cambiada correctamente. Ya puedes iniciar sesión.",
@@ -360,10 +354,13 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
 
     setAdminCargando(true);
     try {
-      const { ok, status, data } = await apiFetch("/api/auth/verify-admin-master", {
-        method: "POST",
-        body: JSON.stringify({ masterPassword: adminMasterInput }),
-      });
+      const { ok, status, data } = await apiFetch(
+        "/api/auth/verify-admin-master",
+        {
+          method: "POST",
+          body: JSON.stringify({ masterPassword: adminMasterInput }),
+        },
+      );
 
       if (ok) {
         notificar("Acceso concedido, Comandante", "success");
@@ -380,22 +377,32 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
         setTimeout(() => setAdminShake(false), 500);
 
         if (status === 404) {
-          setAdminError("El servidor no pudo procesar la solicitud. Asegúrate de que la API esté actualizada y en ejecución.");
+          setAdminError(
+            "El servidor no pudo procesar la solicitud. Asegúrate de que la API esté actualizada y en ejecución.",
+          );
           return;
         }
 
         if (data?.bloqueado || status === 429) {
           setAdminBloqueado(true);
           setAdminIntentos(3);
-          setAdminError(data?.error || "Bloqueado por 10 minutos tras demasiados intentos fallidos.");
+          setAdminError(
+            data?.error ||
+              "Bloqueado por 10 minutos tras demasiados intentos fallidos.",
+          );
         } else {
           const intentosBackend = data?.intentos || adminIntentos + 1;
           setAdminIntentos(intentosBackend);
           if (intentosBackend >= 3) {
             setAdminBloqueado(true);
-            setAdminError("DEMASIADOS INTENTOS FALLIDOS. ACCESO DENEGADO POR 10 MINUTOS.");
+            setAdminError(
+              "DEMASIADOS INTENTOS FALLIDOS. ACCESO DENEGADO POR 10 MINUTOS.",
+            );
           } else {
-            setAdminError(data?.error || `Contraseña incorrecta. Intento ${intentosBackend} de 3.`);
+            setAdminError(
+              data?.error ||
+                `Contraseña incorrecta. Intento ${intentosBackend} de 3.`,
+            );
           }
         }
       }
@@ -491,7 +498,10 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
       if (data.token) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("usuarioId", data.user.id);
-        localStorage.setItem("usuarioNombre", data.user.nombre || data.user.correo.split("@")[0]);
+        localStorage.setItem(
+          "usuarioNombre",
+          data.user.nombre || data.user.correo.split("@")[0],
+        );
         localStorage.setItem("usuarioRol", data.user.id_rol);
         localStorage.setItem("logueado", "true");
 
@@ -621,7 +631,11 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
       </div>
 
       {transitionState === "loading" ? (
-        <div className="login-loader" role="status" aria-label="Iniciando sesión">
+        <div
+          className="login-loader"
+          role="status"
+          aria-label="Iniciando sesión"
+        >
           <div className="loader-ring"></div>
           <span className="loader-text">Entrando…</span>
         </div>
@@ -710,10 +724,17 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
             </div>
 
             {/* ── PANEL LOGIN ── */}
-            <div className="form-panel" id="panel-login" role="tabpanel" aria-labelledby="r-login">
+            <div
+              className="form-panel"
+              id="panel-login"
+              role="tabpanel"
+              aria-labelledby="r-login"
+            >
               {/* Campo de correo con validación en tiempo real */}
               <div className="campo">
-                <label htmlFor="login-correo" className="campo-label">Correo electrónico</label>
+                <label htmlFor="login-correo" className="campo-label">
+                  Correo electrónico
+                </label>
                 <input
                   id="login-correo"
                   type="email"
@@ -722,16 +743,26 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
                   onChange={(e) => validarCorreo(e.target.value, "login")}
                   autoComplete="email"
                   aria-invalid={!!errores.correo}
-                  aria-describedby={errores.correo ? "login-correo-error" : undefined}
+                  aria-describedby={
+                    errores.correo ? "login-correo-error" : undefined
+                  }
                 />
                 {errores.correo && (
-                  <span id="login-correo-error" className="error-msg" role="alert">{errores.correo}</span>
+                  <span
+                    id="login-correo-error"
+                    className="error-msg"
+                    role="alert"
+                  >
+                    {errores.correo}
+                  </span>
                 )}
               </div>
 
               {/* Campo de contraseña con validación de longitud mínima */}
               <div className="campo">
-                <label htmlFor="login-pass" className="campo-label">Contraseña</label>
+                <label htmlFor="login-pass" className="campo-label">
+                  Contraseña
+                </label>
                 <input
                   id="login-pass"
                   type="password"
@@ -740,10 +771,18 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
                   onChange={(e) => validarPassLogin(e.target.value)}
                   autoComplete="current-password"
                   aria-invalid={!!errores.pass}
-                  aria-describedby={errores.pass ? "login-pass-error" : undefined}
+                  aria-describedby={
+                    errores.pass ? "login-pass-error" : undefined
+                  }
                 />
                 {errores.pass && (
-                  <span id="login-pass-error" className="error-msg" role="alert">{errores.pass}</span>
+                  <span
+                    id="login-pass-error"
+                    className="error-msg"
+                    role="alert"
+                  >
+                    {errores.pass}
+                  </span>
                 )}
               </div>
 
@@ -780,10 +819,18 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
                 <span>o continúa con</span>
               </div>
 
-              <button className="btn-secundario btn-google" onClick={() => googleLogin()}>
-                <i className="bi bi-google"></i>
-                <span>Continuar con Google</span>
-              </button>
+              <div className="btn-google-wrapper">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                  useOneTap={false}
+                  text="continue_with"
+                  locale="es"
+                  shape="rectangular"
+                  theme="outline"
+                  width="100%"
+                />
+              </div>
 
               <p className="pie">
                 ¿No tienes cuenta?{" "}
@@ -794,10 +841,17 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
             </div>
 
             {/* ── PANEL REGISTRO ── */}
-            <div className="form-panel" id="panel-reg" role="tabpanel" aria-labelledby="r-reg">
+            <div
+              className="form-panel"
+              id="panel-reg"
+              role="tabpanel"
+              aria-labelledby="r-reg"
+            >
               {/* Campo nombre con validación de longitud */}
               <div className="campo">
-                <label htmlFor="reg-nombre" className="campo-label">Nombre completo</label>
+                <label htmlFor="reg-nombre" className="campo-label">
+                  Nombre completo
+                </label>
                 <input
                   id="reg-nombre"
                   type="text"
@@ -806,17 +860,27 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
                   onChange={(e) => validarNombre(e.target.value)}
                   autoComplete="name"
                   aria-invalid={!!errores.nombre}
-                  aria-describedby={errores.nombre ? "reg-nombre-error" : undefined}
+                  aria-describedby={
+                    errores.nombre ? "reg-nombre-error" : undefined
+                  }
                 />
                 {errores.nombre && (
-                  <span id="reg-nombre-error" className="error-msg" role="alert">{errores.nombre}</span>
+                  <span
+                    id="reg-nombre-error"
+                    className="error-msg"
+                    role="alert"
+                  >
+                    {errores.nombre}
+                  </span>
                 )}
               </div>
 
               {/* Campo correo con botón para enviar código de verificación.
                   Se deshabilita una vez que el correo fue verificado exitosamente. */}
               <div className="campo">
-                <label htmlFor="reg-correo" className="campo-label">Correo electrónico</label>
+                <label htmlFor="reg-correo" className="campo-label">
+                  Correo electrónico
+                </label>
                 <div className="correo-verify-wrap">
                   <input
                     id="reg-correo"
@@ -828,11 +892,18 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
                     className={correoVerificado ? "input-verified" : ""}
                     autoComplete="email"
                     aria-invalid={!!errores.correoReg}
-                    aria-describedby={errores.correoReg ? "reg-correo-error" : undefined}
+                    aria-describedby={
+                      errores.correoReg ? "reg-correo-error" : undefined
+                    }
                   />
                   {/* Muestra badge "Verificado" o el botón de enviar código según estado */}
                   {correoVerificado ? (
-                    <span className="verified-badge" aria-label="Correo verificado">✓ Verificado</span>
+                    <span
+                      className="verified-badge"
+                      aria-label="Correo verificado"
+                    >
+                      ✓ Verificado
+                    </span>
                   ) : (
                     <button
                       type="button"
@@ -849,13 +920,21 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
                   )}
                 </div>
                 {errores.correoReg && (
-                  <span id="reg-correo-error" className="error-msg" role="alert">{errores.correoReg}</span>
+                  <span
+                    id="reg-correo-error"
+                    className="error-msg"
+                    role="alert"
+                  >
+                    {errores.correoReg}
+                  </span>
                 )}
               </div>
 
               {/* Campo contraseña del registro */}
               <div className="campo">
-                <label htmlFor="reg-pass" className="campo-label">Contraseña</label>
+                <label htmlFor="reg-pass" className="campo-label">
+                  Contraseña
+                </label>
                 <input
                   id="reg-pass"
                   type="password"
@@ -864,16 +943,22 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
                   onChange={(e) => validarPassReg(e.target.value)}
                   autoComplete="new-password"
                   aria-invalid={!!errores.passReg}
-                  aria-describedby={errores.passReg ? "reg-pass-error" : undefined}
+                  aria-describedby={
+                    errores.passReg ? "reg-pass-error" : undefined
+                  }
                 />
                 {errores.passReg && (
-                  <span id="reg-pass-error" className="error-msg" role="alert">{errores.passReg}</span>
+                  <span id="reg-pass-error" className="error-msg" role="alert">
+                    {errores.passReg}
+                  </span>
                 )}
               </div>
 
               {/* Campo de confirmación — compara con el campo anterior */}
               <div className="campo">
-                <label htmlFor="reg-pass2" className="campo-label">Confirmar contraseña</label>
+                <label htmlFor="reg-pass2" className="campo-label">
+                  Confirmar contraseña
+                </label>
                 <input
                   id="reg-pass2"
                   type="password"
@@ -882,10 +967,14 @@ const { data } = await apiFetch("/api/Auth/verify-code", {
                   onChange={(e) => validarPassReg2(e.target.value)}
                   autoComplete="new-password"
                   aria-invalid={!!errores.passReg2}
-                  aria-describedby={errores.passReg2 ? "reg-pass2-error" : undefined}
+                  aria-describedby={
+                    errores.passReg2 ? "reg-pass2-error" : undefined
+                  }
                 />
                 {errores.passReg2 && (
-                  <span id="reg-pass2-error" className="error-msg" role="alert">{errores.passReg2}</span>
+                  <span id="reg-pass2-error" className="error-msg" role="alert">
+                    {errores.passReg2}
+                  </span>
                 )}
               </div>
 
