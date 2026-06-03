@@ -372,11 +372,15 @@ const Perfil = () => {
 
   // Llama al endpoint DELETE y elimina el servicio de la lista local si el servidor responde OK
   const confirmarEliminar = async () => {
+    const token = localStorage.getItem("token");
     const res = await fetch(
       `/api/services/${confirmEliminar}?id_proveedor=${id_usuario_logueado}`,
       {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
       },
     );
     if (res.ok) {
