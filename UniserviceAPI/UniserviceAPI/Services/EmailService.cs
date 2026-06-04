@@ -20,6 +20,20 @@ namespace UniserviceAPI.Services
             _config = config;
         }
 
+        private (string host, int port, MailKit.Security.SecureSocketOptions secureOption) GetSmtpConfig()
+        {
+            string host = _config["EmailSettings:Host"] ?? "";
+            int port = 587;
+            if (int.TryParse(_config["EmailSettings:Port"], out var parsedPort))
+                port = parsedPort;
+
+            var secureOption = port == 465
+                ? MailKit.Security.SecureSocketOptions.SslOnConnect
+                : MailKit.Security.SecureSocketOptions.StartTls;
+
+            return (host, port, secureOption);
+        }
+
         public void EnviarNotificacionChat(string emailDestino, string nombreDestinatario, string nombreRemitente, string previewMensaje)
         {
             string key = $"chat_{emailDestino}";
@@ -88,11 +102,9 @@ namespace UniserviceAPI.Services
             client.Timeout = 10000;
             try
             {
-                await client.ConnectAsync(
-                    _config["EmailSettings:Host"],
-                    int.Parse(_config["EmailSettings:Port"]),
-                    MailKit.Security.SecureSocketOptions.StartTls
-                );
+                var (host, port, secureOption) = GetSmtpConfig();
+                Console.WriteLine($"[SMTP] Conectando a {host}:{port} (modo: {(port == 465 ? "SSL" : "StartTLS")})...");
+                await client.ConnectAsync(host, port, secureOption);
 
                 await client.AuthenticateAsync(
                     _config["EmailSettings:Email"],
@@ -166,11 +178,9 @@ namespace UniserviceAPI.Services
             client.Timeout = 10000;
             try
             {
-                await client.ConnectAsync(
-                    _config["EmailSettings:Host"],
-                    int.Parse(_config["EmailSettings:Port"]),
-                    MailKit.Security.SecureSocketOptions.StartTls
-                );
+                var (host, port, secureOption) = GetSmtpConfig();
+                Console.WriteLine($"[SMTP] Conectando a {host}:{port} (modo: {(port == 465 ? "SSL" : "StartTLS")})...");
+                await client.ConnectAsync(host, port, secureOption);
 
                 await client.AuthenticateAsync(
                     _config["EmailSettings:Email"],
@@ -235,14 +245,9 @@ namespace UniserviceAPI.Services
 
             try
             {
-                // Conexi�n usando las llaves exactas de tu appsettings.json
-
-
-                await client.ConnectAsync(
-                    _config["EmailSettings:Host"],
-                    int.Parse(_config["EmailSettings:Port"]),
-                    MailKit.Security.SecureSocketOptions.StartTls
-                );
+                var (host, port, secureOption) = GetSmtpConfig();
+                Console.WriteLine($"[SMTP] Conectando a {host}:{port} (modo: {(port == 465 ? "SSL" : "StartTLS")})...");
+                await client.ConnectAsync(host, port, secureOption);
 
                 await client.AuthenticateAsync(
                     _config["EmailSettings:Email"],
@@ -293,10 +298,9 @@ namespace UniserviceAPI.Services
             client.Timeout = 10000;
             try
             {
-                await client.ConnectAsync(
-                    _config["EmailSettings:Host"],
-                    int.Parse(_config["EmailSettings:Port"]),
-                    MailKit.Security.SecureSocketOptions.StartTls);
+                var (host, port, secureOption) = GetSmtpConfig();
+                Console.WriteLine($"[SMTP] Conectando a {host}:{port} (modo: {(port == 465 ? "SSL" : "StartTLS")})...");
+                await client.ConnectAsync(host, port, secureOption);
                 await client.AuthenticateAsync(_config["EmailSettings:Email"], _config["EmailSettings:Password"]);
                 await client.SendAsync(mensaje);
                 Console.WriteLine($"[EMAIL] Notificación de nuevo servicio enviada a {emailAdmin}");
@@ -416,10 +420,9 @@ namespace UniserviceAPI.Services
             client.Timeout = 10000;
             try
             {
-                await client.ConnectAsync(
-                    _config["EmailSettings:Host"],
-                    int.Parse(_config["EmailSettings:Port"]),
-                    MailKit.Security.SecureSocketOptions.StartTls);
+                var (host, port, secureOption) = GetSmtpConfig();
+                Console.WriteLine($"[SMTP] Conectando a {host}:{port} (modo: {(port == 465 ? "SSL" : "StartTLS")})...");
+                await client.ConnectAsync(host, port, secureOption);
                 await client.AuthenticateAsync(
                     _config["EmailSettings:Email"],
                     _config["EmailSettings:Password"]);
