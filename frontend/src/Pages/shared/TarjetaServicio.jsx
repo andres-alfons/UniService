@@ -43,8 +43,9 @@ export default function TarjetaServicio({ servicio, linkBase = "/servicio?id=" }
           />
         </div>
       ) : (
-        <div className="card-icono card-icono-azul" aria-hidden="true">
+        <div className="card-icono card-icono-azul" aria-hidden="true" style={{ '--delay': `${-(servicio.id_servicio % 8)}s`, '--duration': `${28 + (servicio.id_servicio % 21)}s`, '--anim': `floatCircle-${1 + (servicio.id_servicio % 4)}` }}>
           <i className={`bi ${ICONOS_POR_NOMBRE_CATEGORIA[servicio.nombre_categoria] || (servicio.icono?.startsWith("bi-") ? servicio.icono : "bi-pin")}`}></i>
+          {servicio.nombre_categoria && <span className="card-icono-fallback-label">{servicio.nombre_categoria}</span>}
         </div>
       )}
       <div className="card-body-custom">
