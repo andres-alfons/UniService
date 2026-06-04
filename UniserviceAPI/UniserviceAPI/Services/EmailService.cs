@@ -99,11 +99,10 @@ namespace UniserviceAPI.Services
             mensaje.Body = builder.ToMessageBody();
 
             using var client = new SmtpClient();
-            client.Timeout = 10000;
             try
             {
                 var (host, port, secureOption) = GetSmtpConfig();
-                Console.WriteLine($"[SMTP] Conectando a {host}:{port} (modo: {(port == 465 ? "SSL" : "StartTLS")})...");
+                Console.WriteLine($"[SMTP] Conectando a {host}:{port}...");
                 await client.ConnectAsync(host, port, secureOption);
 
                 await client.AuthenticateAsync(
@@ -175,11 +174,10 @@ namespace UniserviceAPI.Services
             mensaje.Body = builder.ToMessageBody();
 
             using var client = new SmtpClient();
-            client.Timeout = 10000;
             try
             {
                 var (host, port, secureOption) = GetSmtpConfig();
-                Console.WriteLine($"[SMTP] Conectando a {host}:{port} (modo: {(port == 465 ? "SSL" : "StartTLS")})...");
+                Console.WriteLine($"[SMTP] Conectando a {host}:{port}...");
                 await client.ConnectAsync(host, port, secureOption);
 
                 await client.AuthenticateAsync(
@@ -241,12 +239,11 @@ namespace UniserviceAPI.Services
 
             // 4. Configuraci�n y env�o mediante SMTP
             using var client = new MailKit.Net.Smtp.SmtpClient();
-            client.Timeout = 10000;
 
             try
             {
                 var (host, port, secureOption) = GetSmtpConfig();
-                Console.WriteLine($"[SMTP] Conectando a {host}:{port} (modo: {(port == 465 ? "SSL" : "StartTLS")})...");
+                Console.WriteLine($"[SMTP] Conectando a {host}:{port}...");
                 await client.ConnectAsync(host, port, secureOption);
 
                 await client.AuthenticateAsync(
@@ -295,11 +292,10 @@ namespace UniserviceAPI.Services
             mensaje.Body = builder.ToMessageBody();
 
             using var client = new SmtpClient();
-            client.Timeout = 10000;
             try
             {
                 var (host, port, secureOption) = GetSmtpConfig();
-                Console.WriteLine($"[SMTP] Conectando a {host}:{port} (modo: {(port == 465 ? "SSL" : "StartTLS")})...");
+                Console.WriteLine($"[SMTP] Conectando a {host}:{port}...");
                 await client.ConnectAsync(host, port, secureOption);
                 await client.AuthenticateAsync(_config["EmailSettings:Email"], _config["EmailSettings:Password"]);
                 await client.SendAsync(mensaje);
@@ -417,11 +413,10 @@ namespace UniserviceAPI.Services
             mensaje.Body = builder.ToMessageBody();
 
             using var client = new SmtpClient();
-            client.Timeout = 10000;
             try
             {
                 var (host, port, secureOption) = GetSmtpConfig();
-                Console.WriteLine($"[SMTP] Conectando a {host}:{port} (modo: {(port == 465 ? "SSL" : "StartTLS")})...");
+                Console.WriteLine($"[SMTP] Conectando a {host}:{port}...");
                 await client.ConnectAsync(host, port, secureOption);
                 await client.AuthenticateAsync(
                     _config["EmailSettings:Email"],
