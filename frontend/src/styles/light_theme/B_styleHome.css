@@ -1078,15 +1078,64 @@ html[data-theme="claro"] {
 }
 
 [data-theme="claro"] .card-icono-azul {
-  background: linear-gradient(
-    135deg,
-    rgba(14, 165, 160, 0.15),
-    rgba(14, 165, 160, 0.02)
-  );
+  background:
+    radial-gradient(circle at 20% 30%, rgba(168, 213, 232, 0.35), transparent 60%),
+    radial-gradient(circle at 80% 70%, rgba(127, 189, 216, 0.25), transparent 60%),
+    linear-gradient(135deg, rgba(168, 213, 232, 0.3), rgba(212, 228, 240, 0.1));
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="claro"] .card-icono-azul::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(107, 139, 168, 0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+[data-theme="claro"] .card-icono-azul::after {
+  content: "";
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 1px solid rgba(107, 139, 168, 0.15);
+  bottom: -30px;
+  right: -20px;
+  pointer-events: none;
+  animation: var(--anim, floatCircle-1) var(--duration, 32s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
 }
 
 [data-theme="claro"] .card-icono-azul i {
-  color: #0ea5a0;
+  font-size: 3rem;
+  color: #6b8ba8;
+  filter: drop-shadow(0 2px 6px rgba(107, 139, 168, 0.3));
+  transition: transform 0.3s ease, filter 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+[data-theme="claro"] .card-servicio:hover .card-icono-azul i {
+  transform: scale(1.15);
+  filter: drop-shadow(0 4px 12px rgba(107, 139, 168, 0.5));
+}
+
+[data-theme="claro"] .card-icono-fallback-label {
+  font-size: 0.7rem;
+  color: #6b8ba8;
+  opacity: 0.55;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  line-height: 1.2;
 }
 
 [data-theme="claro"] .card-icono-morado {
@@ -2267,8 +2316,8 @@ html[data-theme="claro"] {
 [data-theme="claro"] .top-cards-3d {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-  perspective: 1000px;
+  gap: 20px;
+  perspective: 1200px;
   margin-top: 32px;
 }
 
@@ -2277,72 +2326,84 @@ html[data-theme="claro"] {
 }
 
 [data-theme="claro"] .top-card {
-  background: var(--card);
-  border: 1px solid var(--borde);
-  border-radius: 18px;
-  padding: 24px 18px;
+  background: linear-gradient(145deg, rgba(168, 213, 232, 0.12), rgba(248, 249, 252, 0.06));
+  border: 1px solid rgba(168, 213, 232, 0.25);
+  border-radius: 20px;
+  padding: 30px 22px 22px;
   position: relative;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   transform-style: preserve-3d;
 }
 
 [data-theme="claro"] .top-card:hover {
-  transform: rotateY(4deg) rotateX(4deg) translateZ(12px);
+  transform: translateY(-6px) rotateY(3deg) rotateX(3deg);
   box-shadow:
-    0 24px 48px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(14, 165, 160, 0.2);
-  border-color: var(--borde2);
+    0 32px 64px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(168, 213, 232, 0.3);
+  border-color: rgba(168, 213, 232, 0.4);
 }
 
 [data-theme="claro"] .top-card-rank {
   position: absolute;
-  top: -12px;
-  left: 15px;
+  top: -14px;
+  left: 18px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: var(--card);
-  padding: 2px 12px 2px 8px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  gap: 7px;
+  background: linear-gradient(135deg, rgba(168, 213, 232, 0.3), rgba(168, 213, 232, 0.08));
+  padding: 5px 16px 5px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(168, 213, 232, 0.35);
+  box-shadow: 0 4px 20px rgba(107, 139, 168, 0.15);
+  backdrop-filter: blur(8px);
 }
 
 [data-theme="claro"] .rank-number {
-  font-size: 2.6rem;
+  font-size: 2rem;
   font-weight: 900;
-  color: var(--bg3);
+  color: #6b8ba8;
   line-height: 1;
-  -webkit-text-stroke: 2px var(--teal);
+  -webkit-text-stroke: 0;
+  text-shadow: 0 0 20px rgba(107, 139, 168, 0.2);
 }
 
 [data-theme="claro"] .rank-medal {
-  font-size: 1.35rem;
-  color: rgba(14, 165, 160, 0.4);
+  font-size: 1.1rem;
+  color: #d4a04a;
+  filter: drop-shadow(0 0 8px rgba(212, 160, 74, 0.25));
 }
 
 [data-theme="claro"] .top-card-content {
   text-align: center;
-  padding-top: 15px;
+  padding-top: 18px;
 }
 
 [data-theme="claro"] .top-card-icon {
-  font-size: 2.25rem;
-  margin-bottom: 12px;
+  font-size: 2.5rem;
+  margin-bottom: 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(14, 165, 160, 0.15), rgba(14, 165, 160, 0.02));
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(212, 160, 74, 0.12), rgba(212, 160, 74, 0.02));
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+[data-theme="claro"] .top-card:hover .top-card-icon {
+  transform: scale(1.08);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1);
 }
 
 [data-theme="claro"] .top-card-icon i {
-  color: #0ea5a0;
+  color: #d4a04a;
+  filter: drop-shadow(0 2px 6px rgba(212, 160, 74, 0.2));
 }
 
 [data-theme="claro"] .top-card-content h5 {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--texto);
   margin-bottom: 6px;
@@ -2359,7 +2420,7 @@ html[data-theme="claro"] {
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  margin-bottom: 15px;
+  margin-bottom: 16px;
 }
 
 [data-theme="claro"] .top-card-rating .stars {
@@ -2376,8 +2437,8 @@ html[data-theme="claro"] {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 12px;
-  border-top: 1px solid var(--borde);
+  padding-top: 14px;
+  border-top: 1px solid rgba(168, 213, 232, 0.3);
 }
 
 [data-theme="claro"] .top-card-footer .author {
@@ -2389,9 +2450,9 @@ html[data-theme="claro"] {
 }
 
 [data-theme="claro"] .top-card-footer .price {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 800;
-  color: var(--teal);
+  color: #d4a04a;
 }
 
 /* Animación entrada top cards */
@@ -3336,6 +3397,12 @@ html[data-theme="claro"] {
   [data-theme="claro"] .card-icono-imagen {
     height: 120px;
   }
+  [data-theme="claro"] .card-icono-azul i {
+    font-size: 2.2rem;
+  }
+  [data-theme="claro"] .card-icono-fallback-label {
+    font-size: 0.6rem;
+  }
 }
 
 /* Mobile muy pequeño - 360px */
@@ -3470,23 +3537,22 @@ html[data-theme="claro"] {
 
   [data-theme="claro"] .top-card {
     min-width: 100%;
-    padding-left: 15%;
-    padding-right: 15%;
     flex-shrink: 0;
+    padding: 26px 18px 20px;
   }
 
   [data-theme="claro"] .top-card:hover {
     transform: none;
     box-shadow: none;
-    border-color: var(--borde);
+    border-color: rgba(168, 213, 232, 0.25);
   }
 }
 
 [data-theme="claro"] .carousel-dots {
   display: none;
   justify-content: center;
-  gap: 10px;
-  margin-top: 24px;
+  gap: 12px;
+  margin-top: 28px;
 }
 
 @media (max-width: 768px) {
@@ -3496,10 +3562,10 @@ html[data-theme="claro"] {
 }
 
 [data-theme="claro"] .carousel-dot {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  border: 2px solid var(--teal);
+  border: 2px solid rgba(168, 213, 232, 0.5);
   background: transparent;
   cursor: pointer;
   padding: 0;
@@ -3507,8 +3573,9 @@ html[data-theme="claro"] {
 }
 
 [data-theme="claro"] .carousel-dot.active {
-  background: var(--teal);
-  box-shadow: 0 0 8px rgba(14, 165, 160, 0.5);
+  background: #a8d5e8;
+  border-color: #a8d5e8;
+  box-shadow: 0 0 12px rgba(168, 213, 232, 0.4);
 }
 
 /* ═══════════════════════════════════════════

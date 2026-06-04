@@ -2,6 +2,7 @@
 import { CATEGORIAS, MODALIDADES, DISPONIBILIDAD, initialPublicar, API_HOME, mapaIconos, mapaCategoriaId, MAPA_ICONOS_MODALIDAD, MAPA_ICONOS_DISPONIBILIDAD } from "../shared/constantes";
 import GoogleMapsAutocomplete from "../../Components/GoogleMapsAutocomplete";
 import { apiFetch } from "../../utils/apiFetch";
+import { compressImage } from "../../utils/compressImage";
 
 export default function SeccionPublicar({ onPublicado }) {
   const [form, setForm] = useState(initialPublicar);
@@ -47,7 +48,7 @@ export default function SeccionPublicar({ onPublicado }) {
   };
 
   // Manejo de imágenes
-  const handleImagenesChange = (e) => {
+  const handleImagenesChange = async (e) => {
     const files = Array.from(e.target.files);
     const nuevasImagenes = files.slice(0, 5 - imagenes.length);
     
@@ -56,12 +57,16 @@ export default function SeccionPublicar({ onPublicado }) {
       return;
     }
 
-    const previews = nuevasImagenes.map((file) => ({
+    const comprimidas = await Promise.all(
+      nuevasImagenes.map((file) => compressImage(file))
+    );
+
+    const previews = comprimidas.map((file) => ({
       file,
       preview: URL.createObjectURL(file),
     }));
 
-    setImagenes((prev) => [...prev, ...nuevasImagenes]);
+    setImagenes((prev) => [...prev, ...comprimidas]);
     setImagenesPreview((prev) => [...prev, ...previews]);
   };
 
