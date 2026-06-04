@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { CATEGORIAS, MODALIDADES, DISPONIBILIDAD, initialPublicar, API_HOME, mapaIconos, mapaCategoriaId, MAPA_ICONOS_MODALIDAD, MAPA_ICONOS_DISPONIBILIDAD } from "../shared/constantes";
 import GoogleMapsAutocomplete from "../../Components/GoogleMapsAutocomplete";
 import { apiFetch } from "../../utils/apiFetch";
+import { compressImage } from "../../utils/compressImage";
 
 export default function ModalPublicarServicio({ abierto, onCerrar, onPublicado }) {
   const [form, setForm] = useState(initialPublicar);
@@ -59,15 +60,18 @@ export default function ModalPublicarServicio({ abierto, onCerrar, onPublicado }
     setForm((prev) => ({ ...prev, universidad: val }));
   };
 
-  const handleImagenesChange = (e) => {
+  const handleImagenesChange = async (e) => {
     const files = Array.from(e.target.files);
     const nuevasImagenes = files.slice(0, 5 - imagenes.length);
     if (imagenes.length + nuevasImagenes.length > 5) {
       setModalError("Máximo 5 imágenes permitidas");
       return;
     }
-    const previews = nuevasImagenes.map((file) => ({ file, preview: URL.createObjectURL(file) }));
-    setImagenes((prev) => [...prev, ...nuevasImagenes]);
+    const comprimidas = await Promise.all(
+      nuevasImagenes.map((file) => compressImage(file))
+    );
+    const previews = comprimidas.map((file) => ({ file, preview: URL.createObjectURL(file) }));
+    setImagenes((prev) => [...prev, ...comprimidas]);
     setImagenesPreview((prev) => [...prev, ...previews]);
   };
 
