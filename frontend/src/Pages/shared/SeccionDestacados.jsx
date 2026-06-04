@@ -62,7 +62,7 @@ export default function SeccionDestacados({ top3, linkBase = "/servicio?id=" }) 
                             : `${s.universidad || "Universidad no especificada"}`}
                         </p>
                         <div className="top-card-rating">
-                          <StarRating rating={promNum} size={16} color="#F5A623" />
+                          <StarRating rating={promNum} size={16} color="#0ea5a0" />
                           <span className="rating-text">
                             {Array.isArray(s.estrellas) ? s.estrellas.length : 0} puntuaciones
                           </span>

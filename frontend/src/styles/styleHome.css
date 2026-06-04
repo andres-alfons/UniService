@@ -2689,8 +2689,8 @@ html {
 
 .rank-medal {
   font-size: 1.1rem;
-  color: #f5c542;
-  filter: drop-shadow(0 0 8px rgba(245, 197, 66, 0.4));
+  color: var(--teal);
+  filter: drop-shadow(0 0 8px rgba(14, 165, 160, 0.4));
 }
 
 .top-card-content {
@@ -2707,7 +2707,7 @@ html {
   width: 72px;
   height: 72px;
   border-radius: 20px;
-  background: linear-gradient(135deg, rgba(245, 197, 66, 0.12), rgba(245, 197, 66, 0.02));
+  background: var(--teal-dim);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -2718,8 +2718,8 @@ html {
 }
 
 .top-card-icon i {
-  color: #f5c542;
-  filter: drop-shadow(0 2px 6px rgba(245, 197, 66, 0.3));
+  color: var(--teal);
+  filter: drop-shadow(0 2px 6px rgba(14, 165, 160, 0.3));
 }
 
 .top-card-content h5 {
@@ -2772,8 +2772,8 @@ html {
 .top-card-footer .price {
   font-size: 0.95rem;
   font-weight: 800;
-  color: #f5c542;
-  text-shadow: 0 0 12px rgba(245, 197, 66, 0.15);
+  color: var(--teal);
+  text-shadow: 0 0 12px rgba(14, 165, 160, 0.15);
 }
 
 /* Animación entrada top cards */
