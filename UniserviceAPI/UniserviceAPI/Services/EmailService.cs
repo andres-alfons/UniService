@@ -12,6 +12,7 @@ namespace UniserviceAPI.Services
 {
     public class EmailService
     {
+        private static readonly string LogoUrl = "https://mpdeejiivmctbqcfflbz.supabase.co/storage/v1/object/public/imagenes-servicios/logo_uniservice.png";
         private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _config;
         private static readonly HttpClient _httpClient = new()
@@ -76,20 +77,6 @@ namespace UniserviceAPI.Services
             }
         }
 
-        private string GetLogoDataUri()
-        {
-            try
-            {
-                string pathLogo = Path.Combine(_env.WebRootPath, "img", "logo_uniservice.png");
-                if (File.Exists(pathLogo))
-                {
-                    var bytes = File.ReadAllBytes(pathLogo);
-                    return $"data:image/png;base64,{Convert.ToBase64String(bytes)}";
-                }
-            }
-            catch { }
-            return "";
-        }
 
         public void EnviarNotificacionChat(string emailDestino, string nombreDestinatario, string nombreRemitente, string previewMensaje)
         {
@@ -181,9 +168,7 @@ namespace UniserviceAPI.Services
                                    .Replace("{{presupuesto}}", presupuestoTexto)
                                    .Replace("{{urgencia}}", urgenciaTexto);
 
-                string logoUri = GetLogoDataUri();
-                if (!string.IsNullOrEmpty(logoUri))
-                    htmlBody = htmlBody.Replace("cid:logo_uniservice", logoUri);
+                htmlBody = htmlBody.Replace("cid:logo_uniservice", LogoUrl);
 
                 await SendViaBrevoAsync(emailProveedor, $"Nueva solicitud de servicio - UniService", htmlBody);
             }
@@ -208,9 +193,7 @@ namespace UniserviceAPI.Services
                 string htmlBody = await File.ReadAllTextAsync(pathHtml);
                 htmlBody = htmlBody.Replace("{{codigo}}", codigo);
 
-                string logoUri = GetLogoDataUri();
-                if (!string.IsNullOrEmpty(logoUri))
-                    htmlBody = htmlBody.Replace("cid:logo_uniservice", logoUri);
+                htmlBody = htmlBody.Replace("cid:logo_uniservice", LogoUrl);
 
                 await SendViaBrevoAsync(emailDestino, "Verifica tu cuenta - UniService", htmlBody);
             }
@@ -286,8 +269,7 @@ namespace UniserviceAPI.Services
                 Puedes crear un nuevo servicio corrigiendo los puntos mencionados y enviarlo nuevamente para revisión.
             </p>";
 
-                string logoUri = GetLogoDataUri();
-                string logoSrc = !string.IsNullOrEmpty(logoUri) ? logoUri : "";
+                string logoSrc = LogoUrl;
 
                 string htmlBody = $@"
 <!DOCTYPE html>
