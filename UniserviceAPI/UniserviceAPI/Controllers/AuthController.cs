@@ -145,12 +145,12 @@ public class AuthController : ControllerBase
             using (var reader = await cmd.ExecuteReaderAsync())
             {
                 if (!await reader.ReadAsync())
-                    return NotFound(new { error = "Usuario no existe" });
+                    return NotFound(new { error = "Usuario no existe o contraseña incorrecta" });
 
                 string hash = reader["password_hash"]?.ToString() ?? "";
 
                 if (string.IsNullOrEmpty(hash) || !BCrypt.Net.BCrypt.Verify(dto.password, hash))
-                    return Unauthorized(new { error = "Contraseña incorrecta" });
+                    return Unauthorized(new { error = "Usuario no existe o contraseña incorrecta" });
 
                 id = (int)reader["id_usuario"];
                 idRol = reader["id_rol"] != DBNull.Value ? Convert.ToInt32(reader["id_rol"]) : 2;
