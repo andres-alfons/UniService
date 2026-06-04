@@ -10,25 +10,32 @@ using System.Text.Json.Serialization;
 
 namespace UniserviceAPI.Services
 {
-    public class EmailService : IDisposable
+    public class EmailService
     {
         private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _config;
-        private readonly HttpClient _httpClient;
+        private static readonly HttpClient _httpClient = new()
+        {
+            BaseAddress = new Uri("https://api.brevo.com/")
+        };
         private static readonly ConcurrentDictionary<string, (DateTime ultimoEnvio, CancellationTokenSource cts)> _spamControl = new();
+        private static bool _httpClientInitialized;
 
         public EmailService(IWebHostEnvironment env, IConfiguration config)
         {
             _env = env;
             _config = config;
-            _httpClient = new HttpClient();
-            _httpClient.BaseAddress = new Uri("https://api.brevo.com/");
-            _httpClient.DefaultRequestHeaders.Add("api-key", _config["Brevo:ApiKey"] ?? "");
-        }
 
-        public void Dispose()
-        {
-            _httpClient?.Dispose();
+            if (!_httpClientInitialized)
+            {
+                var apiKey = _config["Brevo:ApiKey"] ?? "";
+                if (!string.IsNullOrEmpty(apiKey))
+                {
+                    _httpClient.DefaultRequestHeaders.Remove("api-key");
+                    _httpClient.DefaultRequestHeaders.Add("api-key", apiKey);
+                }
+                _httpClientInitialized = true;
+            }
         }
 
         private async Task<string> SendViaBrevoAsync(string to, string subject, string htmlBody)
