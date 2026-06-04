@@ -32,7 +32,7 @@ public class AuthController : ControllerBase
     // =========================
     [AllowAnonymous]
     [HttpPost("send-code")]
-    public async Task<IActionResult> EnviarCodigo([FromBody] EmailDTO data)
+    public Task<IActionResult> EnviarCodigo([FromBody] EmailDTO data)
     {
         var codigo = new Random().Next(100000, 999999).ToString();
 
@@ -45,9 +45,19 @@ public class AuthController : ControllerBase
                 codigos.Remove(data.correo);
         });
 
-        await _emailService.EnviarCodigoVerificacion(data.correo, codigo);
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await _emailService.EnviarCodigoVerificacion(data.correo, codigo);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[EMAIL] Error enviando código: {ex.Message}");
+            }
+        });
 
-        return Ok(new { ok = true });
+        return Task.FromResult<IActionResult>(Ok(new { ok = true }));
     }
 
     // =========================
@@ -351,7 +361,17 @@ public class AuthController : ControllerBase
                     codigos.Remove(data.correo);
             });
 
-            await _emailService.EnviarCodigoVerificacion(data.correo, codigo);
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await _emailService.EnviarCodigoVerificacion(data.correo, codigo);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[EMAIL] Error enviando código recuperación: {ex.Message}");
+                }
+            });
 
             return Ok(new { ok = true });
         }

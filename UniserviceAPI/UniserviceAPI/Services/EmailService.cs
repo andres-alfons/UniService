@@ -20,7 +20,7 @@ namespace UniserviceAPI.Services
             _config = config;
         }
 
-        public async Task EnviarNotificacionChat(string emailDestino, string nombreDestinatario, string nombreRemitente, string previewMensaje)
+        public void EnviarNotificacionChat(string emailDestino, string nombreDestinatario, string nombreRemitente, string previewMensaje)
         {
             string key = $"chat_{emailDestino}";
 
@@ -32,13 +32,27 @@ namespace UniserviceAPI.Services
             var cts = new CancellationTokenSource();
             _spamControl[key] = (DateTime.UtcNow, cts);
 
-            await Task.Delay(45000, cts.Token).ContinueWith(async _ =>
+            _ = Task.Run(async () =>
             {
-                if (cts.Token.IsCancellationRequested) return;
+                try
+                {
+                    await Task.Delay(45000, cts.Token);
+                    if (cts.Token.IsCancellationRequested) return;
 
-                await EnviarEmailChativo(emailDestino, nombreDestinatario, nombreRemitente, previewMensaje);
-
-                _spamControl.TryRemove(key, out var _);
+                    await EnviarEmailChativo(emailDestino, nombreDestinatario, nombreRemitente, previewMensaje);
+                }
+                catch (OperationCanceledException)
+                {
+                    // Cancelado por nuevo mensaje, no es error
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[EMAIL CHAT] ERROR: {ex.Message}");
+                }
+                finally
+                {
+                    _spamControl.TryRemove(key, out _);
+                }
             });
         }
 
@@ -71,6 +85,7 @@ namespace UniserviceAPI.Services
             mensaje.Body = builder.ToMessageBody();
 
             using var client = new SmtpClient();
+            client.Timeout = 10000;
             try
             {
                 await client.ConnectAsync(
@@ -148,6 +163,7 @@ namespace UniserviceAPI.Services
             mensaje.Body = builder.ToMessageBody();
 
             using var client = new SmtpClient();
+            client.Timeout = 10000;
             try
             {
                 await client.ConnectAsync(
@@ -215,6 +231,7 @@ namespace UniserviceAPI.Services
 
             // 4. Configuraci�n y env�o mediante SMTP
             using var client = new MailKit.Net.Smtp.SmtpClient();
+            client.Timeout = 10000;
 
             try
             {
@@ -273,6 +290,7 @@ namespace UniserviceAPI.Services
             mensaje.Body = builder.ToMessageBody();
 
             using var client = new SmtpClient();
+            client.Timeout = 10000;
             try
             {
                 await client.ConnectAsync(
@@ -395,6 +413,7 @@ namespace UniserviceAPI.Services
             mensaje.Body = builder.ToMessageBody();
 
             using var client = new SmtpClient();
+            client.Timeout = 10000;
             try
             {
                 await client.ConnectAsync(

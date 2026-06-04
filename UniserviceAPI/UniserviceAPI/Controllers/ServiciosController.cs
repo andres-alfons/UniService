@@ -589,8 +589,18 @@ public class ServicesController : ControllerBase
 
                 foreach (var (email, nombre) in admins)
                 {
-                    _ = _emailService.EnviarNotificacionNuevoServicio(
-                        email, nombre, nombreProv, dto.titulo, Convert.ToInt32(idServicio));
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await _emailService.EnviarNotificacionNuevoServicio(
+                                email, nombre, nombreProv, dto.titulo, Convert.ToInt32(idServicio));
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[EMAIL] Error notificando admin: {ex.Message}");
+                        }
+                    });
                 }
             }
             catch (Exception ex)
@@ -974,11 +984,21 @@ public class ServicesController : ControllerBase
                     return NotFound(new { error = "Servicio no encontrado" });
             }
 
-            // 3. Enviar correo
+            // 3. Enviar correo en segundo plano
             if (!string.IsNullOrEmpty(emailProv))
             {
                 Console.WriteLine($"[EMAIL] Enviando aprobación a {emailProv}...");
-                await _emailService.EnviarResultadoRevision(emailProv, nombreProv, tituloServ, aprobado: true);
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _emailService.EnviarResultadoRevision(emailProv, nombreProv, tituloServ, aprobado: true);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[EMAIL] Error enviando aprobación: {ex.Message}");
+                    }
+                });
             }
             else
             {
@@ -1030,14 +1050,24 @@ public class ServicesController : ControllerBase
                     return NotFound(new { error = "Servicio no encontrado" });
             }
 
-            // 3. Enviar correo
+            // 3. Enviar correo en segundo plano
             if (!string.IsNullOrEmpty(emailProv))
             {
                 Console.WriteLine($"[EMAIL] Enviando rechazo a {emailProv}...");
-                await _emailService.EnviarResultadoRevision(
-                    emailProv, nombreProv, tituloServ,
-                    aprobado: false,
-                    razonRechazo: dto?.razon);
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _emailService.EnviarResultadoRevision(
+                            emailProv, nombreProv, tituloServ,
+                            aprobado: false,
+                            razonRechazo: dto?.razon);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[EMAIL] Error enviando rechazo: {ex.Message}");
+                    }
+                });
             }
             else
             {

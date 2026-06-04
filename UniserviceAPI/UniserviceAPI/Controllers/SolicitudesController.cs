@@ -212,24 +212,27 @@ public class SolicitudesController : ControllerBase
             {
                 if (!string.IsNullOrEmpty(emailProveedor))
                 {
-                    try
+                    _ = Task.Run(async () =>
                     {
-                        Console.WriteLine($"📧 Intentando enviar correo a: {emailProveedor}");
-                        await _emailService.EnviarNotificacionSolicitud(
-                            emailProveedor,
-                            nombreProveedor ?? "Proveedor",
-                            nombreCliente ?? "Un estudiante",
-                            tituloServicio ?? "Tu servicio",
-                            dto.tipo_servicio ?? "No especificado",
-                            dto.descripcion ?? "",
-                            dto.presupuesto.ToString(),
-                            dto.urgencia ?? ""
-                        );
-                    }
-                    catch (Exception emailEx)
-                    {
-                        Console.WriteLine($"❌ Error enviando correo: {emailEx.Message}");
-                    }
+                        try
+                        {
+                            Console.WriteLine($"📧 Intentando enviar correo a: {emailProveedor}");
+                            await _emailService.EnviarNotificacionSolicitud(
+                                emailProveedor,
+                                nombreProveedor ?? "Proveedor",
+                                nombreCliente ?? "Un estudiante",
+                                tituloServicio ?? "Tu servicio",
+                                dto.tipo_servicio ?? "No especificado",
+                                dto.descripcion ?? "",
+                                dto.presupuesto.ToString(),
+                                dto.urgencia ?? ""
+                            );
+                        }
+                        catch (Exception emailEx)
+                        {
+                            Console.WriteLine($"❌ Error enviando correo: {emailEx.Message}");
+                        }
+                    });
                 }
             }
             catch (Exception ex)
