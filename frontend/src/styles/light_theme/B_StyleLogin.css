@@ -8,18 +8,19 @@
 /* ── Colores ── */
 
 html[data-theme="claro"] {
-  --bg: #070d16;
-  --bg2: #0b1420;
-  --bg3: #0f1c2e;
-  --card: #0e1929;
-  --borde: #1a2e48;
-  --borde2: #243d5c;
+  --bg: #f8fafc;
+  --bg2: #f1f5f9;
+  --bg3: #e2e8f0;
+  --card: #ffffff;
+  --borde: #cbd5e1;
+  --borde2: #94a3b8;
   --teal: #0ea5a0;
-  --teal2: #14c7c1;
-  --teal-dim: rgba(14, 165, 160, 0.12);
-  --texto: #e8eef8;
-  --texto2: #8fa3bf;
-  --texto3: #5a7a9a;
+  --teal2: #0d9488;
+  --teal-dim: rgba(14, 165, 160, 0.08);
+  --amarillo: #eab308;
+  --texto: #0a1120;
+  --texto2: #374760;
+  --texto3: #546580;
   --trans: all 0.25s ease;
 }
 

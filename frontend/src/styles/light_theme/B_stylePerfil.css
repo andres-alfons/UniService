@@ -1568,8 +1568,27 @@ html[data-theme="claro"] {
 }
 
 /* ══════════════════════════════
-           MENÚ PARA CAMBIAR IMAGEN
-        ═══════════════════════════════ */
+           FORMULARIOS EN MODALES
+         ═══════════════════════════════ */
+[data-theme="claro"] .form-label {
+  color: var(--texto2);
+}
+[data-theme="claro"] .modal-input {
+  border: 1px solid var(--borde);
+  background: var(--card);
+  color: var(--texto);
+}
+[data-theme="claro"] .modal-input:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px var(--teal-dim);
+}
+[data-theme="claro"] .modal-input::placeholder {
+  color: var(--texto3);
+}
+
+/* ══════════════════════════════
+            MENÚ PARA CAMBIAR IMAGEN
+         ═══════════════════════════════ */
 [data-theme="claro"] .image-menu-overlay {
   position: fixed;
   inset: 0;

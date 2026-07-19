@@ -1677,7 +1677,7 @@ const Perfil = () => {
               {seguridadSubPaso === "password" && (
                 <div className="image-menu-options" style={{ padding: "8px 0" }}>
                   <div style={{ marginBottom: "12px" }}>
-                    <label style={{ display: "block", marginBottom: "4px", fontSize: "0.85rem", opacity: 0.8 }}>
+                    <label className="form-label">
                       Contraseña actual
                     </label>
                     <input
@@ -1685,19 +1685,11 @@ const Perfil = () => {
                       value={formPassword.actual}
                       onChange={(e) => setFormPassword((p) => ({ ...p, actual: e.target.value }))}
                       placeholder="••••••••"
-                      style={{
-                        width: "100%",
-                        padding: "10px 12px",
-                        borderRadius: "8px",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        background: "rgba(255,255,255,0.05)",
-                        color: "inherit",
-                        fontSize: "0.9rem",
-                      }}
+                      className="modal-input"
                     />
                   </div>
                   <div style={{ marginBottom: "12px" }}>
-                    <label style={{ display: "block", marginBottom: "4px", fontSize: "0.85rem", opacity: 0.8 }}>
+                    <label className="form-label">
                       Nueva contraseña
                     </label>
                     <input
@@ -1705,19 +1697,11 @@ const Perfil = () => {
                       value={formPassword.nueva}
                       onChange={(e) => setFormPassword((p) => ({ ...p, nueva: e.target.value }))}
                       placeholder="Mínimo 8 caracteres"
-                      style={{
-                        width: "100%",
-                        padding: "10px 12px",
-                        borderRadius: "8px",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        background: "rgba(255,255,255,0.05)",
-                        color: "inherit",
-                        fontSize: "0.9rem",
-                      }}
+                      className="modal-input"
                     />
                   </div>
                   <div style={{ marginBottom: "16px" }}>
-                    <label style={{ display: "block", marginBottom: "4px", fontSize: "0.85rem", opacity: 0.8 }}>
+                    <label className="form-label">
                       Confirmar nueva contraseña
                     </label>
                     <input
@@ -1725,15 +1709,7 @@ const Perfil = () => {
                       value={formPassword.confirmar}
                       onChange={(e) => setFormPassword((p) => ({ ...p, confirmar: e.target.value }))}
                       placeholder="Repite la nueva contraseña"
-                      style={{
-                        width: "100%",
-                        padding: "10px 12px",
-                        borderRadius: "8px",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        background: "rgba(255,255,255,0.05)",
-                        color: "inherit",
-                        fontSize: "0.9rem",
-                      }}
+                      className="modal-input"
                     />
                   </div>
                   <div style={{ display: "flex", gap: "8px" }}>
@@ -1770,7 +1746,7 @@ const Perfil = () => {
               {seguridadSubPaso === "correo" && (
                 <div className="image-menu-options" style={{ padding: "8px 0" }}>
                   <div style={{ marginBottom: "12px" }}>
-                    <label style={{ display: "block", marginBottom: "4px", fontSize: "0.85rem", opacity: 0.8 }}>
+                    <label className="form-label">
                       Nuevo correo electrónico
                     </label>
                     <input
@@ -1778,19 +1754,11 @@ const Perfil = () => {
                       value={formCorreo.nuevoCorreo}
                       onChange={(e) => setFormCorreo((c) => ({ ...c, nuevoCorreo: e.target.value }))}
                       placeholder="nuevo@correo.com"
-                      style={{
-                        width: "100%",
-                        padding: "10px 12px",
-                        borderRadius: "8px",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        background: "rgba(255,255,255,0.05)",
-                        color: "inherit",
-                        fontSize: "0.9rem",
-                      }}
+                      className="modal-input"
                     />
                   </div>
                   <div style={{ marginBottom: "16px" }}>
-                    <label style={{ display: "block", marginBottom: "4px", fontSize: "0.85rem", opacity: 0.8 }}>
+                    <label className="form-label">
                       Contraseña actual (para confirmar)
                     </label>
                     <input
@@ -1798,15 +1766,7 @@ const Perfil = () => {
                       value={formCorreo.password}
                       onChange={(e) => setFormCorreo((c) => ({ ...c, password: e.target.value }))}
                       placeholder="••••••••"
-                      style={{
-                        width: "100%",
-                        padding: "10px 12px",
-                        borderRadius: "8px",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        background: "rgba(255,255,255,0.05)",
-                        color: "inherit",
-                        fontSize: "0.9rem",
-                      }}
+                      className="modal-input"
                     />
                   </div>
                   <div style={{ display: "flex", gap: "8px" }}>
