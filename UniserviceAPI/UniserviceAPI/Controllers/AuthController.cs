@@ -547,15 +547,17 @@ public class AuthController : ControllerBase
 
             int userId = int.Parse(userIdClaim);
 
-            if (_adminAttempts.TryGetValue(userId, out var entry))
+            var entry = (intentos: 0, bloqueadoHasta: default(DateTime));
+
+            if (_adminAttempts.TryGetValue(userId, out var storedEntry))
             {
-                if (entry.bloqueadoHasta > DateTime.UtcNow)
+                if (storedEntry.bloqueadoHasta > DateTime.UtcNow)
                 {
-                    var minutosRestantes = (int)Math.Ceiling((entry.bloqueadoHasta - DateTime.UtcNow).TotalMinutes);
+                    var minutosRestantes = (int)Math.Ceiling((storedEntry.bloqueadoHasta - DateTime.UtcNow).TotalMinutes);
                     return StatusCode(429, new { error = $"Demasiados intentos. Intenta de nuevo en {minutosRestantes} minuto(s).", bloqueado = true });
                 }
 
-                if (entry.bloqueadoHasta != default)
+                if (storedEntry.bloqueadoHasta != default)
                     _adminAttempts.Remove(userId);
             }
 
