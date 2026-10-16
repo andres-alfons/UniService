@@ -1,52 +1,71 @@
 // ════════════════════════════════════════════════════════════════
 // PÁGINA PRINCIPAL (HOME) — Usuario logueado
-// La misma cartelera, desde dentro: buscar, pedir, publicar y gestionar
-// las solicitudes. El chat y las notificaciones flotan encima.
+// Importa y organiza todas las secciones de la página principal:
+// barra de navegación, presentación, buscador, servicios recientes,
+// destacados, formulario de publicación, bandeja de solicitudes,
+// notificaciones flotantes y pie de página.
 // ════════════════════════════════════════════════════════════════
-import { useEffect, useRef, useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/cartel.css";
 import "../styles/styleHome.css";
 import "../styles/styleChat.css";
-import Portada from "./Cartel/Portada";
-import Cartelera from "./Cartel/Cartelera";
-import Explorador from "./Cartel/Explorador";
-import Registro from "./Cartel/Registro";
-import Cierre from "./Cartel/Cierre";
-import { useCartelera, useEntradas } from "./Cartel/useCartel";
+import Navbar from "./Principal/BarraNavegacion";
+import SeccionBuscar from "./Principal/BusquedaServicios";
 import ModalPublicarServicio from "./Principal/ModalPublicarServicio";
 import ModalSolicitudes from "./Principal/ModalSolicitudes";
+import TarjetaPublicar from "./Principal/TarjetaPublicar";
 import NotificacionesFlotantes from "./Principal/Notificaciones";
 import ChatPanel from "./Principal/ChatPanel";
+import BotonTema from "../Components/B_StyleHome";
+import Footer from "./Principal/PiePagina";
+import SeccionRecientes from "./shared/SeccionRecientes";
+import SeccionDestacados from "./shared/SeccionDestacados";
+import Presentacion from "./shared/Presentacion";
+import { listarServicios } from "./shared/servicios";
 import { apiFetch } from "../utils/apiFetch";
 
 export default function HomePrincipal() {
   const navigate = useNavigate();
-  const raizRef = useRef(null);
+  const [scrolled, setScrolled] = useState(false);
   const [chatAbierto, setChatAbierto] = useState(false);
   const [modalPublicar, setModalPublicar] = useState(false);
-  const [borrador, setBorrador] = useState(null);
   const [modalSolicitudes, setModalSolicitudes] = useState(false);
-  const [categoria, setCategoria] = useState(null);
-  const [recarga, setRecarga] = useState(0);
-  const { total, categorias } = useCartelera();
-  useEntradas(raizRef);
-
-  const nombre = (localStorage.getItem("usuarioNombre") || "").split(" ")[0];
+  const [recientes, setRecientes] = useState([]);
+  const [top3, setTop3] = useState([]);
+  const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
     if (!localStorage.getItem("token")) navigate("/login");
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, [navigate]);
 
-  const abrirPublicar = (inicial = null) => {
-    setBorrador(inicial);
-    setModalPublicar(true);
-  };
+  const cargarServicios = useCallback(() => {
+    setCargando(true);
+    Promise.all([
+      listarServicios({ porPagina: 4, orden: "recientes" }),
+      listarServicios({ porPagina: 3, orden: "rating-mayor" }),
+    ])
+      .then(([nuevos, mejores]) => {
+        setRecientes(nuevos.servicios);
+        setTop3(mejores.servicios);
+      })
+      .catch(err => console.error("Error cargando servicios:", err))
+      .finally(() => setCargando(false));
+  }, []);
 
-  const elegirCategoria = (valor) => {
-    setCategoria(valor);
-    document.getElementById("buscar")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
+  useEffect(() => { cargarServicios(); }, [cargarServicios]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => { entries.forEach((entry) => { if (entry.isIntersecting) entry.target.classList.add("visible"); }); },
+      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
+    );
+    const revealElements = document.querySelectorAll(".reveal, .reveal-left, .reveal-right, .reveal-scale");
+    revealElements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
 
   const handleCerrarSesion = async () => {
     // El servidor invalida el token (y los de otros dispositivos); si falla, se sale igual.
@@ -62,41 +81,30 @@ export default function HomePrincipal() {
   };
 
   return (
-    <div className="us" ref={raizRef}>
-      <a className="us-saltar" href="#buscar">Saltar a los servicios</a>
-      <Portada
-        lineas={["¿Qué", "necesitas?"]}
-        texto={`${nombre ? `Hola, ${nombre}. ` : ""}Busca entre lo que ofrecen otros estudiantes de la UPC, o publica lo que tú sabes hacer.`}
-        accion={{ label: "Publicar un servicio", onClick: () => abrirPublicar() }}
-        enlaces={[
-          { label: "Servicios", href: "#buscar" },
-          { label: "Mis solicitudes", onClick: () => setModalSolicitudes(true) },
-          { label: "Mi perfil", href: "/perfil" },
-          { label: "Salir", onClick: handleCerrarSesion },
-        ]}
-        total={total}
-      />
-      <main id="main-content">
-        <Cartelera categorias={categorias} onElegir={elegirCategoria} />
-        <Explorador key={recarga} categoria={categoria} onCategoria={setCategoria} linkBase="/servicio?id=" />
-        <Registro conSesion onPublicar={abrirPublicar} />
+    <>
+      <Navbar scrolled={scrolled} onCerrarSesion={handleCerrarSesion} onAbrirSolicitudes={() => setModalSolicitudes(true)} />
+      <main id="main-content" role="main">
+        <Presentacion primaryBtn={{href:"#buscar", className:"btn btn-verde", label:"Explorar servicios"}} secondaryBtn={{href:"#publicar", className:"btn btn-borde", label:"Publicar mi servicio"}} />
+        <SeccionBuscar />
+        <SeccionRecientes servicios={recientes} cargando={cargando} />
+        <SeccionDestacados top3={top3} />
+        <TarjetaPublicar onAbrir={() => setModalPublicar(true)} />
+        <BotonTema />
+        <ChatPanel abierto={chatAbierto} onCerrar={() => setChatAbierto(false)} />
+        <NotificacionesFlotantes onToggleChat={() => setChatAbierto((v) => !v)} />
+        <Footer />
       </main>
-      <Cierre accion={{ label: "Publicar mi servicio", onClick: () => abrirPublicar() }} />
-
-      <ChatPanel abierto={chatAbierto} onCerrar={() => setChatAbierto(false)} />
-      <NotificacionesFlotantes onToggleChat={() => setChatAbierto((v) => !v)} />
 
       <ModalPublicarServicio
         abierto={modalPublicar}
-        inicial={borrador}
         onCerrar={() => setModalPublicar(false)}
-        onPublicado={() => setRecarga((n) => n + 1)}
+        onPublicado={cargarServicios}
       />
 
       <ModalSolicitudes
         abierto={modalSolicitudes}
         onCerrar={() => setModalSolicitudes(false)}
       />
-    </div>
+    </>
   );
 }

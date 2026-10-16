@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import "../styles/StyleLogin.css";
-import "../styles/cartel.css";
 import { useNavigate } from "react-router-dom";
 import logoIcon from "../img/logo_color_noBG.png";
 import ResetPasswordModal from "./Login/ModalRecuperarClave";
 import VerificationCodeModal from "./Login/ModalVerificarCodigo";
 import NotificationModal from "./Login/ModalNotificacion";
+import BotonTema from "../Components/B_StyleHome";
 import { apiFetch, limpiarSesion, mensajeError } from "../utils/apiFetch";
 
 // Sólo se admiten cuentas con correo institucional (la base de datos lo exige).
@@ -84,7 +84,6 @@ export default function Login() {
   // ════════════════════════════════
   // ESTADOS GENERALES DE UI
   // ════════════════════════════════
-  const [tab, setTab] = useState("login"); // "login" | "registro"
   const [errores, setErrores] = useState({}); // Objeto con mensajes de error por campo (ej: { correo: "Inválido" })
   const [cargandoLogin, setCargandoLogin] = useState(false); // Evita doble clic en login
   const [cargandoRegistro, setCargandoRegistro] = useState(false); // Evita doble clic en registro
@@ -380,6 +379,7 @@ export default function Login() {
       return;
     }
 
+    const inicio = Date.now();
     setTransitionState("loading");
     setCargandoLogin(true);
     try {
@@ -389,18 +389,20 @@ export default function Login() {
         body: JSON.stringify({ correo: correo.trim().toLowerCase(), password: pass }),
       });
 
+      const transcurrido = Date.now() - inicio;
+      const espera = Math.max(0, 4000 - transcurrido);
+
       if (ok && data?.token) {
         guardarSesion(data);
-        // Si el invitado venía de un volante (/login?id=…), vuelve a ese servicio.
-        const idServicio = new URLSearchParams(window.location.search).get("id");
-        const destino = data.user.id_rol === 1 ? "/admin-dashboard"
-          : /^\d+$/.test(idServicio || "") ? `/servicio?id=${idServicio}` : "/home";
-        navigate(destino, { replace: true });
+        await new Promise((r) => setTimeout(r, espera));
+        navigate(data.user.id_rol === 1 ? "/admin-dashboard" : "/home", { replace: true });
       } else {
+        await new Promise((r) => setTimeout(r, Math.min(espera, 1500)));
         setTransitionState(null);
         notificar(mensajeError(data, "Credenciales incorrectas"));
       }
     } catch {
+      await new Promise((r) => setTimeout(r, 1500));
       setTransitionState(null);
       notificar("Error de conexión con el servidor");
     } finally {
@@ -464,15 +466,6 @@ export default function Login() {
     }
   };
 
-  // Desde la portada: ?registro=1&correo=… abre el registro con el correo ya escrito.
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("registro") !== "1") return;
-    setTab("registro");
-    const correoInicial = params.get("correo");
-    if (correoInicial) validarCorreo(correoInicial, "registro");
-  }, []);
-
   // Aviso cuando el servidor cerró la sesión (token vencido o cuenta suspendida)
   useEffect(() => {
     const motivo = new URLSearchParams(window.location.search).get("sesion");
@@ -482,249 +475,462 @@ export default function Login() {
   }, []);
 
   // ════════════════════════════════
-  // RENDERIZADO (JSX)
-  // A la izquierda el cartel amarillo; a la derecha el formulario sobre papel.
+  // EFECTO DE CLASE CSS EN EL BODY
+  // Añade la clase "login-page" al body mientras esta página está montada.
+  // Esto permite aplicar estilos globales específicos solo para la página de login
+  // (como fondo diferente). Se elimina automáticamente al salir de la página.
   // ════════════════════════════════
-  const error = (campo, id) =>
-    errores[campo] ? (
-      <span id={id} className="us-error" role="alert">
-        {errores[campo]}
-      </span>
-    ) : null;
+  useEffect(() => {
+    document.body.classList.add("login-page");
+    return () => document.body.classList.remove("login-page"); // Limpieza al desmontar
+  }, []);
 
+  // ════════════════════════════════
+  // RENDERIZADO (JSX)
+  // La estructura visual usa dos radios ocultos (#r-login y #r-reg)
+  // para controlar qué panel (login o registro) se muestra,
+  // usando solo CSS sin necesidad de estado de React para el tab activo.
+  // ════════════════════════════════
   return (
-    <div className="us us-login">
-      <a className="us-saltar" href="#formulario">Saltar al formulario</a>
+    <>
+      {transitionState !== "loading" ? <BotonTema /> : null}
+      {/* Radios ocultos que controlan qué tab está activa mediante CSS puro */}
+      <input
+        type="radio"
+        className="tab-radio"
+        name="tab"
+        id="r-login"
+        defaultChecked
+      />
+      <input type="radio" className="tab-radio" name="tab" id="r-reg" />
 
-      <section className="us-login-lado" aria-labelledby="login-titulo">
-        <a href="/home-guest" className="us-marca" aria-label="UniService, volver al inicio">
-          <img src={logoIcon} alt="" width="44" height="44" />
-          UniService
-        </a>
-        <h1 id="login-titulo" className="us-login-cartel">
-          <span className="us-linea"><span data-line style={{ "--i": 0 }}>Entra</span></span>
-          <span className="us-linea"><span data-line style={{ "--i": 1 }}>a la U.</span></span>
-        </h1>
-        <p className="us-lead">
-          Para pedir, ofrecer y chatear necesitas una cuenta con tu correo de la Universidad Popular del Cesar.
-        </p>
-        <a href="/home-guest" className="us-enlace">Ver los servicios sin cuenta</a>
-        <figure className="us-login-foto">
-          <img
-            src="/assets/rio-guatapuri-valledupar.jpg"
-            alt="El río Guatapurí a su paso por Valledupar"
-            width="1920"
-            height="1440"
-          />
-          <figcaption className="us-credito-foto">
-            Río Guatapurí · Jdvillalobos, <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>
-          </figcaption>
-        </figure>
-      </section>
+      {/* ── Escena 3D Tesseract / Portal Cósmico de fondo ── */}
+      <div className="cosmos-scene" aria-hidden="true">
+        <div className="cs-ring r1"></div>
+        <div className="cs-ring r2"></div>
+        <div className="cs-ring r3"></div>
+        <div className="cs-ring r4"></div>
+        <div className="cs-ring r5"></div>
+        <div className="cs-ring r6"></div>
+        <div className="cs-ring r7"></div>
+        <div className="cs-core"></div>
+        {[...Array(30)].map((_, i) => (
+          <div key={i} className="cs-dot" />
+        ))}
+        {[...Array(35)].map((_, i) => (
+          <div key={i} className="cs-star" />
+        ))}
+      </div>
 
-      <main id="formulario" className="us-login-form" role="main">
-        {transitionState === "loading" && (
-          <div className="us-login-entrando" role="status">Entrando…</div>
-        )}
-
-        <div className="us-segmento us-login-tabs" role="tablist" aria-label="Acceso">
-          <button
-            type="button"
-            role="tab"
-            id="tab-login"
-            aria-selected={tab === "login"}
-            aria-pressed={tab === "login"}
-            aria-controls="panel-login"
-            onClick={() => setTab("login")}
-          >
-            Iniciar sesión
-          </button>
-          <button
-            type="button"
-            role="tab"
-            id="tab-registro"
-            aria-selected={tab === "registro"}
-            aria-pressed={tab === "registro"}
-            aria-controls="panel-reg"
-            onClick={() => setTab("registro")}
-          >
-            Crear cuenta
-          </button>
+      {transitionState === "loading" ? (
+        <div
+          className="login-loader"
+          role="status"
+          aria-label="Iniciando sesión"
+        >
+          <div className="loader-ring"></div>
+          <span className="loader-text">Entrando…</span>
         </div>
+      ) : null}
 
-        {tab === "login" ? (
-          <form
-            key="login"
-            id="panel-login"
-            role="tabpanel"
-            aria-labelledby="tab-login"
-            className="us-login-panel"
-            onSubmit={(e) => { e.preventDefault(); handleLogin(); }}
-            noValidate
-          >
-            <h2 className="us-login-titulo">Hola de nuevo</h2>
-            <div className="us-login-campo">
-              <label htmlFor="login-correo">Correo institucional</label>
-              <input
-                id="login-correo"
-                className="us-campo-texto"
-                type="email"
-                inputMode="email"
-                placeholder="tu@unicesar.edu.co"
-                value={correo}
-                onChange={(e) => validarCorreo(e.target.value, "login")}
-                autoComplete="email"
-                aria-invalid={!!errores.correo}
-                aria-describedby={errores.correo ? "login-correo-error" : undefined}
-              />
-              {error("correo", "login-correo-error")}
+      <main
+        id="main-content"
+        className={`auth-wrapper ${transitionState === "loading" ? "auth-hidden" : ""}`}
+        role="main"
+      >
+        <div className="auth-box" role="region" aria-label="Autenticación">
+          {/* ── COLUMNA IZQUIERDA: Logo y descripción de la plataforma ── */}
+          <div className="auth-lateral">
+            <i className="bi bi-book icon-float fi-1"></i>
+            <i className="bi bi-code-slash icon-float fi-2"></i>
+            <i className="bi bi-pencil icon-float fi-3"></i>
+            <i className="bi bi-palette icon-float fi-4"></i>
+            <i className="bi bi-box icon-float fi-5"></i>
+            <i className="bi bi-house icon-float fi-6"></i>
+            <i className="bi bi-mortarboard icon-float fi-7"></i>
+            <i className="bi bi-lightbulb icon-float fi-8"></i>
+            <i className="bi bi-star icon-float fi-9"></i>
+            <div className="glow-orb go-1"></div>
+            <div className="glow-orb go-2"></div>
+            <div className="glow-orb go-3"></div>
+            <div className="sparkle s1"></div>
+            <div className="sparkle s2"></div>
+            <div className="sparkle s3"></div>
+            <div className="sparkle s4"></div>
+            <div className="sparkle s5"></div>
+            <div className="sparkle s6"></div>
+            <div className="sparkle s7"></div>
+            <div className="sparkle s8"></div>
+            <div className="lateral-contenido">
+              <div className="lateral-icono">
+                <img
+                  src={logoIcon}
+                  alt="UniService - Plataforma de servicios universitarios en Colombia"
+                  className="lateral-icono-img"
+                  loading="eager"
+                  fetchpriority="high"
+                />
+              </div>
+              <h2 className="lateral-titulo">
+                Uni<span className="lateral-titulo-service">Service</span>
+              </h2>
+              <p className="lateral-desc">
+                Intercambia tutorías, proyectos, diseño y más con otros
+                estudiantes universitarios.
+              </p>
+              {/* Chips decorativos que muestran las categorías disponibles */}
+              <div className="lateral-chips">
+                {[
+                  ["bi-book", "Tutorías"],
+                  ["bi-code-slash", "Programación"],
+                  ["bi-pencil", "Ensayos"],
+                  ["bi-palette", "Diseño"],
+                  ["bi-box", "Productos"],
+                  ["bi-house", "Arriendo"],
+                ].map(([icono, texto]) => (
+                  <span key={texto} className="lateral-chip">
+                    <i className={`bi ${icono}`}></i> {texto}
+                  </span>
+                ))}
+              </div>
             </div>
-            <div className="us-login-campo">
-              <label htmlFor="login-pass">Contraseña</label>
-              <input
-                id="login-pass"
-                className="us-campo-texto"
-                type="password"
-                value={pass}
-                onChange={(e) => validarPassLogin(e.target.value)}
-                autoComplete="current-password"
-                aria-invalid={!!errores.pass}
-                aria-describedby={errores.pass ? "login-pass-error" : undefined}
-              />
-              {error("pass", "login-pass-error")}
+          </div>
+
+          {/* ── COLUMNA DERECHA: Formularios de login y registro ── */}
+          <div className="auth-formulario">
+            <div className="auth-logo">
+              <p className="auth-pretitle">Bienvenido 👋</p>
+              <h1 className="auth-title">
+                Accede a la <span>plataforma</span>
+              </h1>
             </div>
-            <button type="submit" className="us-boton" disabled={cargandoLogin}>
-              {cargandoLogin ? "Entrando…" : "Entrar"}
-            </button>
-            <button type="button" className="us-login-link" onClick={() => setResetPaso("correo")}>
-              Olvidé mi contraseña
-            </button>
-          </form>
-        ) : (
-          <form
-            key="registro"
-            id="panel-reg"
-            role="tabpanel"
-            aria-labelledby="tab-registro"
-            className="us-login-panel"
-            onSubmit={(e) => { e.preventDefault(); handleRegister(); }}
-            noValidate
-          >
-            <h2 className="us-login-titulo">Tu cuenta en dos minutos</h2>
-            <div className="us-login-fila">
-              <div className="us-login-campo">
-                <label htmlFor="reg-nombre">Nombre</label>
+
+            {/* Tabs que alternan entre "Iniciar sesión" y "Registrarse" usando CSS */}
+            <div className="tabs">
+              <label className="tab" htmlFor="r-login">
+                Iniciar sesión
+              </label>
+              <label className="tab" htmlFor="r-reg">
+                Registrarse
+              </label>
+            </div>
+
+            {/* ── PANEL LOGIN ── */}
+            <div
+              className="form-panel"
+              id="panel-login"
+              role="tabpanel"
+              aria-labelledby="r-login"
+            >
+              {/* Campo de correo con validación en tiempo real */}
+              <div className="campo">
+                <label htmlFor="login-correo" className="campo-label">
+                  Correo electrónico
+                </label>
+                <input
+                  id="login-correo"
+                  type="email"
+                  placeholder="tu@unicesar.edu.co"
+                  value={correo}
+                  onChange={(e) => validarCorreo(e.target.value, "login")}
+                  autoComplete="email"
+                  aria-invalid={!!errores.correo}
+                  aria-describedby={
+                    errores.correo ? "login-correo-error" : undefined
+                  }
+                />
+                {errores.correo && (
+                  <span
+                    id="login-correo-error"
+                    className="error-msg"
+                    role="alert"
+                  >
+                    {errores.correo}
+                  </span>
+                )}
+              </div>
+
+              {/* Campo de contraseña con validación de longitud mínima */}
+              <div className="campo">
+                <label htmlFor="login-pass" className="campo-label">
+                  Contraseña
+                </label>
+                <input
+                  id="login-pass"
+                  type="password"
+                  placeholder="Tu contraseña"
+                  value={pass}
+                  onChange={(e) => validarPassLogin(e.target.value)}
+                  autoComplete="current-password"
+                  aria-invalid={!!errores.pass}
+                  aria-describedby={
+                    errores.pass ? "login-pass-error" : undefined
+                  }
+                />
+                {errores.pass && (
+                  <span
+                    id="login-pass-error"
+                    className="error-msg"
+                    role="alert"
+                  >
+                    {errores.pass}
+                  </span>
+                )}
+              </div>
+
+              {/* Botón que abre el flujo de recuperación de contraseña */}
+              <div className="olvide">
+                <button
+                  type="button"
+                  className="btn-olvide"
+                  onClick={() => setResetPaso("correo")}
+                >
+                  ¿Olvidaste tu contraseña?
+                </button>
+              </div>
+
+              <div className="botones-login">
+                <button
+                  className="btn-principal"
+                  type="button"
+                  onClick={handleLogin}
+                  disabled={cargandoLogin}
+                >
+                  {cargandoLogin ? "Entrando..." : "Entrar →"}
+                </button>
+                {/* Permite explorar la app sin cuenta */}
+                <button
+                  className="btn-secundario"
+                  onClick={() => navigate("/home-guest")}
+                >
+                  Entrar como invitado
+                </button>
+              </div>
+
+              <p className="pie">
+                ¿No tienes cuenta?{" "}
+                <label className="pie-link" htmlFor="r-reg">
+                  Regístrate gratis
+                </label>
+              </p>
+            </div>
+
+            {/* ── PANEL REGISTRO ── */}
+            <div
+              className="form-panel"
+              id="panel-reg"
+              role="tabpanel"
+              aria-labelledby="r-reg"
+            >
+              {/* Campo nombre con validación de longitud */}
+              <div className="campo">
+                <label htmlFor="reg-nombre" className="campo-label">
+                  Nombre
+                </label>
                 <input
                   id="reg-nombre"
-                  className="us-campo-texto"
+                  type="text"
+                  placeholder="Tu nombre"
                   value={nombre}
                   onChange={(e) => validarNombre(e.target.value)}
                   autoComplete="given-name"
                   aria-invalid={!!errores.nombre}
-                  aria-describedby={errores.nombre ? "reg-nombre-error" : undefined}
+                  aria-describedby={
+                    errores.nombre ? "reg-nombre-error" : undefined
+                  }
                 />
-                {error("nombre", "reg-nombre-error")}
+                {errores.nombre && (
+                  <span
+                    id="reg-nombre-error"
+                    className="error-msg"
+                    role="alert"
+                  >
+                    {errores.nombre}
+                  </span>
+                )}
               </div>
-              <div className="us-login-campo">
-                <label htmlFor="reg-apellido">Apellido</label>
+
+              <div className="campo">
+                <label htmlFor="reg-apellido" className="campo-label">
+                  Apellido
+                </label>
                 <input
                   id="reg-apellido"
-                  className="us-campo-texto"
+                  type="text"
+                  placeholder="Tu apellido"
                   value={apellido}
                   onChange={(e) => validarApellido(e.target.value)}
                   autoComplete="family-name"
                   aria-invalid={!!errores.apellido}
-                  aria-describedby={errores.apellido ? "reg-apellido-error" : undefined}
+                  aria-describedby={
+                    errores.apellido ? "reg-apellido-error" : undefined
+                  }
                 />
-                {error("apellido", "reg-apellido-error")}
-              </div>
-            </div>
-            <div className="us-login-campo">
-              <label htmlFor="reg-telefono">Teléfono</label>
-              <input
-                id="reg-telefono"
-                className="us-campo-texto"
-                type="tel"
-                inputMode="tel"
-                placeholder="300 123 4567"
-                value={telefono}
-                onChange={(e) => validarTelefono(e.target.value)}
-                autoComplete="tel"
-                aria-invalid={!!errores.telefono}
-                aria-describedby={errores.telefono ? "reg-telefono-error" : undefined}
-              />
-              {error("telefono", "reg-telefono-error")}
-            </div>
-            <div className="us-login-campo">
-              <label htmlFor="reg-correo">Correo institucional</label>
-              <div className="us-login-correo">
-                <input
-                  id="reg-correo"
-                  className="us-campo-texto"
-                  type="email"
-                  inputMode="email"
-                  placeholder="tu@unicesar.edu.co"
-                  value={correoReg}
-                  onChange={(e) => validarCorreo(e.target.value, "registro")}
-                  disabled={correoVerificado}
-                  autoComplete="email"
-                  aria-invalid={!!errores.correoReg}
-                  aria-describedby={errores.correoReg ? "reg-correo-error" : undefined}
-                />
-                {correoVerificado ? (
-                  <span className="us-login-verificado">Verificado</span>
-                ) : (
-                  <button type="button" className="us-boton us-boton--secundario" onClick={handleEnviarCodigo} disabled={enviandoCodigo}>
-                    {enviandoCodigo ? "Enviando…" : codigoEnviado ? "Reenviar código" : "Enviar código"}
-                  </button>
+                {errores.apellido && (
+                  <span id="reg-apellido-error" className="error-msg" role="alert">
+                    {errores.apellido}
+                  </span>
                 )}
               </div>
-              {error("correoReg", "reg-correo-error")}
-            </div>
-            <div className="us-login-fila">
-              <div className="us-login-campo">
-                <label htmlFor="reg-pass">Contraseña</label>
+
+              <div className="campo">
+                <label htmlFor="reg-telefono" className="campo-label">
+                  Teléfono
+                </label>
+                <input
+                  id="reg-telefono"
+                  type="tel"
+                  placeholder="3001234567"
+                  value={telefono}
+                  onChange={(e) => validarTelefono(e.target.value)}
+                  autoComplete="tel"
+                  aria-invalid={!!errores.telefono}
+                  aria-describedby={
+                    errores.telefono ? "reg-telefono-error" : undefined
+                  }
+                />
+                {errores.telefono && (
+                  <span id="reg-telefono-error" className="error-msg" role="alert">
+                    {errores.telefono}
+                  </span>
+                )}
+              </div>
+
+              {/* Campo correo con botón para enviar código de verificación.
+                  Se deshabilita una vez que el correo fue verificado exitosamente. */}
+              <div className="campo">
+                <label htmlFor="reg-correo" className="campo-label">
+                  Correo electrónico
+                </label>
+                <div className="correo-verify-wrap">
+                  <input
+                    id="reg-correo"
+                    type="email"
+                    placeholder="tu@unicesar.edu.co"
+                    value={correoReg}
+                    onChange={(e) => validarCorreo(e.target.value, "registro")}
+                    disabled={correoVerificado}
+                    className={correoVerificado ? "input-verified" : ""}
+                    autoComplete="email"
+                    aria-invalid={!!errores.correoReg}
+                    aria-describedby={
+                      errores.correoReg ? "reg-correo-error" : undefined
+                    }
+                  />
+                  {/* Muestra badge "Verificado" o el botón de enviar código según estado */}
+                  {correoVerificado ? (
+                    <span
+                      className="verified-badge"
+                      aria-label="Correo verificado"
+                    >
+                      ✓ Verificado
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      className="btn-send-code"
+                      onClick={handleEnviarCodigo}
+                      disabled={enviandoCodigo}
+                    >
+                      {enviandoCodigo
+                        ? "Enviando..."
+                        : codigoEnviado
+                          ? "Reenviar"
+                          : "Enviar código"}
+                    </button>
+                  )}
+                </div>
+                {errores.correoReg && (
+                  <span
+                    id="reg-correo-error"
+                    className="error-msg"
+                    role="alert"
+                  >
+                    {errores.correoReg}
+                  </span>
+                )}
+              </div>
+
+              {/* Campo contraseña del registro */}
+              <div className="campo">
+                <label htmlFor="reg-pass" className="campo-label">
+                  Contraseña
+                </label>
                 <input
                   id="reg-pass"
-                  className="us-campo-texto"
                   type="password"
+                  placeholder="Mínimo 8, con letras y números"
                   value={passReg}
                   onChange={(e) => validarPassReg(e.target.value)}
                   autoComplete="new-password"
                   aria-invalid={!!errores.passReg}
-                  aria-describedby="reg-pass-ayuda"
+                  aria-describedby={
+                    errores.passReg ? "reg-pass-error" : undefined
+                  }
                 />
-                {errores.passReg ? error("passReg", "reg-pass-ayuda") : (
-                  <span id="reg-pass-ayuda" className="us-login-ayuda">8 o más, con letras y números</span>
+                {errores.passReg && (
+                  <span id="reg-pass-error" className="error-msg" role="alert">
+                    {errores.passReg}
+                  </span>
                 )}
               </div>
-              <div className="us-login-campo">
-                <label htmlFor="reg-pass2">Repite la contraseña</label>
+
+              {/* Campo de confirmación — compara con el campo anterior */}
+              <div className="campo">
+                <label htmlFor="reg-pass2" className="campo-label">
+                  Confirmar contraseña
+                </label>
                 <input
                   id="reg-pass2"
-                  className="us-campo-texto"
                   type="password"
+                  placeholder="Repite tu contraseña"
                   value={passReg2}
                   onChange={(e) => validarPassReg2(e.target.value)}
                   autoComplete="new-password"
                   aria-invalid={!!errores.passReg2}
-                  aria-describedby={errores.passReg2 ? "reg-pass2-error" : undefined}
+                  aria-describedby={
+                    errores.passReg2 ? "reg-pass2-error" : undefined
+                  }
                 />
-                {error("passReg2", "reg-pass2-error")}
+                {errores.passReg2 && (
+                  <span id="reg-pass2-error" className="error-msg" role="alert">
+                    {errores.passReg2}
+                  </span>
+                )}
               </div>
+
+              {/* Checkbox de aceptación de términos — obligatorio para registrarse */}
+              <div className="terminos">
+                <input
+                  type="checkbox"
+                  id="reg-terminos"
+                  checked={terminos}
+                  onChange={(e) => setTerminos(e.target.checked)}
+                  aria-describedby="terminos-desc"
+                />
+                <p id="terminos-desc">
+                  Acepto los <a href="/terminos">Términos y Condiciones</a> y la
+                  <a href="/privacidad"> Política de Privacidad</a>.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="btn-principal"
+                onClick={handleRegister}
+                disabled={cargandoRegistro}
+              >
+                {cargandoRegistro ? "Creando cuenta..." : "Crear cuenta →"}
+              </button>
+              <p className="pie">
+                ¿Ya tienes cuenta?{" "}
+                <label className="pie-link" htmlFor="r-login">
+                  Inicia sesión
+                </label>
+              </p>
             </div>
-            <label className="us-login-terminos">
-              <input type="checkbox" checked={terminos} onChange={(e) => setTerminos(e.target.checked)} />
-              <span>
-                Acepto los <a href="/terminos" className="us-enlace">términos</a> y la{" "}
-                <a href="/privacidad" className="us-enlace">política de privacidad</a>.
-              </span>
-            </label>
-            <button type="submit" className="us-boton" disabled={cargandoRegistro}>
-              {cargandoRegistro ? "Creando tu cuenta…" : "Crear cuenta"}
-            </button>
-          </form>
-        )}
+          </div>
+        </div>
       </main>
 
       <ResetPasswordModal
@@ -756,6 +962,6 @@ export default function Login() {
       />
 
       <NotificationModal modal={modal} setModal={setModal} />
-    </div>
+    </>
   );
 }
