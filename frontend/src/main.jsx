@@ -8,6 +8,7 @@ import "./styles/light_theme/B_StyleLogin.css";
 import "./styles/light_theme/B_stylePerfil.css";
 import "./styles/light_theme/B_styleServicio.css";
 import "./styles/light_theme/B_StyleChat.css";
+import "./styles/rendimiento.css";
 
 
 ReactDOM.createRoot(document.getElementById("root")).render(

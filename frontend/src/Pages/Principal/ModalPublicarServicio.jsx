@@ -4,7 +4,8 @@ import GoogleMapsAutocomplete from "../../Components/GoogleMapsAutocomplete";
 import { apiFetch, mensajeError } from "../../utils/apiFetch";
 import { compressImage } from "../../utils/compressImage";
 
-export default function ModalPublicarServicio({ abierto, onCerrar, onPublicado }) {
+// inicial: { titulo, unidad } escritos en el cuadro "Nuevo servicio" de la portada.
+export default function ModalPublicarServicio({ abierto, onCerrar, onPublicado, inicial = null }) {
   const [form, setForm] = useState(initialPublicar);
   const [loading, setLoading] = useState(false);
   const [tipoContacto, setTipoContacto] = useState("");
@@ -17,6 +18,13 @@ export default function ModalPublicarServicio({ abierto, onCerrar, onPublicado }
   const fileInputRef = useRef(null);
   const [ubicacion, setUbicacion] = useState(null);
   const modalRef = useRef(null);
+
+  useEffect(() => {
+    if (abierto && inicial) {
+      if (inicial.titulo) setForm((prev) => ({ ...prev, titulo: inicial.titulo }));
+      if (inicial.unidad) setUnidadPrecio(inicial.unidad);
+    }
+  }, [abierto, inicial]);
 
   useEffect(() => {
     if (abierto) {

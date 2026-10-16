@@ -37,3 +37,5 @@ Proyecto-main/src/PHP/UserPerfilFotos/*
 
 #---cache de c# en visual studio---
 *.lscache
+# Archivos de trabajo de la skill de diseño (capturas, dirección)
+.taste-skill/

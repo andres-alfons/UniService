@@ -1,76 +1,54 @@
 // ════════════════════════════════════════════════════════════════
 // PÁGINA PRINCIPAL — Invitado (sin login)
-// Es idéntica al Home normal pero sin opciones de usuario:
-// no tiene navbar con perfil, no muestra solicitudes ni
-// notificaciones. Los enlaces a detalle redirigen al login.
+// La cartelera del campus: qué se ofrece hoy, cómo se pide, por qué es
+// seguro y el registro con el correo institucional. Los volantes llevan
+// al login, porque el detalle de un servicio exige sesión.
 // ════════════════════════════════════════════════════════════════
-import { useState, useEffect } from "react";
-import "../styles/styleHome.css";
-import Navbar from "./Guest/BarraNavegacionInvitado";
-import SeccionBuscar from "./Guest/BusquedaInvitado";
-import Footer from "./Guest/PiePaginaInvitado";
-import SeccionRecientes from "./shared/SeccionRecientes";
-import SeccionDestacados from "./shared/SeccionDestacados";
-import Presentacion from "./shared/Presentacion";
-import { listarServicios } from "./shared/servicios";
-import BotonTema from "../Components/B_StyleHome";
+import { useRef, useState } from "react";
+import "../styles/cartel.css";
+import Portada from "./Cartel/Portada";
+import Cartelera from "./Cartel/Cartelera";
+import Explorador from "./Cartel/Explorador";
+import ComoFunciona from "./Cartel/ComoFunciona";
+import Confianza from "./Cartel/Confianza";
+import Registro from "./Cartel/Registro";
+import Cierre from "./Cartel/Cierre";
+import { useCartelera, useEntradas } from "./Cartel/useCartel";
 
 export default function HomeGuest() {
-  const [scrolled, setScrolled] = useState(false);
-  const [serviciosTotales, setServiciosTotales] = useState([]);
-  const [recientes, setRecientes] = useState([]);
-  const [top3, setTop3] = useState([]);
-  const [cargando, setCargando] = useState(true);
+  const raizRef = useRef(null);
+  const [categoria, setCategoria] = useState(null);
+  const { total, categorias } = useCartelera();
+  useEntradas(raizRef);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-          }
-        });
-      },
-      { threshold: 0.1, rootMargin: "0px 0px -50px 0px" }
-    );
-    const revealElements = document.querySelectorAll(".reveal, .reveal-left, .reveal-right, .reveal-scale");
-    revealElements.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    // El buscador del invitado filtra en el navegador los 50 servicios más recientes.
-    Promise.all([
-      listarServicios({ porPagina: 50, orden: "recientes" }),
-      listarServicios({ porPagina: 3, orden: "rating-mayor" }),
-    ])
-      .then(([todos, mejores]) => {
-        setServiciosTotales(todos.servicios);
-        setRecientes(todos.servicios.slice(0, 4));
-        setTop3(mejores.servicios);
-      })
-      .catch((err) => console.error("Error cargando servicios:", err))
-      .finally(() => setCargando(false));
-  }, []);
+  const elegirCategoria = (valor) => {
+    setCategoria(valor);
+    document.getElementById("buscar")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
-    <>
-      <Navbar scrolled={scrolled} />
-      <main id="main-content" role="main">
-        {/* El linkBase="/login?id=" obliga a iniciar sesión para ver detalles */}
-        <Presentacion primaryBtn={{href:"#buscar", className:"btn btn-verde reveal delay-3", label:"Explorar servicios"}} secondaryBtn={{href:"/login", className:"btn btn-borde", label:"Publicar mi servicio"}} />
-        <SeccionBuscar serviciosTotales={serviciosTotales} />
-        <SeccionRecientes servicios={recientes} cargando={cargando} linkBase="/login?id=" />
-        <SeccionDestacados top3={top3} linkBase="/login?id=" />
-        <BotonTema />
-        <Footer />
+    <div className="us" ref={raizRef}>
+      <a className="us-saltar" href="#buscar">Saltar a los servicios</a>
+      <Portada
+        lineas={["Se dicta", "de todo."]}
+        texto="Tutorías, ensayos, programación, diseño y habitaciones cerca de la U, ofrecidos por estudiantes de la Universidad Popular del Cesar."
+        accion={{ label: "Ver servicios", href: "#buscar" }}
+        enlaces={[
+          { label: "Servicios", href: "#buscar" },
+          { label: "Cómo funciona", href: "#como" },
+          { label: "Crear cuenta", href: "#registro" },
+          { label: "Ingresar", href: "/login" },
+        ]}
+        total={total}
+      />
+      <main id="main-content">
+        <Cartelera categorias={categorias} onElegir={elegirCategoria} />
+        <Explorador categoria={categoria} onCategoria={setCategoria} linkBase="/login?id=" />
+        <ComoFunciona />
+        <Confianza />
+        <Registro />
       </main>
-    </>
+      <Cierre accion={{ label: "Publicar mi servicio", href: "/login?registro=1" }} />
+    </div>
   );
 }
